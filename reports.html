@@ -35,12 +35,11 @@
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
 @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
 #thermalPrintArea{display:none}
-#thermalPrintArea{display:none}
 @media print{
-  body *{visibility:hidden !important}
-  #thermalPrintArea{visibility:visible !important; display:block !important; position:absolute !important; left:0 !important; top:0 !important; width:100% !important; max-width:80mm !important; margin:0 !important; padding:0 !important; background:white !important}
-  #thermalPrintArea *{visibility:visible !important}
-  #thermalPrintArea div{box-sizing:border-box !important}
+  body *{visibility:hidden!important}
+  #thermalPrintArea{visibility:visible!important; display:block!important; position:absolute!important; left:0!important; top:0!important; width:100%!important; max-width:80mm!important; margin:0!important; padding:0!important; background:white!important}
+  #thermalPrintArea *{visibility:visible!important}
+  #thermalPrintArea div{box-sizing:border-box!important}
   @page{size:auto; margin:2mm}
 }
 </style>
@@ -50,6 +49,21 @@
 *{font-family:'Cairo',sans-serif} body{background:#f8fafc}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center}
 .modal.active{display:flex}
+/* === Custom Delete Bon Modal === */
+.custom-modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.custom-modal-backdrop.active{display:flex}
+.custom-modal-box{background:#fff;border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,0.18);width:100%;max-width:380px;padding:24px;text-align:center;animation:modalPop.28s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalPop{from{transform:scale(.88) translateY(16px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.custom-modal-icon{width:64px;height:64px;border-radius:20px;background:#fef2f2;border:1px solid #fee2e2;color:#ef4444;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+.custom-modal-title{font-size:17px;font-weight:800;color:#0f172a;margin-bottom:8px}
+.custom-modal-msg{font-size:13.5px;line-height:1.7;color:#64748b;margin-bottom:22px}
+.custom-modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.custom-modal-btn{padding:12px 14px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.custom-modal-btn:active{transform:scale(.97)}
+.custom-modal-cancel{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+.custom-modal-cancel:hover{background:#e2e8f0}
+.custom-modal-delete{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;box-shadow:0 8px 20px rgba(239,68,68,.35)}
+.custom-modal-delete:hover{filter:brightness(1.05)}
 </style>
 </head>
 <body class="pb-24">
@@ -106,6 +120,23 @@
     <div id="productsToAdd" class="flex-1 overflow-y-auto p-2 space-y-2"></div>
   </div>
 </div>
+
+<!-- === Modal تأكيد حذف البون الجديد - بدون confirm() === -->
+<div id="deleteBonModal" class="custom-modal-backdrop">
+  <div class="custom-modal-box">
+    <div class="custom-modal-icon"><i class="fa-solid fa-trash"></i></div>
+    <div class="custom-modal-title">🗑️ تأكيد حذف البون</div>
+    <div class="custom-modal-msg">
+      هل أنت متأكد من حذف هذا البون؟<br>
+      سيتم حذف جميع بيانات البون المرتبطة بهذا العميل، ولا يمكن التراجع عن هذا الإجراء.
+    </div>
+    <div class="custom-modal-actions">
+      <button class="custom-modal-btn custom-modal-cancel" onclick="closeDeleteBonModal()"><i class="fa-solid fa-xmark"></i> إلغاء</button>
+      <button class="custom-modal-btn custom-modal-delete" onclick="confirmDeleteBon()"><i class="fa-solid fa-trash"></i> حذف البون</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="hidden fixed top-20 left-1/2 z-[100]" style="transform:translateX(-50%)"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl"><span id="toastMessage" class="text-sm"></span></div></div>
 <script type="module">
 import { auth, db } from "./firebase.js";
@@ -167,7 +198,7 @@ window.loadFirebase = async function(){
     if(snapProd.exists()){
       var val = snapProd.val();
       if(val._init) delete val._init;
-      allProducts=Object.values(val).filter(v=>v && typeof v==='object' && !v._init);
+      allProducts=Object.values(val).filter(v=>v && typeof v==='object' &&!v._init);
       try{ localStorage.setItem(getProdCacheKey(), JSON.stringify({v:'v3', t:Date.now(), d:allProducts})); }catch(e){}
     }
   }catch(e){}
@@ -283,12 +314,24 @@ window.updateQtyInput = function(idx,v){ currentBonItems[idx].qty=Math.max(0,par
 window.updatePrice = function(idx,v){ currentBonItems[idx].price=parseFloat(v)||0; renderBonItems(); }
 window.removeItem = function(idx){ currentBonItems.splice(idx,1); renderBonItems(); }
 window.saveBonEdits = async function(){
-  if(!currentViewingClient || !currentUid) return;
+  if(!currentViewingClient ||!currentUid) return;
   try{ await set(ref(db, `users/${currentUid}/clientBons/${currentViewingClient}`), {items: currentBonItems, updatedAt: new Date().toISOString()}); showToast('تم الحفظ'); await loadFirebase(); renderBonItems(); }catch(e){ showToast('خطأ: '+e.message); }
 }
-window.deleteClientBon = async function(){
-  if(!currentViewingClient || !currentUid) return;
-  if(!confirm('حذف بون '+currentViewingClient+'؟')) return;
+
+// === نظام حذف البون الجديد - بدون confirm() ===
+window.deleteClientBon = function(){
+  if(!currentViewingClient ||!currentUid) return;
+  openDeleteBonModal();
+}
+window.openDeleteBonModal = function(){
+  document.getElementById('deleteBonModal').classList.add('active');
+}
+window.closeDeleteBonModal = function(){
+  document.getElementById('deleteBonModal').classList.remove('active');
+}
+window.confirmDeleteBon = async function(){
+  if(!currentViewingClient ||!currentUid) return;
+  closeDeleteBonModal();
   try{
     await remove(ref(db, `users/${currentUid}/clientBons/${currentViewingClient}`));
     for(var i=0;i<(groupedByClient[currentViewingClient]||[]).length;i++){
@@ -298,8 +341,14 @@ window.deleteClientBon = async function(){
     localStorage.removeItem(getOrdersCacheKey());
     closeBon();
     await loadFirebase();
+    showToast('تم حذف البون');
   }catch(e){ showToast('خطأ: '+e.message); }
 }
+// إغلاق بالضغط على الخلفية
+document.getElementById('deleteBonModal')?.addEventListener('click', function(e){
+  if(e.target===this) closeDeleteBonModal();
+});
+
 window.openAddProductToBon = function(){ document.getElementById('addProductModal').classList.add('active'); renderProductsToAdd(''); }
 window.closeAddProductModal = function(){ document.getElementById('addProductModal').classList.remove('active'); }
 function renderProductsToAdd(filter){
@@ -340,7 +389,6 @@ function buildPrintHTML(width){
   var total=0;
   currentBonItems.forEach(function(i){ total+=(parseFloat(i.price)||0)*(parseInt(i.qty)||0); });
 
-  // بناء صفوف المنتجات - المنتج في أقصى اليمين، المجموع في أقصى اليسار
   var rows='';
   currentBonItems.forEach(function(i){
     var lineTotal=(parseFloat(i.price)||0)*parseInt(i.qty||0);
@@ -359,12 +407,11 @@ function buildPrintHTML(width){
   html+='<div style="border-top:1px dashed #000;margin:6px 0;width:100%;"></div>';
   html+='<div style="display:flex;flex-direction:column;gap:2px;width:100%;direction:rtl;">';
   html+='<div style="display:flex;flex-direction:row;justify-content:space-between;width:100%;"><span>التاريخ : '+dateStr+'</span><span></span></div>';
-  html+='<div style="display:flex;flex-direction:row;justify-content:space-between;width:100%;"><span>الوقت   : '+timeStr+'</span><span></span></div>';
-  html+='<div style="display:flex;flex-direction:row;justify-content:space-between;width:100%;"><span>العميل  : '+escapeHtml(currentViewingClient)+'</span><span></span></div>';
+  html+='<div style="display:flex;flex-direction:row;justify-content:space-between;width:100%;"><span>الوقت : '+timeStr+'</span><span></span></div>';
+  html+='<div style="display:flex;flex-direction:row;justify-content:space-between;width:100%;"><span>العميل : '+escapeHtml(currentViewingClient)+'</span><span></span></div>';
   html+='<div style="display:flex;flex-direction:row;justify-content:space-between;width:100%;"><span>رقم الفاتورة : '+invNum+'</span><span></span></div>';
   html+='</div>';
   html+='<div style="border-top:1px solid #000;margin:8px 0;width:100%;"></div>';
-  // رأس المنتجات - المنتج يمين، المجموع يسار
   html+='<div style="display:flex;flex-direction:row;justify-content:flex-start;align-items:center;font-weight:800;border-bottom:1px solid #000;padding:4px 0;width:100%;box-sizing:border-box;direction:rtl;">';
   html+='<div style="width:45%;text-align:right;">المنتج</div>';
   html+='<div style="width:15%;text-align:center;">الكمية</div>';
@@ -387,7 +434,6 @@ function escapeHtml(str){
   if(!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 
 window.doPrint = function(width){
   if(!currentViewingClient || currentBonItems.length===0) return;
