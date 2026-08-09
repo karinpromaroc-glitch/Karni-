@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><!-- PLAYABLE_TOUCH_PATCH_V1 --><script>
+(function() {
+  if (window.__playableTouchPatchInstalled) return;
+  window.__playableTouchPatchInstalled = true;
+  var origAdd = EventTarget.prototype.addEventListener;
+  var blockedTypes = { touchstart: 1, touchmove: 1, wheel: 1 };
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (blockedTypes[type]) {
+      if (options === undefined || options === null) {
+        options = { passive: true };
+      } else if (typeof options === 'boolean') {
+        options = { capture: options, passive: true };
+      } else {
+        options = Object.assign({}, options, { passive: true });
+      }
+    }
+    return origAdd.call(this, type, listener, options);
+  };
+})();
+</script><script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<script>(function(){if(window.__playableTouchPatchInstalled)return;window.__playableTouchPatchInstalled=true;var o=EventTarget.prototype.addEventListener;var b={touchstart:1,touchmove:1,wheel:1};EventTarget.prototype.addEventListener=function(t,l,op){if(b[t]){if(op===undefined||op===null){op={passive:true};}else if(typeof op==='boolean'){op={capture:op,passive:true};}else{op=Object.assign({},op,{passive:true});}}return o.call(this,t,l,op);};})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title data-i18n="myStore">متجري - الطلب</title>
+<script src="lang.js"></script>
+<style>
+*{font-family:'Cairo',sans-serif;box-sizing:border-box}body{background:#f8fafc;margin:0}
+.flex{display:flex}.grid{display:grid}.hidden{display:none}
+.grid-cols-2{grid-template-columns:repeat(2,1fr)}.gap-3{gap:.75rem}.gap-2{gap:.5rem}
+.bg-white{background:#fff}.rounded-2xl{border-radius:1rem}.rounded-xl{border-radius:.75rem}
+.border{border:1px solid #e5e7eb}.p-4{padding:1rem}.p-3{padding:.75rem}
+.font-bold{font-weight:700}.text-sm{font-size:.875rem}.text-xs{font-size:.75rem}
+.justify-between{justify-content:space-between}.items-center{align-items:center}
+.w-10{width:2.5rem}.h-10{height:2.5rem}.w-8{width:2rem}.h-8{height:2rem}
+.bg-emerald-100{background:#d1fae5}.bg-emerald-50{background:#ecfdf5}.bg-gray-100{background:#f3f4f6}
+.max-w-7xl{max-width:80rem}.mx-auto{margin-left:auto;margin-right:auto}
+.pb-6{padding-bottom:1.5rem}.pt-4{padding-top:1rem}.px-4{padding-left:1rem;padding-right:1rem}
+.product-card{contain:layout style paint;content-visibility:auto;contain-intrinsic-size:200px}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
+@keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+<script>
+setTimeout(()=>{
+  var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);
+  var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);
+  var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';document.head.appendChild(f);
+}, 80);
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+*{font-family:'Cairo',sans-serif} body{background:#f8fafc}
+.product-card{transition:.2s;contain:layout}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,.08)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.slider-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:none;align-items:center;justify-content:center}
+.slider-modal.active{display:flex}
+</style>
+</head>
+<body class="pb-6">
+
+<header class="bg-white border-b border-gray-100 sticky top-0 z-30">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></a>
+      <h1 class="font-bold text-gray-900" data-i18n="myStore">متجري</h1>
+    </div>
+    <button id="reportsBtn" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center relative">
+      <i class="fa-solid fa-file-invoice"></i>
+      <span id="orderCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+    </button>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 pt-4">
+  <div class="bg-white rounded-2xl shadow-sm border border-emerald-100 p-4 mb-4">
+    <div class="flex items-center gap-2 mb-3">
+      <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-users text-emerald-600 text-sm"></i></div>
+      <h3 class="font-bold text-sm" data-i18n="chooseClientFromList">اختيار العميل من القائمة</h3>
+    </div>
+    <div class="flex gap-2">
+      <div class="flex-1 relative">
+        <input type="text" id="clientSearchInput" data-i18n-placeholder="searchClient" placeholder="ابحث عن عميل..." autocomplete="off" class="w-full pr-10 pl-4 py-3.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-bold bg-white">
+        <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <div id="clientDropdown" class="hidden absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto"></div>
+      </div>
+      <button id="searchClientBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-search"></i></button>
+    </div>
+    <div id="activeClientBar" class="hidden mt-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between">
+      <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i><span class="text-sm font-bold"><span data-i18n="client">العميل</span>: <span id="activeClientName" class="text-emerald-700"></span></span></div>
+      <button id="changeClientBtn" class="text-xs bg-white border px-3 py-1 rounded-full" data-i18n="change">تغيير</button>
+    </div>
+    <p id="clientsLoading" class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-spinner fa-spin ml-1"></i> <span data-i18n="loadingClients">جاري تحميل العملاء...</span></p>
+  </div>
+
+  <div id="orderProgress" class="hidden bg-white rounded-2xl border p-4 mb-4">
+    <div class="flex justify-between items-center mb-2"><span class="text-sm font-bold" data-i18n="orderProgress">تقدم الطلب</span><span id="progressText" class="text-xs bg-gray-100 px-2 py-1 rounded-full">0 / 0</span></div>
+    <div class="w-full bg-gray-100 rounded-full h-2"><div id="progressBar" class="bg-emerald-600 h-2 rounded-full transition-all" style="width:0%"></div></div>
+    <div class="flex gap-2 mt-3">
+      <button id="finishOrderBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm"><i class="fa-solid fa-check ml-2"></i><span data-i18n="finishAndSendOrder">إنهاء وإرسال الطلب</span></button>
+      <button id="clearOrderBtn" class="px-5 py-3 bg-gray-100 rounded-xl text-sm font-bold" data-i18n="clear">مسح</button>
+    </div>
+    <div id="orderSummary" class="mt-3 space-y-1.5 text-xs"></div>
+  </div>
+
+  <div class="bg-white rounded-2xl border p-3 mb-4">
+    <div class="relative">
+      <input type="text" id="searchInput" data-i18n-placeholder="searchForProduct" placeholder="البحث عن منتج..." class="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none text-sm">
+      <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+    </div>
+  </div>
+
+  <div id="productsContainer" class="grid grid-cols-2 gap-3"></div>
+  <div id="loadMoreTrigger" class="h-10"></div>
+  <div id="emptyState" class="hidden text-center py-16"><i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i><p class="text-gray-500 text-sm" data-i18n="noProducts">لا توجد منتجات</p></div>
+</main>
+
+<div id="orderModal" class="modal p-0 md:p-4">
+  <div class="bg-white md:rounded-[24px] w-full max-w-lg h-[100dvh] md:h-auto md:max-h-[92vh] overflow-hidden flex flex-col">
+    <div class="p-4 flex items-center justify-between border-b">
+      <h3 class="font-bold" data-i18n="setQuantity">تحديد الكمية</h3>
+      <button onclick="closeOrderModal()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4">
+      <div class="relative bg-gray-50 rounded-2xl overflow-hidden mb-3">
+        <img id="orderMainImage" src="" class="w-full h-[320px] object-contain cursor-zoom-in" onclick="openGalleryFromOrder()">
+        <span id="orderStockBadge" class="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full font-bold" data-i18n="available">متوفر</span>
+        <span id="orderImagesCount" class="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full"><i class="fa-solid fa-images ml-1"></i><span>0</span></span>
+      </div>
+      <div id="orderThumbs" class="flex gap-2 overflow-x-auto pb-2 mb-4"></div>
+      <h3 id="orderProductName" class="font-bold text-base mb-1">اسم المنتج</h3>
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-emerald-600 font-bold text-lg"><span id="orderPrice">0.00</span> <span class="text-xs font-normal text-gray-500" data-i18n="dirham">درهم</span></p>
+        <p class="text-xs text-gray-500"><span data-i18n="stockLabel">المخزون</span>: <span id="orderStock">0</span></p>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+        <label class="text-sm font-bold mb-3 block"><span data-i18n="requiredQuantityFor">الكمية المطلوبة لـ</span> <span id="orderClientLabel" class="text-emerald-700"></span></label>
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="changeQty(-1)" class="w-14 h-14 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center text-2xl font-bold">-</button>
+          <input type="number" id="orderQty" min="0" value="1" class="flex-1 h-14 text-center border-2 border-emerald-200 rounded-xl text-xl font-bold outline-none focus:border-emerald-500">
+          <button type="button" onclick="changeQty(1)" class="w-14 h-14 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center text-2xl font-bold">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 border-t bg-white">
+      <div class="flex gap-2">
+        <button onclick="closeOrderModal()" class="px-8 py-4 bg-gray-100 rounded-xl font-bold" data-i18n="cancel">إلغاء</button>
+        <button onclick="confirmOrder()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold"><i class="fa-solid fa-check ml-2"></i><span data-i18n="done">تم</span></button>
+      </div>
+      <p class="text-[11px] text-gray-400 text-center mt-2" data-i18n="backToProducts">سيتم الرجوع إلى قائمة المنتجات</p>
+    </div>
+  </div>
+</div>
+
+<div id="galleryModal" class="slider-modal">
+  <button onclick="closeGallery()" class="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white z-10"><i class="fa-solid fa-xmark"></i></button>
+  <button onclick="prevGallery()" class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/15 rounded-full flex items-center justify-center text-white z-10"><i class="fa-solid fa-chevron-left"></i></button>
+  <button onclick="nextGallery()" class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/15 rounded-full flex items-center justify-center text-white z-10"><i class="fa-solid fa-chevron-right"></i></button>
+  <div class="flex flex-col items-center w-full max-w-5xl px-4">
+    <img id="galleryImage" src="" class="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl">
+    <div id="galleryThumbs" class="mt-4 flex gap-2 overflow-x-auto max-w-full pb-2"></div>
+    <div class="mt-3 flex items-center gap-3"><div id="galleryDots" class="flex gap-2"></div><span id="galleryCounter" class="bg-black/50 text-white px-3 py-1 rounded-full text-xs">1 / 1</span></div>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"><i id="toastIcon" class="fa-solid fa-check-circle text-emerald-400"></i><span id="toastMessage" class="text-sm"></span></div></div>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { ref, get, push, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+let products = [];
+let filteredProducts = [];
+let currentOrder = [];
+let currentProductIndex = -1;
+let activeClient = localStorage.getItem('activeClient') || '';
+let galleryImages = [];
+let galleryIndex = 0;
+let allClients = [];
+let renderedCount = 0;
+const PAGE_SIZE = 20;
+
+let currentUid = null;
+let productsRef = null;
+let customersRef = null;
+let ordersRef = null;
+let profileRef = null;
+
+function t(key, params={}){ return window.KarniLang ? window.KarniLang.t(key, params) : key; }
+
+function getProdCacheKey(){ return `products_${currentUid}`; }
+function getClientCacheKey(){ return `clients_${currentUid}`; }
+function getClientTimeKey(){ return `clients_time_${currentUid}`; }
+
+function saveProductsToPhone(data){
+  try{
+    if(!currentUid) return;
+    localStorage.setItem(getProdCacheKey(), JSON.stringify({v:'v3', t:Date.now(), d:data}));
+  } catch(e){}
+}
+function loadProductsFromPhone(){
+  try{
+    if(!currentUid) return null;
+    const raw = localStorage.getItem(getProdCacheKey());
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    if(Date.now() - p.t > 24*60*60*1000) return null;
+    return p.d;
+  } catch(e){ return null; }
+}
+function saveClientsToPhone(clients){
+  try{
+    if(!currentUid) return;
+    localStorage.setItem(getClientCacheKey(), JSON.stringify(clients));
+    localStorage.setItem(getClientTimeKey(), Date.now().toString());
+  } catch(e){}
+}
+function loadClientsFromPhone(){
+  try{
+    if(!currentUid) return null;
+    const raw = localStorage.getItem(getClientCacheKey());
+    const time = localStorage.getItem(getClientTimeKey());
+    if(!raw || !time) return null;
+    if(Date.now() - parseInt(time) > 24*60*60*1000) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+
+function renderInstant(){
+  let hasData = false;
+  const cachedProds = loadProductsFromPhone();
+  if(cachedProds && cachedProds.length>0){
+    products = cachedProds.filter(p=>!p.hidden);
+    filteredProducts = [...products];
+    renderProducts(true);
+    hasData = true;
+  }
+  const cachedClients = loadClientsFromPhone();
+  if(cachedClients && cachedClients.length>0){
+    allClients = cachedClients;
+    document.getElementById('clientsLoading').innerHTML = t('loadedClientsFromPhone', {count: cachedClients.length});
+    setTimeout(()=>document.getElementById('clientsLoading').classList.add('hidden'), 1200);
+    hasData = true;
+    if(activeClient){
+      document.getElementById('activeClientName').textContent = activeClient;
+      document.getElementById('activeClientBar').classList.remove('hidden');
+      document.getElementById('orderClientLabel').textContent = `(${activeClient})`;
+      document.getElementById('clientSearchInput').value = activeClient;
+    }
+  }
+  return hasData;
+}
+
+async function loadClients(){
+  if(!currentUid || !customersRef) return;
+  try{
+    const snap = await get(customersRef);
+    let clients = [];
+    if(snap.exists()){
+      const val = snap.val();
+      if(val._init) delete val._init;
+      Object.values(val).forEach(c=>{
+        if(!c || !c.name) return;
+        if(c.name) clients.push(c.name.trim());
+      });
+    }
+    clients = [...new Set(clients.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
+    if(clients.length>0){
+      allClients = clients;
+      saveClientsToPhone(clients);
+      document.getElementById('clientsLoading').innerHTML = t('loadedClients', {count: clients.length});
+      setTimeout(()=>document.getElementById('clientsLoading').classList.add('hidden'), 1200);
+      if(activeClient && clients.includes(activeClient)){
+        document.getElementById('activeClientName').textContent = activeClient;
+        document.getElementById('activeClientBar').classList.remove('hidden');
+        document.getElementById('orderClientLabel').textContent = `(${activeClient})`;
+        document.getElementById('clientSearchInput').value = activeClient;
+      }
+    } else if(allClients.length===0){
+      document.getElementById('clientsLoading').innerHTML = `<span class="text-red-400 text-xs">${t('noClients')}</span>`;
+    }
+  }catch(e){
+    console.error(e);
+  }
+}
+
+async function loadProducts(){
+  if(!currentUid || !productsRef) return;
+  try{
+    const snap = await get(productsRef);
+    if(snap.exists()){
+      const val = snap.val();
+      if(val._init) delete val._init;
+      const fresh = Object.values(val).filter(v=>v && typeof v==='object' && !v._init).map(p=>{
+        if(p.image && !p.mainImage) p.mainImage = p.image;
+        if(p.mainImage && (!p.images || p.images.length===0)) p.images=[p.mainImage];
+        if(!p.images) p.images = p.mainImage ? [p.mainImage] : [];
+        if(!p.mainImage && p.images.length>0) p.mainImage = p.images[0];
+        return {hidden:false, ...p};
+      }).filter(p=>!p.hidden);
+      if(JSON.stringify(fresh.map(p=>p.id).sort()) !== JSON.stringify(products.map(p=>p.id).sort())){
+        products = fresh;
+        filteredProducts = [...fresh];
+        saveProductsToPhone(fresh);
+        renderProducts(true);
+      }
+    }
+  } catch(e){}
+}
+
+function renderProducts(reset=true){
+  const container = document.getElementById('productsContainer');
+  const empty = document.getElementById('emptyState');
+  if(reset){
+    let filtered = products;
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if(q) filtered = filtered.filter(p=>(p.name||'').toLowerCase().includes(q));
+    window._lastFiltered = filtered;
+    renderedCount = 0;
+    container.innerHTML = '';
+    if(filtered.length===0){ empty.classList.remove('hidden'); if(window.KarniLang) KarniLang.applyTranslations(empty); return; }
+    empty.classList.add('hidden');
+  }
+  const list = window._lastFiltered || products;
+  const nextSlice = list.slice(renderedCount, renderedCount+PAGE_SIZE);
+  if(nextSlice.length===0) return;
+  const html = nextSlice.map(p=>{
+    const mainImg = p.mainImage || p.images?.[0] || 'https://via.placeholder.com/300';
+    const inOrder = currentOrder.find(o=>o.productId==p.id);
+    const hasQty = inOrder ? inOrder.qty : 0;
+    const isZero = (parseInt(p.stock)||0) <= 0;
+    const badgeText = isZero ? t('outOfStock') : t('available');
+    const badgeClass = isZero ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700';
+    return `<div class="product-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="relative bg-gray-50 cursor-pointer" onclick="openOrderModal('${p.id}')">
+        <img src="${mainImg}" alt="${p.name}" class="w-full h-48 object-cover" loading="lazy" decoding="async">
+        <span class="absolute top-2 right-2 ${badgeClass} text-[11px] px-2.5 py-1 rounded-full font-bold">${badgeText}</span>
+        ${hasQty>0?`<span class="absolute top-2 left-2 bg-emerald-600 text-white text-xs w-7 h-7 rounded-full flex items-center justify-center font-bold">${hasQty}</span>`:''}
+      </div>
+      <div class="p-3">
+        <h3 class="font-bold text-[13px] text-gray-900 line-clamp-1 mb-2 text-center">${p.name||t('noName')}</h3>
+        <p class="font-bold text-emerald-600 text-[13px] text-center mb-1">${parseFloat(p.price||0).toFixed(2)} ${t('dirham')}</p>
+        <p class="text-[11px] text-gray-400 text-center mb-2">${t('stockLabel')}: ${p.stock||0}</p>
+        ${hasQty>0?`
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2 flex items-center justify-between gap-1">
+          <button onclick="editProductQty('${p.id}',-1)" class="w-8 h-8 bg-white border rounded-full flex items-center justify-center font-bold">-</button>
+          <span class="flex-1 text-center font-bold text-sm">${hasQty}</span>
+          <button onclick="editProductQty('${p.id}',1)" class="w-8 h-8 bg-white border rounded-full flex items-center justify-center font-bold">+</button>
+          <button onclick="deleteFromOrder('${p.id}')" class="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center ml-1"><i class="fa-solid fa-trash text-[11px]"></i></button>
+        </div>
+        `:`
+        <button onclick="openOrderModal('${p.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs"><i class="fa-solid fa-cart-plus ml-1"></i>${t('addToOrder')}</button>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  while(temp.firstChild) container.appendChild(temp.firstChild);
+  renderedCount += nextSlice.length;
+}
+
+window.editProductQty = function(productId, delta){
+  const item = currentOrder.find(o=>o.productId==productId);
+  if(!item) return;
+  item.qty = Math.max(0, item.qty + delta);
+  if(item.qty===0) currentOrder = currentOrder.filter(o=>o.productId!=productId);
+  updateProgress(); renderProducts(true);
+}
+window.deleteFromOrder = function(productId){
+  currentOrder = currentOrder.filter(o=>o.productId!=productId);
+  updateProgress(); renderProducts(true);
+}
+
+window.openOrderModal = function(productId){
+  if(!activeClient){ showToast(t('selectClientFirst'),'error'); return; }
+  const p = products.find(x=>x.id==productId);
+  if(!p) return;
+  currentProductIndex = products.findIndex(x=>x.id==productId);
+  const mainImg = p.mainImage || p.images?.[0] || '';
+  document.getElementById('orderMainImage').src = mainImg;
+  document.getElementById('orderProductName').textContent = p.name;
+  document.getElementById('orderPrice').textContent = parseFloat(p.price||0).toFixed(2);
+  document.getElementById('orderStock').textContent = p.stock||0;
+  document.getElementById('orderStockBadge').textContent = (parseInt(p.stock)||0) <=0 ? t('outOfStock') : t('available');
+  document.getElementById('orderStockBadge').className = `absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-bold ${(parseInt(p.stock)||0)<=0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}`;
+  document.getElementById('orderImagesCount').querySelector('span').textContent = p.images?.length||1;
+  document.getElementById('orderThumbs').innerHTML = (p.images||[]).map((img,i)=>`<img src="${img}" class="w-16 h-16 rounded-xl object-cover border-2 ${i===0?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="setOrderMain('${img}',${i})">`).join('');
+  const existing = currentOrder.find(o=>o.productId==p.id);
+  document.getElementById('orderQty').value = existing ? existing.qty : 1;
+  document.getElementById('orderModal').classList.add('active');
+  if(window.KarniLang) KarniLang.applyTranslations(document.getElementById('orderModal'));
+  galleryImages = p.images||[mainImg];
+  galleryIndex = 0;
+}
+window.setOrderMain = function(src, idx){
+  document.getElementById('orderMainImage').src = src;
+  document.querySelectorAll('#orderThumbs img').forEach((t,i)=>{ t.classList.toggle('border-emerald-500', i===idx); t.classList.toggle('border-transparent', i!==idx); });
+  galleryIndex = idx;
+}
+window.changeQty = function(d){
+  const input = document.getElementById('orderQty');
+  let v = parseInt(input.value)||0; v+=d; if(v<0) v=0; input.value=v;
+}
+window.closeOrderModal = function(){ document.getElementById('orderModal').classList.remove('active'); }
+window.confirmOrder = function(){
+  const qty = parseInt(document.getElementById('orderQty').value)||0;
+  if(qty<=0){ showToast(t('enterValidQty'),'error'); return; }
+  const p = products[currentProductIndex];
+  if(!p) return;
+  const existingIdx = currentOrder.findIndex(o=>o.productId==p.id);
+  if(existingIdx>-1) currentOrder[existingIdx].qty = qty;
+  else currentOrder.push({productId:p.id, name:p.name, qty, price:p.price, mainImage:p.mainImage||p.images?.[0]});
+  updateProgress();
+  renderProducts(true);
+  closeOrderModal();
+  showToast(t('addedToOrder', {name: p.name, qty: qty}),'success');
+}
+
+function updateProgress(){
+  const bar = document.getElementById('orderProgress');
+  const countEl = document.getElementById('orderCount');
+  if(currentOrder.length===0 && !activeClient){ bar.classList.add('hidden'); countEl.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  countEl.classList.remove('hidden');
+  countEl.textContent = currentOrder.length;
+  document.getElementById('progressText').textContent = `${currentOrder.length} / ${window._lastFiltered?.length||products.length||0}`;
+  const total = window._lastFiltered?.length||products.length||1;
+  document.getElementById('progressBar').style.width = `${(currentOrder.length/total)*100}%`;
+  document.getElementById('orderSummary').innerHTML = currentOrder.map(o=>`<div class="bg-gray-50 rounded-lg p-2.5 flex justify-between items-center"><span class="font-bold text-xs truncate">${o.name}</span><div class="flex items-center gap-2"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold text-xs">${o.qty}</span><button onclick="deleteFromOrder('${o.productId}')" class="w-6 h-6 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark text-[10px]"></i></button></div></div>`).join('');
+}
+
+window.finishOrder = async function(){
+  if(!currentUid){ location.href="login.html"; return; }
+  if(!activeClient){ showToast(t('chooseClientFirst'),'error'); return; }
+  if(currentOrder.length===0){ showToast(t('noOrders'),'error'); return; }
+  
+  const btn = document.getElementById('finishOrderBtn');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin ml-2"></i> ${t('loadingClients')}`;
+  btn.disabled = true;
+  
+  try{
+    // 1. خصم الكمية من المخزون مباشرة - حتى لو أصبح 0 أو سالب مسموح
+    for(const item of currentOrder){
+      const product = products.find(p=>p.id==item.productId);
+      if(product){
+        const currentStock = parseInt(product.stock)||0;
+        const newStock = currentStock - parseInt(item.qty);
+        // تحديث محلي
+        product.stock = newStock;
+        // تحديث في Firebase - نسمح حتى لو 0 أو سالب
+        try{
+          await update(ref(db, `users/${currentUid}/products/${product.id}`), {
+            stock: newStock,
+            updatedAt: new Date().toISOString()
+          });
+        }catch(e){
+          console.warn("Stock update failed for", product.id, e);
+        }
+      }
+    }
+    
+    // حفظ المنتجات المحدثة محليا
+    saveProductsToPhone(products);
+    
+    // 2. إنشاء الطلب
+    const orderData = {
+      clientName:activeClient, 
+      items:currentOrder, 
+      totalItems:currentOrder.length, 
+      totalQty:currentOrder.reduce((s,i)=>s+i.qty,0), 
+      totalValue:currentOrder.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0), 
+      createdAt:new Date().toISOString(), 
+      status:'pending'
+    };
+    await push(ref(db, `users/${currentUid}/orders`), orderData);
+    await push(ref(db, `users/${currentUid}/clientBons/${activeClient}/orders`), orderData);
+    
+    showToast(t('orderSent', {client: activeClient, count: currentOrder.length}),'success');
+    currentOrder=[]; 
+    updateProgress(); 
+    renderProducts(true);
+    setTimeout(()=>{ window.location.href='reports.html'; }, 800);
+  } catch(e){ 
+    showToast(t('orderError')+': '+e.message,'error'); 
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+    if(window.KarniLang) KarniLang.applyTranslations(btn);
+  }
+}
+window.clearOrder = function(){ if(confirm(t('clearOrderConfirm'))){ currentOrder=[]; updateProgress(); renderProducts(true); } }
+
+function renderClientDropdown(filter){
+  const dropdown = document.getElementById('clientDropdown');
+  let list = allClients;
+  if(filter) list = list.filter(c=>c.toLowerCase().includes(filter.toLowerCase()));
+  if(list.length===0 || !filter){ dropdown.classList.add('hidden'); return; }
+  dropdown.innerHTML = list.slice(0,20).map(c=>`<div class="p-3 hover:bg-emerald-50 cursor-pointer border-b last:border-0 text-sm font-bold" onclick="selectClient('${c.replace(/'/g,"\'")}')"><i class="fa-solid fa-user ml-2 text-gray-400"></i>${c}</div>`).join('');
+  dropdown.classList.remove('hidden');
+}
+window.selectClient = function(name){
+  document.getElementById('clientSearchInput').value = name;
+  document.getElementById('clientDropdown').classList.add('hidden');
+  setActiveClient(name);
+}
+function setActiveClient(name){
+  if(!name) return;
+  activeClient = name;
+  localStorage.setItem('activeClient', name);
+  document.getElementById('activeClientName').textContent = name;
+  document.getElementById('activeClientBar').classList.remove('hidden');
+  document.getElementById('orderClientLabel').textContent = `(${name})`;
+  showToast(`${t('clientLabel')}: ${name}`,'success');
+  updateProgress();
+}
+
+window.openGalleryFromOrder = function(){ openGallery(galleryImages, galleryIndex); }
+function openGallery(images, startIdx=0){ galleryImages=images; galleryIndex=startIdx; showGallery(); document.getElementById('galleryModal').classList.add('active'); }
+function showGallery(){
+  if(!galleryImages.length) return;
+  document.getElementById('galleryImage').src=galleryImages[galleryIndex];
+  document.getElementById('galleryCounter').textContent=`${galleryIndex+1} / ${galleryImages.length}`;
+  document.getElementById('galleryDots').innerHTML=galleryImages.map((_,i)=>`<div class="w-2 h-2 rounded-full ${i===galleryIndex?'bg-white w-6':'bg-white/40'}" onclick="goGallery(${i})"></div>`).join('');
+  document.getElementById('galleryThumbs').innerHTML=galleryImages.map((img,i)=>`<img src="${img}" class="w-14 h-14 rounded-lg object-cover border-2 ${i===galleryIndex?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="goGallery(${i})">`).join('');
+}
+window.nextGallery=function(){ galleryIndex=(galleryIndex+1)%galleryImages.length; showGallery(); }
+window.prevGallery=function(){ galleryIndex=(galleryIndex-1+galleryImages.length)%galleryImages.length; showGallery(); }
+window.goGallery=function(i){ galleryIndex=i; showGallery(); }
+window.closeGallery=function(){ document.getElementById('galleryModal').classList.remove('active'); }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(window.KarniLang){
+    KarniLang.applyTranslations(document);
+  }
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){
+      location.href="login.html";
+      return;
+    }
+    currentUid = user.uid;
+    productsRef = ref(db, `users/${currentUid}/products`);
+    customersRef = ref(db, `users/${currentUid}/customers`);
+    ordersRef = ref(db, `users/${currentUid}/orders`);
+    profileRef = ref(db, `users/${currentUid}/profile`);
+
+    try{
+      const snap = await get(profileRef);
+      let profile = snap.exists() ? snap.val() : {};
+      console.log("Firebase profile:", profile);
+      console.log("Firebase language:", profile.language);
+      console.log("Current language:", window.KarniLang ? KarniLang.getLanguage() : 'no KarniLang');
+      console.log("LocalStorage:", localStorage.getItem("karni_language"));
+      if(profile.language && window.KarniLang){
+        await KarniLang.setLanguage(profile.language);
+        KarniLang.applyDirection(profile.language);
+        KarniLang.applyTranslations(document);
+        localStorage.setItem("karni_language", profile.language);
+        console.log("Translation:", KarniLang.t("available"));
+        console.log("Document lang:", document.documentElement.lang);
+      } else {
+        if(window.KarniLang){
+          const ls = localStorage.getItem("karni_language") || "ar";
+          await KarniLang.setLanguage(ls);
+          KarniLang.applyDirection(ls);
+          KarniLang.applyTranslations(document);
+        }
+      }
+    }catch(e){ console.warn(e); }
+
+    const hasCache = renderInstant();
+    document.getElementById('clientSearchInput').addEventListener('input', e=>renderClientDropdown(e.target.value));
+    document.getElementById('clientSearchInput').addEventListener('focus', e=>renderClientDropdown(e.target.value));
+    document.addEventListener('click', e=>{ if(!e.target.closest('#clientSearchInput') && !e.target.closest('#clientDropdown')) document.getElementById('clientDropdown').classList.add('hidden'); });
+    document.getElementById('searchClientBtn').addEventListener('click', ()=>{ const v=document.getElementById('clientSearchInput').value.trim(); if(v) setActiveClient(v); });
+    document.getElementById('changeClientBtn').addEventListener('click', ()=>{ document.getElementById('activeClientBar').classList.add('hidden'); document.getElementById('clientSearchInput').value=''; activeClient=''; localStorage.removeItem('activeClient'); updateProgress(); });
+    document.getElementById('searchInput').addEventListener('input', ()=>{ renderProducts(true); });
+    document.getElementById('finishOrderBtn').addEventListener('click', finishOrder);
+    document.getElementById('clearOrderBtn').addEventListener('click', clearOrder);
+    document.getElementById('reportsBtn').addEventListener('click', ()=>window.location.href='reports.html');
+    const observer = new IntersectionObserver(entries=>{ if(entries[0].isIntersecting) renderProducts(false); }, {rootMargin:'300px'});
+    observer.observe(document.getElementById('loadMoreTrigger'));
+
+    if(hasCache){
+      setTimeout(()=>{ loadClients(); loadProducts(); }, 300);
+    } else {
+      document.getElementById('productsContainer').innerHTML = Array(4).fill(0).map(()=>`<div class="bg-white rounded-2xl p-4 border"><div class="w-full h-48 skeleton rounded-xl mb-2"></div><div class="h-3 skeleton rounded w-3/4 mx-auto"></div></div>`).join('');
+      await Promise.all([loadClients(), loadProducts()]);
+    }
+  });
+});
+
+function showToast(msg,type='success'){
+  const toast=document.getElementById('toast');
+  const icon=document.getElementById('toastIcon');
+  const m=document.getElementById('toastMessage');
+  m.textContent=msg;
+  icon.className=type==='success'?'fa-solid fa-check-circle text-emerald-400':type==='error'?'fa-solid fa-circle-exclamation text-red-400':'fa-solid fa-info-circle text-blue-400';
+  toast.classList.remove('hidden');
+  setTimeout(()=>toast.classList.add('hidden'),3000);
+}
+
+window.addEventListener('karniLanguageChanged', ()=>{
+  if(window.KarniLang){
+    KarniLang.applyTranslations(document);
+    renderProducts(true);
+    updateProgress();
+  }
+});
+</script>
+</body>
+</html>
