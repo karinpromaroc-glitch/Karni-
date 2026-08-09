@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<!-- PLAYABLE_TOUCH_PATCH_V1 --><script>
+(function() {
+  if (window.__playableTouchPatchInstalled) return;
+  window.__playableTouchPatchInstalled = true;
+  var origAdd = EventTarget.prototype.addEventListener;
+  var blockedTypes = { touchstart: 1, touchmove: 1, wheel: 1 };
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (blockedTypes[type]) {
+      if (options === undefined || options === null) {
+        options = { passive: true };
+      } else if (typeof options === 'boolean') {
+        options = { capture: options, passive: true };
+      } else {
+        options = Object.assign({}, options, { passive: true });
+      }
+    }
+    return origAdd.call(this, type, listener, options);
+  };
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkthcm5pIFBybyIsCiAgInNob3J0X25hbWUiOiAiS2FybmkiLAogICJkZXNjcmlwdGlvbiI6ICLZhti42KfZhSDYpdiv2KfYsdipINin2YTZg9ix2YbZiiDYp9mE2LDZg9mKINmE2KXYr9in2LHYqSDYp9mE2LnZhdmE2KfYoSDZiNin2YTYr9mB2LnYp9iqINmI2KfZhNiq2YLYp9ix2YrYsS4iLAogICJpZCI6ICJrYXJuaS1wcm8tcHdhIiwKICAibGFuZyI6ICJhciIsCiAgImRpciI6ICJydGwiLAogICJzdGFydF91cmwiOiAiLi9pbmRleC5odG1sP3V0bV9zb3VyY2U9cHdhIiwKICAic2NvcGUiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJkaXNwbGF5X292ZXJyaWRlIjogWwogICAgIndpbmRvdy1jb250cm9scy1vdmVybGF5IiwKICAgICJzdGFuZGFsb25lIgogIF0sCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAidGhlbWVfY29sb3IiOiAiIzBmNzY2ZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y2ZmNmYiIsCiAgImxhdW5jaF9oYW5kbGVyIjogewogICAgImNsaWVudF9tb2RlIjogWwogICAgICAibmF2aWdhdGUtZXhpc3RpbmciLAogICAgICAiYXV0byIKICAgIF0KICB9LAogICJoYW5kbGVfbGlua3MiOiAicHJlZmVycmVkIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiLi9pY29uLTE5Mi5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiLi9pY29uLTUxMi5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiLi9pY29uLTE5Mi5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogIm1hc2thYmxlIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICIuL2ljb24tNTEyLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInB1cnBvc2UiOiAibWFza2FibGUiCiAgICB9CiAgXSwKICAic2hvcnRjdXRzIjogWwogICAgewogICAgICAibmFtZSI6ICLYp9mE2LXZgdit2Kkg2KfZhNix2KbZitiz2YrYqSIsCiAgICAgICJzaG9ydF9uYW1lIjogItin2YTYsdim2YrYs9mK2KkiLAogICAgICAiZGVzY3JpcHRpb24iOiAi2LnYsdi2INmE2YjYrdipINin2YTYqtit2YPZhSDZiNin2YTYudmF2YTYp9ihIiwKICAgICAgInVybCI6ICIuL2luZGV4Lmh0bWw/dXRtX3NvdXJjZT1zaG9ydGN1dF9ob21lIiwKICAgICAgImljb25zIjogWwogICAgICAgIHsKICAgICAgICAgICJzcmMiOiAiLi9pY29uLTE5Mi5wbmciLAogICAgICAgICAgInNpemVzIjogIjE5MngxOTIiCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICLYp9mE2LnZhdmE2KfYoSIsCiAgICAgICJzaG9ydF9uYW1lIjogItin2YTYudmF2YTYp9ihIiwKICAgICAgImRlc2NyaXB0aW9uIjogItil2K/Yp9ix2Kkg2YLYp9im2YXYqSDYp9mE2LnZhdmE2KfYoSDZiNin2YTZg9ix2YbZiiIsCiAgICAgICJ1cmwiOiAiLi9pbmRleC5odG1sP3Nob3J0Y3V0PWN1c3RvbWVycyZ1dG1fc291cmNlPXNob3J0Y3V0IiwKICAgICAgImljb25zIjogWwogICAgICAgIHsKICAgICAgICAgICJzcmMiOiAiLi9pY29uLTE5Mi5wbmciLAogICAgICAgICAgInNpemVzIjogIjE5MngxOTIiCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICLYp9mE2KrZgtin2LHZitixIiwKICAgICAgInNob3J0X25hbWUiOiAi2KfZhNiq2YLYp9ix2YrYsSIsCiAgICAgICJkZXNjcmlwdGlvbiI6ICLYudix2LYg2KfZhNiq2YLYp9ix2YrYsSDZiNin2YTZgdmI2KfYqtmK2LEiLAogICAgICAidXJsIjogIi4vcmVwb3J0cy5odG1sP3V0bV9zb3VyY2U9c2hvcnRjdXRfcmVwb3J0cyIsCiAgICAgICJpY29ucyI6IFsKICAgICAgICB7CiAgICAgICAgICAic3JjIjogIi4vaWNvbi0xOTIucG5nIiwKICAgICAgICAgICJzaXplcyI6ICIxOTJ4MTkyIgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAi2KfZhNmF2KrYrNixIiwKICAgICAgInNob3J0X25hbWUiOiAi2KfZhNmF2KrYrNixIiwKICAgICAgInVybCI6ICIuL21hdGphci5odG1sP3V0bV9zb3VyY2U9c2hvcnRjdXRfc3RvcmUiLAogICAgICAiZGVzY3JpcHRpb24iOiAi2KXYr9in2LHYqSDYp9mE2YXZhtiq2KzYp9iqINmI2KfZhNi32YTYqNin2KoiLAogICAgICAiaWNvbnMiOiBbCiAgICAgICAgewogICAgICAgICAgInNyYyI6ICIuL2ljb24tMTkyLnBuZyIsCiAgICAgICAgICAic2l6ZXMiOiAiMTkyeDE5MiIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICBdLAogICJjYXRlZ29yaWVzIjogWwogICAgImJ1c2luZXNzIiwKICAgICJwcm9kdWN0aXZpdHkiLAogICAgImZpbmFuY2UiCiAgXSwKICAicHJlZmVyX3JlbGF0ZWRfYXBwbGljYXRpb25zIjogZmFsc2UKfQo=">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Karni Pro">
+<title>Karni Pro - تسجيل الدخول</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="lang.js"></script>
+<style>
+:root{
+  --primary:#0f766e; --primary-2:#0d5a54; --primary-light:#14b8a6; --primary-glow:rgba(20,184,166,0.35);
+  --bg-1:#f0fdfa; --bg-2:#ccfbf1; --bg-3:#ecfeff;
+  --card:rgba(255,255,255,0.86); --card-2:rgba(255,255,255,0.94);
+  --text:#0f172a; --muted:#64748b; --line:rgba(15,118,110,0.10);
+  --shadow-1:0 10px 30px rgba(2,44,34,0.08); --shadow-2:0 24px 64px rgba(2,44,34,0.14), 0 8px 24px rgba(15,118,110,0.10);
+  --r-xl:32px; --r-lg:20px; --r-md:14px;
+  --ease-spring:cubic-bezier(0.16,1,0.3,1); --ease-smooth:cubic-bezier(0.2,0.8,0.2,1);
+}
+*{font-family:'Cairo',sans-serif;box-sizing:border-box;-webkit-tap-highlight-color:transparent; margin:0; padding:0}
+html,body{height:100%}
+body{
+  min-height:100vh; background: var(--bg-1); color:var(--text);
+  display:flex; align-items:center; justify-content:center; padding:18px;
+  overflow-x:hidden; position:relative; isolation:isolate;
+}
+/* ===== Animated Mesh Background ===== */
+.bg-mesh{
+  position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;
+  background:
+    radial-gradient(1200px 800px at 85% -15%, rgba(20,184,166,0.28) 0%, transparent 60%),
+    radial-gradient(900px 600px at -15% 20%, rgba(15,118,110,0.16) 0%, transparent 55%),
+    radial-gradient(700px 500px at 50% 120%, rgba(45,212,191,0.18) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-3) 0%, var(--bg-1) 100%);
+}
+.blob{
+  position:absolute; border-radius:50%; filter:blur(48px); opacity:0.7; mix-blend-mode:multiply;
+  animation: blobFloat 18s infinite var(--ease-smooth);
+}
+.blob.b1{width:520px;height:520px;left:-120px;top:-120px;background:radial-gradient(circle at 30% 30%, #99f6e0, #2dd4bf); animation-delay:0s}
+.blob.b2{width:680px;height:680px;right:-180px;top:-80px;background:radial-gradient(circle at 50% 50%, #5eead4, #0f766e); opacity:0.18; animation-delay:-6s}
+.blob.b3{width:600px;height:600px;left:25%;bottom:-220px;background:radial-gradient(circle at 30% 40%, #ccfbf1, #14b8a6); opacity:0.5; animation-delay:-12s}
+@keyframes blobFloat{
+  0%,100%{transform:translate(0,0) scale(1) rotate(0deg)}
+  33%{transform:translate(30px,-20px) scale(1.05) rotate(1deg)}
+  66%{transform:translate(-20px,25px) scale(0.97) rotate(-1deg)}
+}
+/* subtle grid */
+.bg-mesh::after{
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px; opacity:0.35; mask-image: radial-gradient(80% 60% at 50% 10%, black 60%, transparent 100%);
+}
+
+/* ===== Splash ===== */
+#splashScreen{
+  position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(20,184,166,0.22), transparent 60%), linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%);
+  transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring), visibility 0.6s;
+}
+#splashScreen.hide{opacity:0; transform:scale(1.02); visibility:hidden; pointer-events:none}
+.splash-inner{text-align:center; animation: splashIn 0.9s var(--ease-spring)}
+@keyframes splashIn{from{opacity:0; transform:translateY(16px) scale(0.96)} to{opacity:1; transform:translateY(0) scale(1)}}
+.splash-logo{
+  width:96px;height:96px; margin:0 auto 18px; border-radius:26px;
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+  display:flex; align-items:center; justify-content:center; color:white; font-size:40px;
+  box-shadow: 0 16px 40px rgba(15,118,110,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  position:relative; overflow:hidden; animation: logoPop 0.9s var(--ease-spring) 0.1s both;
+}
+.splash-logo::before{
+  content:''; position:absolute; inset:-40%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), transparent 55%);
+  animation: shine 2.2s linear infinite;
+}
+@keyframes shine{from{transform:translateX(-30%) rotate(0deg)} to{transform:translateX(30%) rotate(5deg)}}
+@keyframes logoPop{from{transform:scale(0.8) rotate(-4deg)} to{transform:scale(1) rotate(0)}}
+.splash-title{font-family:'Outfit','Cairo',sans-serif; font-size:28px; font-weight:800; letter-spacing:-0.6px; color:#0f172a}
+.splash-sub{margin-top:6px; font-size:13px; font-weight:700; color:var(--muted); letter-spacing:0.2px}
+.splash-loader{margin-top:22px; display:flex; gap:8px; justify-content:center; align-items:center}
+.splash-loader span{
+  width:8px;height:8px;border-radius:50%; background:var(--primary);
+  animation: loaderDot 1.2s infinite var(--ease-smooth);
+}
+.splash-loader span:nth-child(2){animation-delay:0.15s} .splash-loader span:nth-child(3){animation-delay:0.3s}
+@keyframes loaderDot{0%,80%,100%{transform:scale(0.6); opacity:0.5} 40%{transform:scale(1.2); opacity:1}}
+
+/* ===== Main Card ===== */
+.page-wrap{width:100%; display:flex; justify-content:center; padding:8px}
+.card-main{
+  width:100%; max-width:448px; position:relative;
+  background: var(--card); backdrop-filter: blur(36px) saturate(180%); -webkit-backdrop-filter: blur(36px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.7); border-top-color:rgba(255,255,255,0.9);
+  box-shadow: var(--shadow-2); border-radius: var(--r-xl);
+  padding:28px 26px 22px; overflow:hidden;
+  animation: cardEnter 0.8s var(--ease-spring) 1.6s both;
+}
+@keyframes cardEnter{from{opacity:0; transform:translateY(28px) scale(0.97)} to{opacity:1; transform:translateY(0) scale(1)}}
+.card-main::before{
+  content:''; position:absolute; inset:0 0 auto 0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+}
+.card-main::after{
+  content:''; position:absolute; width:320px; height:320px; right:-120px; top:-140px;
+  background: radial-gradient(circle, rgba(20,184,166,0.18), transparent 70%); pointer-events:none;
+}
+
+/* Lang Switcher - Pill */
+.lang-switcher{
+  display:flex; gap:6px; justify-content:center; margin-bottom:18px;
+  background: rgba(15,118,110,0.06); border:1px solid var(--line); padding:5px; border-radius:999px; width:fit-content; margin-inline:auto;
+}
+.lang-btn{
+  min-width:58px; padding:7px 14px; border-radius:999px; border:1.5px solid transparent;
+  background: transparent; font-family:'Cairo'; font-size:11.5px; font-weight:800; letter-spacing:0.2px;
+  cursor:pointer; transition: all 0.35s var(--ease-spring); color:var(--muted);
+}
+.lang-btn:hover{ background: rgba(255,255,255,0.7); color:var(--text) }
+.lang-btn.active{
+  background: white; color:var(--text); border-color: rgba(15,118,110,0.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,1) inset;
+}
+
+/* Header */
+.header{text-align:center; margin-bottom:22px}
+.logo-box{
+  width:84px;height:84px; border-radius:22px; margin:0 auto 14px;
+  background: linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 12px 32px rgba(15,118,110,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  position:relative; overflow:hidden; transform:translateZ(0);
+}
+.logo-box::before{
+  content:''; position:absolute; inset:0; background: radial-gradient(120px 80px at 30% 20%, rgba(255,255,255,0.28), transparent 60%);
+}
+.logo-box i{position:relative; z-index:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,0.15))}
+.header h1{font-size:24px; font-weight:900; letter-spacing:-0.4px; font-family:'Outfit','Cairo',sans-serif}
+#pageSubtitle{font-size:13px; color:var(--muted); margin-top:6px; font-weight:600; line-height:1.5}
+
+/* Tabs - Segmented */
+.tabs{
+  background: rgba(15,118,110,0.07); border:1px solid var(--line); border-radius:16px;
+  padding:4px; display:flex; gap:4px; margin-bottom:22px; position:relative;
+}
+.tab{
+  flex:1; padding:11px 8px; border-radius:12px; font-weight:800; font-size:13.5px; cursor:pointer;
+  transition: all 0.38s var(--ease-spring); border:none; background:transparent; color:var(--muted);
+  position:relative; z-index:1;
+}
+.tab.active{
+  background:white; color:var(--text);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07), 0 0 0 1px rgba(15,118,110,0.08) inset;
+}
+.tab:active{transform:scale(0.97)}
+
+/* Inputs - Premium */
+.input-group{margin-bottom:14px; position:relative}
+.input-label{font-size:12px; font-weight:700; color:#334155; margin-bottom:7px; display:block; letter-spacing:0.1px}
+.field-wrap{position:relative}
+.input-field{
+  width:100%; padding:14.5px 16px 14.5px 46px; border:1.6px solid rgba(15,118,110,0.12);
+  border-radius:16px; font-size:14px; font-weight:600; background: rgba(255,255,255,0.85);
+  transition: all 0.32s var(--ease-spring); outline:none; color:var(--text);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 2px 8px rgba(15,118,110,0.04);
+}
+.input-field::placeholder{color:#94a3b8; font-weight:500}
+.input-field:hover{border-color: rgba(15,118,110,0.20); background:white}
+.input-field:focus{
+  border-color: var(--primary-light); background:white;
+  box-shadow: 0 0 0 4px rgba(20,184,166,0.14), 0 6px 16px rgba(15,118,110,0.10);
+  transform: translateY(-1px);
+}
+.input-icon{
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  width:32px;height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background: rgba(15,118,110,0.07); color:#0f766e; font-size:13px; transition: all 0.32s var(--ease-spring);
+}
+.input-field:focus + .input-icon, .field-wrap:focus-within .input-icon{
+  background: var(--primary); color:white; transform:translateY(-50%) scale(1.05);
+}
+.input-group.has-label .input-icon{top:50%}
+
+/* Buttons - Material 3 */
+.btn-primary{
+  width:100%; background: linear-gradient(135deg,#0f766e 0%, #0d9488 50%, #14b8a6 100%);
+  color:white; padding:14.5px; border:none; border-radius:16px; font-weight:800; font-size:14.5px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;
+  box-shadow: 0 8px 20px rgba(15,118,110,0.28), 0 1px 0 rgba(255,255,255,0.3) inset;
+  transition: all 0.32s var(--ease-spring); position:relative; overflow:hidden; transform:translateZ(0);
+}
+.btn-primary::before{
+  content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+  opacity:0.9; pointer-events:none;
+}
+.btn-primary::after{
+  content:''; position:absolute; left:50%; top:50%; width:0; height:0; border-radius:50%;
+  background: rgba(255,255,255,0.28); transform:translate(-50%,-50%); transition: width 0.6s, height 0.6s;
+}
+.btn-primary:active::after{width:320px; height:320px}
+.btn-primary:hover{transform:translateY(-1px); box-shadow: 0 12px 28px rgba(15,118,110,0.32)}
+.btn-primary:active{transform:scale(0.98) translateY(0)}
+.btn-primary:disabled{opacity:0.6; cursor:not-allowed; transform:none}
+
+.forgot-wrapper{text-align:left; margin:6px 0 18px}
+.forgot-btn{
+  background:none; border:none; color:var(--primary); font-weight:700; font-size:12.8px; cursor:pointer;
+  padding:6px 8px; border-radius:10px; transition: all 0.25s;
+}
+.forgot-btn:hover{background: rgba(15,118,110,0.08)}
+
+/* Toast - Android style */
+.toast-container{
+  position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:9999;
+  display:flex; flex-direction:column; gap:10px; pointer-events:none; width:92%; max-width:400px;
+}
+.toast{
+  pointer-events:auto; background: rgba(255,255,255,0.96); backdrop-filter:blur(24px) saturate(180%);
+  border-radius:18px; padding:14px 16px; display:flex; align-items:center; gap:12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.04) inset;
+  border:1px solid rgba(255,255,255,0.8); animation: toastIn 0.5s var(--ease-spring);
+  font-size:13.2px; font-weight:700; color:#0f172a;
+}
+.toast.success .toast-icon{background:linear-gradient(135deg,#dcfce7,#bbf7d0); color:#16a34a}
+.toast.error .toast-icon{background:linear-gradient(135deg,#fee2e2,#fecaca); color:#dc2626}
+.toast.info .toast-icon{background:linear-gradient(135deg,#dbeafe,#bfdbfe); color:#2563eb}
+.toast-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+@keyframes toastIn{from{opacity:0; transform:translateY(-14px) scale(0.96)} to{opacity:1; transform:translateY(0) scale(1)}}
+
+/* Modal - Modern */
+.modal{
+  position:fixed; inset:0; background: rgba(6,26,23,0.48); backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%); z-index:5000; display:none; align-items:center; justify-content:center; padding:18px;
+}
+.modal.active{display:flex; animation: fadeIn 0.25s var(--ease-smooth)}
+@keyframes fadeIn{from{opacity:0} to{opacity:1}}
+.modal-card{
+  background: rgba(255,255,255,0.94); backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%); border-radius:28px; padding:26px 22px;
+  width:100%; max-width:400px; box-shadow: 0 32px 80px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.6) inset;
+  border:1px solid rgba(255,255,255,0.8); animation: modalIn 0.55s var(--ease-spring); text-align:center;
+}
+@keyframes modalIn{from{opacity:0; transform:translateY(22px) scale(0.94)} to{opacity:1; transform:translateY(0) scale(1)}}
+
+.otp-single{
+  width:100%; height:58px; border:2px solid rgba(15,118,110,0.12); border-radius:16px;
+  text-align:center; font-size:24px; font-weight:900; letter-spacing:10px; background: rgba(255,255,255,0.92);
+  outline:none; transition: all 0.32s var(--ease-spring); margin:18px 0 12px;
+  box-shadow: 0 2px 12px rgba(15,118,110,0.05) inset;
+}
+.otp-single:focus{
+  border-color: var(--primary-light); background:white;
+  box-shadow: 0 0 0 5px rgba(20,184,166,0.14), 0 8px 20px rgba(15,118,110,0.12); transform:translateY(-1px)
+}
+.otp-icon{
+  width:72px;height:72px; background: linear-gradient(135deg,#ccfbf1,#99f6e0); border-radius:20px;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:28px; color:var(--primary);
+  box-shadow: 0 8px 20px rgba(20,184,166,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.success-icon{
+  width:88px;height:88px; background: linear-gradient(135deg,#dcfce7,#86efac); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:38px; color:#16a34a;
+  box-shadow: 0 12px 32px rgba(22,163,74,0.22), 0 0 0 8px rgba(220,252,231,0.6);
+  animation: successPop 0.7s var(--ease-spring) 0.2s both;
+}
+@keyframes successPop{0%{transform:scale(0.6) rotate(-10deg)} 60%{transform:scale(1.08) rotate(2deg)} 100%{transform:scale(1) rotate(0)}}
+
+.steps-list{
+  text-align:right; background: linear-gradient(180deg, #f8fafc, #f0fdfa);
+  border:1px solid rgba(15,118,110,0.10); border-radius:18px; padding:16px; margin:16px 0;
+}
+.steps-list li{
+  font-size:12.6px; font-weight:600; color:#1e293b; margin-bottom:11px;
+  display:flex; gap:11px; align-items:flex-start; line-height:1.6; list-style:none
+}
+.steps-list li:last-child{margin-bottom:0}
+.steps-list li span.num{
+  width:26px;height:26px; background: linear-gradient(135deg,#0f766e,#14b8a6); color:white;
+  border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; margin-top:1px;
+  box-shadow:0 4px 10px rgba(15,118,110,0.22)
+}
+
+/* Responsive */
+@media (max-width:480px){
+  body{padding:12px}
+  .card-main{padding:24px 18px 18px; border-radius:28px}
+}
+@media (min-width:768px){
+  .card-main{max-width:460px; padding:32px 30px 26px}
+}
+</style>
+</head>
+<body>
+<!-- Background -->
+<div class="bg-mesh">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+
+<!-- Splash Screen -->
+<div id="splashScreen">
+  <div class="splash-inner">
+    <div class="splash-logo"><i class="fa-solid fa-book-open"></i></div>
+    <div class="splash-title">Karni Pro</div>
+    <div class="splash-sub">Smart Customer Management</div>
+    <div class="splash-loader"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="page-wrap">
+<div class="card-main">
+  <div class="lang-switcher">
+    <button class="lang-btn" data-lang="ar" onclick="changeLoginLanguage('ar')">العربية</button>
+    <button class="lang-btn" data-lang="fr" onclick="changeLoginLanguage('fr')">FR</button>
+    <button class="lang-btn" data-lang="en" onclick="changeLoginLanguage('en')">EN</button>
+  </div>
+  <div class="header">
+    <div class="logo-box"><i class="fa-solid fa-book-open" style="color:white;font-size:30px;position:relative;z-index:1"></i></div>
+    <h1>Karni Pro</h1>
+    <p id="pageSubtitle" data-i18n="loginDesc">تسجيل الدخول إلى حسابك</p>
+  </div>
+  <div class="tabs">
+    <button id="loginTab" class="tab active" onclick="switchMode('login')" data-i18n="login">تسجيل الدخول</button>
+    <button id="signupTab" class="tab" onclick="switchMode('signup')" data-i18n="signup">إنشاء حساب</button>
+  </div>
+  <div id="authForm">
+    <div id="fullNameGroup" class="input-group has-label" style="display:none">
+      <label class="input-label" data-i18n="fullName">الاسم الكامل</label>
+      <div class="field-wrap"><input id="fullNameInput" type="text" class="input-field" data-i18n-placeholder="fullNamePlaceholder" placeholder="مصطفى أحمد"><div class="input-icon"><i class="fa-solid fa-user"></i></div></div>
+    </div>
+    <div class="input-group has-label">
+      <label class="input-label" data-i18n="email">البريد الإلكتروني</label>
+      <div class="field-wrap"><input id="emailInput" type="email" class="input-field" placeholder="example@mail.com" data-i18n-placeholder="emailPlaceholder"><div class="input-icon"><i class="fa-solid fa-envelope"></i></div></div>
+    </div>
+    <div class="input-group has-label">
+      <label class="input-label" data-i18n="password">كلمة المرور</label>
+      <div class="field-wrap"><input id="passwordInput" type="password" class="input-field" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder"><div class="input-icon"><i class="fa-solid fa-lock"></i></div></div>
+    </div>
+    <div id="confirmPasswordGroup" class="input-group has-label" style="display:none">
+      <label class="input-label" data-i18n="confirmPassword">تأكيد كلمة المرور</label>
+      <div class="field-wrap"><input id="confirmPasswordInput" type="password" class="input-field" placeholder="••••••••" data-i18n-placeholder="confirmPasswordPlaceholder"><div class="input-icon"><i class="fa-solid fa-lock"></i></div></div>
+    </div>
+    <div id="forgotWrapper" class="forgot-wrapper"><button onclick="openForgotModal()" class="forgot-btn" data-i18n="forgotPassword">نسيت كلمة المرور؟</button></div>
+    <button id="actionBtn" onclick="handleAuth()" class="btn-primary"><i id="actionIcon" class="fa-solid fa-right-to-bracket"></i><span id="actionText" data-i18n="login">تسجيل الدخول</span></button>
+  </div>
+</div>
+</div>
+
+<div id="otpModal" class="modal">
+  <div class="modal-card">
+    <div class="otp-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <h3 style="font-size:19px;font-weight:800" id="otpTitle" data-i18n="otpTitle">رمز التحقق</h3>
+    <p style="font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:600" data-i18n="otpSentTo">تم إرسال رمز مكون من 6 أرقام إلى</p>
+    <p id="otpEmailDisplay" style="font-size:13px;font-weight:800;color:var(--primary);margin:8px 0 0;background:#f0fdfa;padding:8px 12px;border-radius:12px;border:1px solid var(--line);display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis"></p>
+    <input id="otpInput" type="text" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="otp-single" placeholder="123456">
+    <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:16px;padding:0 2px">
+      <span><span data-i18n="expiry">الصلاحية</span>: <span id="expiryTimer" style="color:var(--primary);font-weight:800">05:00</span></span><span>5 <span data-i18n="minutes">دقائق</span></span>
+    </div>
+    <button id="verifyOtpBtn" onclick="verifyOtp()" class="btn-primary" style="margin-bottom:12px" data-i18n="verifyCode">تأكيد الرمز</button>
+    <button id="resendBtn" onclick="resendOtp()" disabled style="width:100%;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:#f8fafc;color:#94a3b8;font-weight:700;font-family:'Cairo';cursor:not-allowed;transition:all 0.3s"><span data-i18n="resend">إعادة الإرسال</span> (<span id="resendTimer">60</span>ث)</button>
+    <button onclick="closeOtpModal()" style="width:100%;margin-top:12px;background:none;border:none;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;padding:8px" data-i18n="cancel">إلغاء</button>
+  </div>
+</div>
+
+<div id="forgotModal" class="modal">
+  <div class="modal-card" style="text-align:right">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg,#e0f2f1,#b2dfdb);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 20px rgba(15,118,110,0.12)"><i class="fa-solid fa-key" style="color:var(--primary);font-size:22px"></i></div>
+      <h3 style="font-size:18px;font-weight:800" data-i18n="forgotPasswordTitle">نسيت كلمة المرور؟</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:500;line-height:1.6" data-i18n="forgotPasswordDesc">أدخل بريدك وسيصلك رابط رسمي من Firebase</p>
+    </div>
+    <div class="input-group has-label"><label class="input-label" data-i18n="email">البريد الإلكتروني</label><div class="field-wrap"><input id="forgotEmailInput" type="email" class="input-field" placeholder="example@mail.com" data-i18n-placeholder="emailPlaceholder"><div class="input-icon"><i class="fa-solid fa-envelope"></i></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+      <button onclick="closeForgotModal()" style="padding:13px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,0.9);font-weight:700;font-family:'Cairo';cursor:pointer;transition:all 0.25s" data-i18n="cancel">إلغاء</button>
+      <button id="forgotSendBtn" onclick="sendForgotPassword()" class="btn-primary" data-i18n="sendLink">إرسال الرابط</button>
+    </div>
+  </div>
+</div>
+
+<div id="successInstructionsModal" class="modal">
+  <div class="modal-card" style="max-width:440px;text-align:right">
+    <div style="text-align:center">
+      <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+      <h3 style="font-size:20px;font-weight:900;color:#0f172a" data-i18n="sentSuccess">تم الإرسال بنجاح</h3>
+      <p style="font-size:13px;color:var(--muted);margin-top:8px;font-weight:600;line-height:1.5" data-i18n="resetLinkSentDesc">تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني</p>
+      <p id="successEmailDisplay" style="font-size:13px;font-weight:800;color:var(--primary);margin-top:10px;background:#f0fdfa;padding:9px 14px;border-radius:12px;border:1px solid var(--line);display:inline-block;max-width:100%;word-break:break-all"></p>
+    </div>
+    <div style="background:linear-gradient(135deg,#f0fdfa,#ecfdf5);border:1px solid var(--line);border-radius:18px;padding:14px;margin:16px 0;text-align:right">
+      <p style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:8px"><i class="fa-solid fa-envelope" style="margin-left:6px"></i><span data-i18n="openEmailInstruction">افتح بريدك الإلكتروني واضغط على الرابط المرسل من Firebase.</span></p>
+      <p style="font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.6" data-i18n="afterResetInfo">بعد إنشاء كلمة مرور جديدة يمكنك العودة إلى التطبيق وتسجيل الدخول مباشرة.</p>
+    </div>
+    <ul class="steps-list">
+      <li><span class="num">1</span><span data-i18n="step1">افتح بريدك الإلكتروني</span></li>
+      <li><span class="num">2</span><span data-i18n="step2">افتح الرسالة القادمة من Firebase</span></li>
+      <li><span class="num">3</span><span data-i18n="step3">اضغط على زر Reset Password</span></li>
+      <li><span class="num">4</span><span data-i18n="step4">أدخل كلمة المرور الجديدة</span></li>
+      <li><span class="num">5</span><span data-i18n="step5">احفظها واضغط Save</span></li>
+      <li><span class="num">6</span><span data-i18n="step6">ارجع إلى تطبيق Karni Pro وسجل الدخول بكلمة المرور الجديدة</span></li>
+    </ul>
+    <button id="openEmailBtn" onclick="openEmailProvider()" class="btn-primary" style="margin-bottom:10px"><i class="fa-solid fa-envelope-open"></i> <span data-i18n="openEmail">فتح البريد الإلكتروني</span></button>
+    <button onclick="closeSuccessInstructionsModal()" style="width:100%;padding:13px;border-radius:14px;border:1.5px solid var(--line);background:white;font-weight:800;font-family:'Cairo';cursor:pointer;color:var(--text);transition:all 0.25s" data-i18n="backToLogin">العودة لتسجيل الدخول</button>
+  </div>
+</div>
+
+<script>
+// Splash logic - independent, does not affect app logic
+(function(){
+  const splash = document.getElementById('splashScreen');
+  const minTime = 1500;
+  const start = Date.now();
+  function hide(){
+    const elapsed = Date.now() - start;
+    const delay = Math.max(0, minTime - elapsed);
+    setTimeout(()=>{ splash.classList.add('hide'); }, delay);
+  }
+  if(document.readyState==='complete') hide();
+  else window.addEventListener('load', hide);
+})();
+</script>
+
+<script type="module">
+import { auth, db } from './firebase.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+emailjs.init("m5C05A9CqCq2Ux4cu");
+
+let currentMode='login';
+let isProcessing=false, isSending=false;
+let otpCode=null, otpExpiry=null, pendingData=null;
+let resendInt=null, expiryInt=null;
+let lastResetEmail='';
+
+// Central Lang System
+function initLanguage(){
+  const saved = localStorage.getItem('karni_language') || 'ar';
+  if(window.KarniLang){
+    KarniLang.setLanguage(saved);
+    KarniLang.applyDirection(saved);
+    KarniLang.applyTranslations(document);
+    document.querySelectorAll('.lang-btn').forEach(btn=>{
+      btn.classList.toggle('active', btn.dataset.lang===saved);
+    });
+  }
+}
+window.changeLoginLanguage = function(lang){
+  if(!window.KarniLang) return;
+  KarniLang.setLanguage(lang);
+  KarniLang.applyDirection(lang);
+  KarniLang.applyTranslations(document);
+  localStorage.setItem('karni_language', lang);
+  document.querySelectorAll('.lang-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.lang===lang);
+  });
+  switchMode(currentMode);
+}
+
+function showToast(msg,type='info'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const icons={success:'fa-check',error:'fa-xmark',info:'fa-info'};
+  t.innerHTML=`<div class="toast-icon"><i class="fa-solid ${icons[type]||'fa-info'}"></i></div><div style="flex:1">${msg}</div>`;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-10px)'; setTimeout(()=>t.remove(),300); },4500);
+}
+
+function clearSignupOtpData(){
+  otpCode=null;
+  otpExpiry=null;
+  pendingData=null;
+  const input=document.getElementById('otpInput');
+  if(input) input.value='';
+}
+
+function startTimers(){
+  clearTimers();
+  let resend=60, expiry=300;
+  const rBtn=document.getElementById('resendBtn');
+  const rTimer=document.getElementById('resendTimer');
+  const eTimer=document.getElementById('expiryTimer');
+  if(!rBtn) return;
+  rBtn.disabled=true; rBtn.style.cursor='not-allowed'; rBtn.style.background='#f8fafc'; rBtn.style.color='#94a3b8';
+  rTimer.textContent=resend; eTimer.textContent='05:00'; eTimer.style.color='#0f766e';
+  resendInt=setInterval(()=>{
+    resend--; rTimer.textContent=resend;
+    if(resend<=0){ clearInterval(resendInt); rBtn.disabled=false; rBtn.style.cursor='pointer'; rBtn.style.background='white'; rBtn.style.color='#0f766e'; rBtn.innerHTML= window.KarniLang ? KarniLang.t('resendCode') : 'إعادة إرسال الرمز'; }
+  },1000);
+  expiryInt=setInterval(()=>{
+    expiry--; const m=Math.floor(expiry/60).toString().padStart(2,'0'); const s=(expiry%60).toString().padStart(2,'0'); eTimer.textContent=`${m}:${s}`;
+    if(expiry<=0){ 
+      clearInterval(expiryInt); 
+      eTimer.textContent='00:00'; eTimer.style.color='#ef4444'; 
+      showToast(window.KarniLang?KarniLang.t('otpExpired'):'انتهت صلاحية الرمز','error');
+      clearSignupOtpData();
+    }
+  },1000);
+}
+function clearTimers(){ if(resendInt) clearInterval(resendInt); if(expiryInt) clearInterval(expiryInt); }
+
+function getFirebaseErrorMessage(error){
+  const code=error.code||'';
+  if(code==='auth/invalid-email') return window.KarniLang?KarniLang.t('invalidEmail'):'البريد غير صحيح';
+  if(code==='auth/user-not-found') return window.KarniLang?KarniLang.t('userNotFound'):'البريد غير موجود';
+  if(code==='auth/wrong-password' || code==='auth/invalid-credential') return window.KarniLang?KarniLang.t('wrongPassword'):'كلمة المرور غير صحيحة';
+  if(code==='auth/email-already-in-use') return 'البريد مستخدم مسبقاً';
+  if(code==='auth/weak-password') return 'كلمة المرور ضعيفة';
+  return error.message || 'حدث خطأ';
+}
+
+window.switchMode=function(mode){
+  currentMode=mode;
+  document.getElementById('loginTab').className=mode==='login'?'tab active':'tab';
+  document.getElementById('signupTab').className=mode==='signup'?'tab active':'tab';
+  document.getElementById('fullNameGroup').style.display=mode==='signup'?'block':'none';
+  document.getElementById('confirmPasswordGroup').style.display=mode==='signup'?'block':'none';
+  document.getElementById('forgotWrapper').style.display=mode==='login'?'block':'none';
+  const t = (k)=> window.KarniLang?KarniLang.t(k):k;
+  document.getElementById('pageSubtitle').textContent=mode==='login'?t('loginDesc'):t('signupDesc');
+  document.getElementById('actionText').textContent=mode==='login'?t('login'):t('signup');
+  document.getElementById('actionIcon').className=mode==='login'?'fa-solid fa-right-to-bracket':'fa-solid fa-user-plus';
+}
+
+function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function genOtp(){ return Math.floor(100000+Math.random()*900000).toString(); }
+
+window.handleAuth=async function(){
+  if(isProcessing) return;
+  const fullName=document.getElementById('fullNameInput').value.trim();
+  const email=document.getElementById('emailInput').value.trim();
+  const password=document.getElementById('passwordInput').value;
+  const confirm=document.getElementById('confirmPasswordInput').value;
+  if(!email||!password){ showToast(window.KarniLang?KarniLang.t('requiredFields'):'أدخل البريد وكلمة المرور','error'); return; }
+  if(!isValidEmail(email)){ showToast(window.KarniLang?KarniLang.t('invalidEmail'):'البريد غير صحيح','error'); return; }
+
+  if(currentMode==='signup'){
+    if(!fullName){ showToast(window.KarniLang?KarniLang.t('fullNameRequired'):'أدخل الاسم','error'); return; }
+    if(password.length<6){ showToast('6 أحرف على الأقل','error'); return; }
+    if(password!==confirm){ showToast(window.KarniLang?KarniLang.t('passwordMismatch'):'كلمة المرور غير متطابقة','error'); return; }
+    if(isSending) return;
+    try{
+      isSending=true; isProcessing=true; setLoading(true);
+      otpCode=genOtp(); otpExpiry=Date.now()+5*60*1000; pendingData={fullName,email,password};
+      await emailjs.send("service_wkx3xnm","template_6z991zk",{to_email:email,to_name:fullName,otp_code:otpCode,user_name:fullName,email:email,message:`رمز التحقق: ${otpCode}`});
+      document.getElementById('otpEmailDisplay').textContent=email;
+      document.getElementById('otpModal').classList.add('active');
+      document.getElementById('otpInput').value=''; setTimeout(()=>document.getElementById('otpInput').focus(),100);
+      startTimers(); showToast(window.KarniLang?KarniLang.t('otpSent'):'تم إرسال الرمز','success');
+    }catch(e){ showToast('فشل الإرسال','error'); console.error(e); }
+    finally{ setLoading(false); isProcessing=false; isSending=false; }
+  } else {
+    try{
+      isProcessing=true; setLoading(true);
+      await signInWithEmailAndPassword(auth,email,password);
+      localStorage.setItem('loggedIn','true');
+      localStorage.setItem('appVersion','10');
+      showToast(window.KarniLang?KarniLang.t('loginSuccess'):'تم تسجيل الدخول','success');
+      setTimeout(()=>{ window.location.href='./index.html'; },700);
+    }catch(e){ showToast(getFirebaseErrorMessage(e),'error'); }
+    finally{ setLoading(false); isProcessing=false; }
+  }
+}
+
+window.verifyOtp=async function(){
+  const input=document.getElementById('otpInput').value.trim();
+  if(input.length!==6){ showToast('6 أرقام','error'); return; }
+  if(!otpExpiry || Date.now()>otpExpiry){ showToast(window.KarniLang?KarniLang.t('otpExpired'):'انتهت الصلاحية','error'); clearSignupOtpData(); clearTimers(); return; }
+  if(!otpCode || input!==otpCode){ showToast('رمز غير صحيح','error'); return; }
+  try{
+    isProcessing=true; setLoading(true,'otp');
+    const cred=await createUserWithEmailAndPassword(auth, pendingData.email, pendingData.password);
+    const uid=cred.user.uid;
+    await updateProfile(cred.user,{displayName:pendingData.fullName});
+    const savedLang = localStorage.getItem('karni_language')||'ar';
+    await set(ref(db,`users/${uid}/profile`),{
+      displayName:pendingData.fullName,
+      email:pendingData.email,
+      language: savedLang,
+      createdAt:new Date().toISOString()
+    });
+    await Promise.all([
+      set(ref(db,`users/${uid}/customers`), {_init:true}),
+      set(ref(db,`users/${uid}/reports`), {_init:true}),
+      set(ref(db,`users/${uid}/products`), {_init:true}),
+      set(ref(db,`users/${uid}/store`), {_init:true}),
+      set(ref(db,`users/${uid}/route`), {_init:true}),
+      set(ref(db,`users/${uid}/settings`), {theme:'light', createdAt:new Date().toISOString()})
+    ]);
+    localStorage.setItem('loggedIn','true');
+    localStorage.setItem('appVersion','10');
+    clearTimers(); closeOtpModal(); clearSignupOtpData();
+    showToast(window.KarniLang?KarniLang.t('accountCreated'):'تم إنشاء الحساب','success');
+    setTimeout(()=>{ window.location.href='./index.html'; },800);
+  }catch(e){ showToast(getFirebaseErrorMessage(e),'error'); }
+  finally{ isProcessing=false; setLoading(false,'otp'); }
+}
+
+window.resendOtp=async function(){
+  if(isSending) return;
+  try{
+    isSending=true;
+    otpCode=genOtp(); otpExpiry=Date.now()+5*60*1000;
+    await emailjs.send("service_wkx3xnm","template_6z991zk",{to_email:pendingData.email,to_name:pendingData.fullName,otp_code:otpCode,user_name:pendingData.fullName,email:pendingData.email,message:`رمزك الجديد: ${otpCode}`});
+    document.getElementById('otpInput').value=''; startTimers(); showToast('تم إرسال رمز جديد','success');
+  }catch(e){ showToast('فشل الإرسال','error'); } finally{ isSending=false; }
+}
+window.closeOtpModal=function(){ document.getElementById('otpModal').classList.remove('active'); clearTimers(); }
+
+window.openForgotModal=function(){ document.getElementById('forgotModal').classList.add('active'); document.getElementById('forgotEmailInput').value=document.getElementById('emailInput').value.trim(); }
+window.closeForgotModal=function(){ document.getElementById('forgotModal').classList.remove('active'); }
+
+window.sendForgotPassword=async function(){
+  const email=document.getElementById('forgotEmailInput').value.trim();
+  const btn=document.getElementById('forgotSendBtn');
+  if(!email){ showToast('أدخل البريد','error'); return; }
+  if(!isValidEmail(email)){ showToast('البريد غير صحيح','error'); return; }
+  if(isSending) return;
+  try{
+    isSending=true; btn.disabled=true; btn.textContent='جاري الإرسال...';
+    await sendPasswordResetEmail(auth, email);
+    lastResetEmail=email;
+    closeForgotModal();
+    document.getElementById('successEmailDisplay').textContent=email;
+    document.getElementById('successInstructionsModal').classList.add('active');
+    showToast('✅ تم الإرسال','success');
+  }catch(e){ showToast(getFirebaseErrorMessage(e),"error"); }
+  finally{ btn.disabled=false; btn.textContent= window.KarniLang?KarniLang.t('sendLink'):'إرسال الرابط'; isSending=false; }
+}
+
+window.openEmailProvider=function(){
+  const email = lastResetEmail || '';
+  const domain = email.split('@')[1]?.toLowerCase() || '';
+  let url = '';
+  if(domain.includes('gmail')) url='https://mail.google.com';
+  else if(domain.includes('outlook')||domain.includes('hotmail')||domain.includes('live')) url='https://outlook.live.com/mail/';
+  else if(domain.includes('yahoo')) url='https://mail.yahoo.com';
+  else { showToast('افتح بريدك يدوياً','info'); return; }
+  window.open(url,'_blank');
+}
+window.closeSuccessInstructionsModal=function(){
+  document.getElementById('successInstructionsModal').classList.remove('active');
+  lastResetEmail='';
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  initLanguage();
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+  });
+}
+
+function setLoading(isLoading,ctx='main'){
+  const btn=document.getElementById('actionBtn');
+  if(ctx==='main'){
+    btn.disabled=isLoading;
+    const icon=document.getElementById('actionIcon');
+    if(isLoading){ icon.className='fa-solid fa-spinner fa-spin'; document.getElementById('actionText').textContent='...'; }
+    else{ 
+      if(currentMode==='login'){ icon.className='fa-solid fa-right-to-bracket'; document.getElementById('actionText').textContent= window.KarniLang?KarniLang.t('login'):'تسجيل الدخول'; } 
+      else { icon.className='fa-solid fa-user-plus'; document.getElementById('actionText').textContent= window.KarniLang?KarniLang.t('signup'):'إنشاء حساب'; } 
+    }
+  }
+}
+</script>
+</body>
+</html>
