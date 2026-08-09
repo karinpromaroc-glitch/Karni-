@@ -1,2 +1,0 @@
-# Karni-
-Programme 
