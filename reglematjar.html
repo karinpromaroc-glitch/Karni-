@@ -57,16 +57,16 @@ setTimeout(()=>{
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
   *{font-family:'Cairo',sans-serif}
-  .modal-backdrop{backdrop-filter:blur(4px)}
-  .animate-slide-up{animation:slideUp .3s ease-out} @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .product-card:hover{transform:translateY(-2px)}
+ .modal-backdrop{backdrop-filter:blur(4px)}
+ .animate-slide-up{animation:slideUp.3s ease-out} @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+ .product-card:hover{transform:translateY(-2px)}
   input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-  .gallery-card{position:relative;border-radius:14px;overflow:hidden;border:2px solid #e5e7eb;background:#fff;transition:.2s}
-  .gallery-card.main{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
-  .slider-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:none;align-items:center;justify-content:center;touch-action:none}
-  .slider-modal.active{display:flex}
-  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);transition:.2s}
-  .dot.active{background:#fff;width:24px}
+ .gallery-card{position:relative;border-radius:14px;overflow:hidden;border:2px solid #e5e7eb;background:#fff;transition:.2s}
+ .gallery-card.main{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+ .slider-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:none;align-items:center;justify-content:center;touch-action:none}
+ .slider-modal.active{display:flex}
+ .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);transition:.2s}
+ .dot.active{background:#fff;width:24px}
 </style>
 </head>
 <body class="pb-10">
@@ -170,11 +170,9 @@ let touchStartX = 0;
 let touchEndX = 0;
 let renderedCount = 0;
 const PAGE_SIZE = 30;
-
 let currentUid = null;
 let productsRef = null;
 let profileRef = null;
-
 const CACHE_VERSION = 'v3';
 const CACHE_EXPIRY = 24*60*60*1000;
 
@@ -205,9 +203,9 @@ function loadFromPhoneStorage(){
     const raw = localStorage.getItem(getCacheKey());
     if(!raw) return null;
     const payload = JSON.parse(raw);
-    if(payload.v !== CACHE_VERSION) return null;
+    if(payload.v!== CACHE_VERSION) return null;
     if(Date.now() - payload.t > CACHE_EXPIRY) return null;
-    if(!payload.d || !Array.isArray(payload.d)) return null;
+    if(!payload.d ||!Array.isArray(payload.d)) return null;
     return payload.d;
   } catch(e){ return null; }
 }
@@ -218,15 +216,34 @@ function renderInstantFromStorage(){
     filteredCache = [...cached];
     renderProducts(true);
     updateStats();
+    if(window.KarniLang) KarniLang.applyTranslations(document);
     return true;
   }
   return false;
 }
 
-function t(key, params={}){ return window.KarniLang ? window.KarniLang.t(key, params) : key; }
+// === إصلاح نظام الترجمة - لا يرجع المفتاح أبداً ===
+function t(key, params={}){
+  try{
+    if(window.KarniLang){
+      const val = window.KarniLang.t(key, params);
+      if(val && val!== key) return val;
+      const ar = window.KarniLang.translations?.ar?.[key];
+      if(ar){
+        let txt = ar;
+        Object.keys(params).forEach(k=>{ txt = txt.replaceAll(`{${k}}`, params[k]); });
+        return txt;
+      }
+      if(val) return val;
+    }
+  }catch(e){}
+  return key;
+}
 
 document.addEventListener('DOMContentLoaded', ()=>{
   if(window.KarniLang){
+    const savedLang = localStorage.getItem('karni_language') || 'ar';
+    KarniLang.applyDirection(savedLang);
     KarniLang.applyTranslations(document);
   }
   onAuthStateChanged(auth, async (user)=>{
@@ -234,22 +251,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     currentUid = user.uid;
     productsRef = ref(db, `users/${currentUid}/products`);
     profileRef = ref(db, `users/${currentUid}/profile`);
-    
-    // Load language like index.html
     try{
       const snap = await get(profileRef);
-      let profile = snap.exists() ? snap.val() : {};
-      console.log("Firebase profile:", profile);
-      console.log("Firebase language:", profile.language);
-      console.log("Current language:", window.KarniLang ? KarniLang.getLanguage() : 'no KarniLang');
-      console.log("LocalStorage:", localStorage.getItem("karni_language"));
+      let profile = snap.exists()? snap.val() : {};
       if(profile.language && window.KarniLang){
         await KarniLang.setLanguage(profile.language);
         KarniLang.applyDirection(profile.language);
         KarniLang.applyTranslations(document);
         localStorage.setItem("karni_language", profile.language);
-        console.log("Translation:", KarniLang.t("available"));
-        console.log("Document lang:", document.documentElement.lang);
       } else {
         if(window.KarniLang){
           const ls = localStorage.getItem("karni_language") || "ar";
@@ -258,7 +267,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           KarniLang.applyTranslations(document);
         }
       }
-    }catch(e){ console.warn(e); }
+    }catch(e){ console.warn(e); if(window.KarniLang){ const ls = localStorage.getItem("karni_language")||"ar"; await KarniLang.setLanguage(ls); KarniLang.applyDirection(ls); KarniLang.applyTranslations(document); } }
 
     const hasInstantCache = renderInstantFromStorage();
     setupEventListeners();
@@ -274,22 +283,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 async function loadProducts(isBackground=false){
   try{
-    if(!productsRef || !currentUid) return;
+    if(!productsRef ||!currentUid) return;
     const snap = await get(productsRef);
     if(snap.exists()){
       const val = snap.val();
       if(val._init) delete val._init;
-      const fresh = Object.values(val).filter(v=>v && typeof v === 'object' && !v._init).map(p=>{
-        if(p.image && !p.mainImage) p.mainImage = p.image;
+      const fresh = Object.values(val).filter(v=>v && typeof v === 'object' &&!v._init).map(p=>{
+        if(p.image &&!p.mainImage) p.mainImage = p.image;
         if(p.mainImage && (!p.images || p.images.length===0)) p.images = [p.mainImage];
-        if(!p.images) p.images = p.mainImage ? [p.mainImage] : [];
+        if(!p.images) p.images = p.mainImage? [p.mainImage] : [];
         if(!p.mainImage && p.images.length>0) p.mainImage = p.images[0];
-        return {hidden:false, lowStockThreshold:10, ...p};
+        return {hidden:false, lowStockThreshold:10,...p};
       });
       const cachedRaw = localStorage.getItem(getCacheKey());
-      const cachedData = cachedRaw ? JSON.parse(cachedRaw).d : null;
+      const cachedData = cachedRaw? JSON.parse(cachedRaw).d : null;
       const isSame = cachedData && cachedData.length===fresh.length && JSON.stringify(cachedData.map(p=>p.id).sort())===JSON.stringify(fresh.map(p=>p.id).sort());
-      if(!isBackground || !isSame){
+      if(!isBackground ||!isSame){
         products = fresh;
         saveToPhoneStorage(products);
         renderProducts(true);
@@ -311,7 +320,7 @@ async function loadProducts(isBackground=false){
   }
 }
 async function saveProducts(){
-  if(!productsRef || !currentUid) throw new Error(t('noProducts'));
+  if(!productsRef ||!currentUid) throw new Error(t('noProducts'));
   const data={};
   products.forEach(p=>{ data[p.id]=p; });
   await set(productsRef, data);
@@ -380,7 +389,7 @@ function renderGallery(){
 window.removeGalleryImage=function(id){
   const idx=galleryImages.findIndex(g=>g.id==id);
   if(idx>-1){
-    if(galleryImages[idx].previewUrl && !galleryImages[idx].isExisting) URL.revokeObjectURL(galleryImages[idx].previewUrl);
+    if(galleryImages[idx].previewUrl &&!galleryImages[idx].isExisting) URL.revokeObjectURL(galleryImages[idx].previewUrl);
     galleryImages.splice(idx,1);
     renderGallery();
   }
@@ -439,7 +448,7 @@ function uploadToCloudinary(file, onProgress){
   });
 }
 async function uploadAllGalleryImages(){
-  const toUpload=galleryImages.filter(g=>g.file && !g.isExisting);
+  const toUpload=galleryImages.filter(g=>g.file &&!g.isExisting);
   if(toUpload.length===0) return true;
   const overall=document.getElementById('overallProgress');
   const bar=document.getElementById('overallProgressBar');
@@ -462,12 +471,12 @@ function renderProducts(reset=true){
   const empty=document.getElementById('emptyState');
   if(reset){
     filteredCache = products.filter(p=>{
-      if(!p || !p.name) return false;
+      if(!p ||!p.name) return false;
       const matchesSearch=(p.name||"").toLowerCase().includes(searchQuery.toLowerCase());
       const isLow=(p.stock||0)<=(p.lowStockThreshold||10);
       const matchesStatus=statusFilter==='all'||(statusFilter==='low'&&isLow)||(statusFilter==='available'&&!isLow);
       return matchesSearch&&matchesStatus;
-    }).sort((a,b)=>(a.name||"").localeCompare(b.name||"", KarniLang ? KarniLang.getLanguage() : 'ar',{sensitivity:'base'}));
+    }).sort((a,b)=>(a.name||"").localeCompare(b.name||"", KarniLang? KarniLang.getLanguage() : 'ar',{sensitivity:'base'}));
     renderedCount=0;
     container.innerHTML='';
   }
@@ -480,6 +489,7 @@ function renderProducts(reset=true){
   temp.innerHTML = html;
   while(temp.firstChild) container.appendChild(temp.firstChild);
   renderedCount+=nextSlice.length;
+  if(window.KarniLang) KarniLang.applyTranslations(container);
 }
 function createProductCard(product){
   const isLow=(product.stock||0)<=(product.lowStockThreshold||10);
@@ -498,8 +508,8 @@ function updateStats(){
     const totalStock=products.reduce((s,p)=>s+(parseInt(p.stock)||0),0);
     const totalValue=products.reduce((s,p)=>s+((parseFloat(p.price)||0)*(parseInt(p.stock)||0)),0);
     const low=products.filter(p=>(parseInt(p.stock)||0)<=(parseInt(p.lowStockThreshold)||10)).length;
-    document.getElementById('totalStock').textContent=totalStock.toLocaleString(KarniLang && KarniLang.getLanguage()==='ar' ? 'ar-MA' : (KarniLang ? KarniLang.getLanguage() : 'en'));
-    document.getElementById('totalValue').textContent=totalValue.toLocaleString(KarniLang && KarniLang.getLanguage()==='ar' ? 'ar-MA' : (KarniLang ? KarniLang.getLanguage() : 'en'),{minimumFractionDigits:0,maximumFractionDigits:0});
+    document.getElementById('totalStock').textContent=totalStock.toLocaleString(KarniLang && KarniLang.getLanguage()==='ar'? 'ar-MA' : (KarniLang? KarniLang.getLanguage() : 'en'));
+    document.getElementById('totalValue').textContent=totalValue.toLocaleString(KarniLang && KarniLang.getLanguage()==='ar'? 'ar-MA' : (KarniLang? KarniLang.getLanguage() : 'en'),{minimumFractionDigits:0,maximumFractionDigits:0});
     document.getElementById('lowStockCount').textContent=low;
     document.getElementById('totalProducts').textContent=products.length;
   });
@@ -542,7 +552,7 @@ function closeProductModal(){
 }
 async function handleFormSubmit(e){
   e.preventDefault();
-  if(!currentUid || !productsRef){ location.href="login.html"; return; }
+  if(!currentUid ||!productsRef){ location.href="login.html"; return; }
   const saveBtn=document.getElementById('saveBtn');
   const name=document.getElementById('productName').value.trim();
   if(!name){ showToast(t('productNameRequired'),'error'); return; }
@@ -564,10 +574,10 @@ async function handleFormSubmit(e){
   try{
     if(editingProductId){
       const idx=products.findIndex(p=>p.id==editingProductId);
-      if(idx!==-1){ products[idx]={...products[idx], ...productData}; }
+      if(idx!==-1){ products[idx]={...products[idx],...productData}; }
       showToast(t('productUpdated'),'success');
     } else {
-      products.push({id:Date.now(), createdAt: new Date().toISOString(), ...productData});
+      products.push({id:Date.now(), createdAt: new Date().toISOString(),...productData});
       showToast(t('productAdded'),'success');
     }
     await saveProducts();
@@ -580,10 +590,11 @@ async function handleFormSubmit(e){
   } finally {
     saveBtn.disabled=false;
     saveBtn.innerHTML=`<i class="fa-solid fa-check ml-2"></i> ${t('saveProduct')}`;
+    if(window.KarniLang) KarniLang.applyTranslations(saveBtn);
   }
 }
 window.toggleHideProduct=async function(id){
-  if(!currentUid || !productsRef){ location.href="login.html"; return; }
+  if(!currentUid ||!productsRef){ location.href="login.html"; return; }
   const p=products.find(x=>x.id==id);
   if(!p) return;
   p.hidden=!p.hidden;
@@ -594,7 +605,7 @@ window.deleteProduct=function(id){ deletingProductId=id; document.getElementById
 function closeDeleteModal(){ document.getElementById('deleteModal').classList.add('hidden'); deletingProductId=null; }
 async function confirmDelete(){
   if(!deletingProductId) return;
-  if(!currentUid || !productsRef){ location.href="login.html"; return; }
+  if(!currentUid ||!productsRef){ location.href="login.html"; return; }
   try{ products=products.filter(p=>p.id!=deletingProductId); await saveProducts(); renderProducts(true); updateStats(); showToast(t('productDeleted'),'success'); } catch(e){ showToast(t('deleteError'),'error'); }
   closeDeleteModal();
 }
