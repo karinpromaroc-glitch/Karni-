@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><!-- PLAYABLE_TOUCH_PATCH_V1 --><script>
+(function() {
+  if (window.__playableTouchPatchInstalled) return;
+  window.__playableTouchPatchInstalled = true;
+  var origAdd = EventTarget.prototype.addEventListener;
+  var blockedTypes = { touchstart: 1, touchmove: 1, wheel: 1 };
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (blockedTypes[type]) {
+      if (options === undefined || options === null) {
+        options = { passive: true };
+      } else if (typeof options === 'boolean') {
+        options = { capture: options, passive: true };
+      } else {
+        options = Object.assign({}, options, { passive: true });
+      }
+    }
+    return origAdd.call(this, type, listener, options);
+  };
+})();
+</script><script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Karni Pro">
+<title>إعدادات الحساب - Karni Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="lang.js"></script>
+<style>
+:root{
+  --primary:#0f766e; --primary-dark:#0d5c56; --primary-light:#14b8a6;
+  --gradient:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);
+  --gradient-soft:linear-gradient(135deg,rgba(15,118,110,0.08) 0%,rgba(20,184,166,0.12) 100%);
+  --danger:#ef4444; --success:#22c55e; --info:#3b82f6; --warning:#f59e0b;
+  --bg:#f6fcfb; --card:#ffffff; --card-glass:rgba(255,255,255,0.92);
+  --text:#0f172a; --text-muted:#64748b; --border:#dff8f1;
+  --shadow-xs:0 1px 4px rgba(15,118,110,0.05); --shadow-sm:0 4px 12px rgba(15,118,110,0.07); --shadow-md:0 8px 24px rgba(15,118,110,0.11); --shadow-lg:0 16px 40px rgba(15,118,110,0.16);
+  --radius:22px; --radius-sm:14px; --radius-lg:28px; --transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="dark"]{ --bg:#0b1215; --card:#162024; --card-glass:rgba(22,32,36,0.9); --text:#e8f5f3; --text-muted:#8aa39e; --border:#1e3330; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:110px;overflow-x:hidden;transition:var(--transition)}
+.header{background:var(--gradient);color:white;padding:18px 16px 22px;text-align:center;border-radius:0 0 34px 34px;box-shadow:var(--shadow-lg);position:sticky;top:0;z-index:100;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-15%;width:130%;height:200%;background:radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18) 0%, transparent 60%);pointer-events:none}
+.header-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.header h1{font-size:20px;font-weight:900;display:flex;align-items:center;gap:10px}
+.icon-btn{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,0.16);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.22);color:white;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.icon-btn:active{transform:scale(0.92)}
+.page{max-width:720px;margin:0 auto;padding:16px 14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:16px;box-shadow:var(--shadow-sm);margin-bottom:14px;transition:var(--transition);animation:cardIn .45s backwards}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:13px;font-weight:900;display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--primary)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row-label{font-size:13px;font-weight:700}
+.row-value{font-size:12.5px;color:var(--text-muted);font-weight:600;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:left}
+.btn-mini{padding:8px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:'Cairo';font-weight:800;font-size:11.5px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:6px}
+.btn-mini.primary{background:var(--gradient);color:white;border-color:transparent}
+.btn-mini.danger{background:#fef2f2;color:#dc2626;border-color:#fee2e2}
+.btn-mini:active{transform:scale(0.94)}
+.select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:14px;background:var(--bg);font-family:'Cairo';font-weight:700;font-size:13px;outline:none;transition:var(--transition)}
+.select:focus{border-color:var(--primary-light);background:var(--card)}
+.switch{width:48px;height:28px;border-radius:100px;background:#e2e8f0;position:relative;cursor:pointer;transition:var(--transition);border:1px solid var(--border)}
+.switch.active{background:var(--primary)}
+.switch::after{content:'';position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 2px 6px rgba(0,0,0,0.15);transition:var(--transition)}
+.switch.active::after{transform:translateX(-20px)}
+.info-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.info-item{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.info-label{font-size:10.5px;color:var(--text-muted);font-weight:700;margin-bottom:4px}
+.info-value{font-size:12.5px;font-weight:800;word-break:break-all;direction:ltr;text-align:left}
+.logout-btn{width:100%;padding:14px;border:none;border-radius:16px;background:#ef4444;color:white;font-family:'Cairo';font-weight:900;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 20px rgba(239,68,68,0.25);transition:var(--transition)}
+.logout-btn:active{transform:scale(0.97)}
+.dialog-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(14px);z-index:5000;display:none;align-items:center;justify-content:center;padding:16px}
+.dialog-overlay.active{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.dialog-box{background:var(--card);border-radius:22px;padding:20px;width:100%;max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,0.22);animation:dialogIn .35s cubic-bezier(0.4,0,0.2,1);border:1px solid var(--border)}
+@keyframes dialogIn{from{opacity:0;transform:translateY(24px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.dialog-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px}
+.dialog-icon.edit{background:#e0f2f1;color:#0f766e} .dialog-icon.danger{background:#fee2e2;color:#dc2626} .dialog-icon.info{background:#dbeafe;color:#2563eb}
+.dialog-title{text-align:center;font-size:16px;font-weight:900;margin-bottom:6px}
+.dialog-msg{text-align:center;font-size:12.5px;color:var(--text-muted);margin-bottom:14px;line-height:1.6}
+.dialog-input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Cairo';font-size:13.5px;background:var(--bg);margin-bottom:10px;outline:none;transition:var(--transition)}
+.dialog-input:focus{border-color:var(--primary-light);background:var(--card)}
+.dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.dialog-btn{padding:12px;border:none;border-radius:12px;font-weight:900;font-size:12.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Cairo';transition:var(--transition)}
+.dialog-btn-cancel{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)} .dialog-btn-confirm{background:var(--gradient);color:white} .dialog-btn-danger{background:#ef4444;color:white}
+.dialog-btn:active{transform:scale(0.96)}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:14px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:var(--transition)}
+.pin-dot.filled{background:var(--primary);border-color:var(--primary)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.pin-key{height:56px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg);font-family:'Cairo';font-size:18px;font-weight:900;cursor:pointer;transition:var(--transition)}
+.pin-key:active{transform:scale(0.92);background:var(--card)}
+.toast-pro{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-140px);background:rgba(255,255,255,0.96);backdrop-filter:blur(20px);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 16px 40px rgba(0,0,0,0.16);border:1px solid rgba(0,0,0,0.06);z-index:7000;transition:all .5s cubic-bezier(0.4,0,0.2,1);opacity:0;min-width:300px;max-width:90vw;overflow:hidden}
+[data-theme="dark"] .toast-pro{background:rgba(22,32,36,0.96);border-color:rgba(255,255,255,0.08)}
+.toast-pro.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast-pro-icon{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.toast-pro.success .toast-pro-icon{background:#dcfce7;color:#16a34a} .toast-pro.error .toast-pro-icon{background:#fee2e2;color:#dc2626} .toast-pro.info .toast-pro-icon{background:#dbeafe;color:#2563eb}
+.toast-pro-msg{flex:1;font-size:12.5px;font-weight:800;color:var(--text);line-height:1.4}
+.toast-pro-progress{position:absolute;bottom:0;left:0;height:3px;width:100%;animation:toastProgress 3s linear forwards}
+.toast-pro.success .toast-pro-progress{background:#22c55e} .toast-pro.error .toast-pro-progress{background:#ef4444} .toast-pro.info .toast-pro-progress{background:#3b82f6}
+@keyframes toastProgress{from{width:100%}to{width:0%}}
+.spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-top">
+    <button class="icon-btn" onclick="history.back()"><i class="fas fa-arrow-right"></i></button>
+    <h1><i class="fas fa-gear"></i> <span data-i18n="accountSettingsTitle">إعدادات الحساب</span></h1>
+    <button class="icon-btn" onclick="window.location.href='./index.html'"><i class="fas fa-house"></i></button>
+  </div>
+</header>
+
+<div class="page">
+  <div class="card" style="animation-delay:.05s">
+    <div class="section-title"><i class="fas fa-user"></i> <span data-i18n="accountSection">الحساب</span></div>
+    <div class="row"><div><div class="row-label" data-i18n="displayName">الاسم</div><div class="row-value" id="displayNameValue">...</div></div><button class="btn-mini" onclick="openEditName()"><i class="fas fa-pen"></i> <span data-i18n="edit">تعديل</span></button></div>
+    <div class="row"><div><div class="row-label" data-i18n="emailAddress">البريد الإلكتروني</div><div class="row-value" id="emailValue">...</div></div><button class="btn-mini" onclick="openEditEmail()"><i class="fas fa-envelope"></i> <span data-i18n="changeEmail">تغيير</span></button></div>
+    <div class="row"><div class="row-label" data-i18n="password">كلمة المرور</div><div class="row-value">••••••••</div><button class="btn-mini primary" onclick="changePassword()"><i class="fas fa-key"></i> <span data-i18n="changeEmail">تغيير</span></button></div>
+  </div>
+
+  <div class="card" style="animation-delay:.1s">
+    <div class="section-title"><i class="fas fa-language"></i> <span data-i18n="languageSection">اللغة</span></div>
+    <select class="select" id="languageSelect" onchange="saveLanguage(this.value)">
+      <option value="ar" data-i18n="arabic">العربية</option>
+      <option value="fr" data-i18n="french">Français</option>
+      <option value="en" data-i18n="english">English</option>
+    </select>
+  </div>
+
+  <div class="card" style="animation-delay:.15s">
+    <div class="section-title"><i class="fas fa-palette"></i> <span data-i18n="appearance">المظهر</span></div>
+    <div class="row"><div class="row-label"><i class="fas fa-sun"></i> <span data-i18n="themeLight">فاتح</span></div><button class="btn-mini" id="themeLightBtn" onclick="setThemeMode('light')" data-i18n="apply">تطبيق</button></div>
+    <div class="row"><div class="row-label"><i class="fas fa-moon"></i> <span data-i18n="themeDark">داكن</span></div><button class="btn-mini" id="themeDarkBtn" onclick="setThemeMode('dark')" data-i18n="apply">تطبيق</button></div>
+    <div class="row"><div class="row-label"><i class="fas fa-circle-half-stroke"></i> <span data-i18n="themeAuto">تلقائي</span></div><button class="btn-mini" id="themeAutoBtn" onclick="setThemeMode('auto')" data-i18n="apply">تطبيق</button></div>
+  </div>
+
+  <div class="card" style="animation-delay:.2s">
+    <div class="section-title"><i class="fas fa-bell"></i> <span data-i18n="notifications">الإشعارات</span></div>
+    <div class="row"><div class="row-label" data-i18n="enableNotifications">تفعيل الإشعارات</div><div class="switch" id="notifSwitch" onclick="toggleNotifications()"></div></div>
+  </div>
+
+  <div class="card" style="animation-delay:.25s">
+    <div class="section-title"><i class="fas fa-shield-halved"></i> <span data-i18n="security">الأمان</span></div>
+    <div class="row"><div class="row-label" data-i18n="enablePin">تفعيل رمز PIN</div><div class="switch" id="pinSwitch" onclick="togglePin()"></div></div>
+    <div id="pinStatusText" style="font-size:11px;color:var(--text-muted);margin-top:8px" data-i18n="pinNotEnabled">غير مفعل</div>
+  </div>
+
+  <div class="card" style="animation-delay:.3s">
+    <div class="section-title"><i class="fas fa-circle-info"></i> <span data-i18n="accountInfo">معلومات الحساب</span></div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label" data-i18n="emailAddress">البريد الإلكتروني</div><div class="info-value" id="infoEmail">...</div></div>
+      <div class="info-item"><div class="info-label" data-i18n="uid">UID</div><div class="info-value" id="infoUid">...</div></div>
+      <div class="info-item"><div class="info-label" data-i18n="createdAt">تاريخ إنشاء الحساب</div><div class="info-value" id="infoCreated">...</div></div>
+      <div class="info-item"><div class="info-label" data-i18n="lastLogin">آخر تسجيل دخول</div><div class="info-value" id="infoLastLogin">...</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:.35s">
+    <button class="logout-btn" onclick="confirmLogout()"><i class="fas fa-right-from-bracket"></i> <span data-i18n="logout">تسجيل الخروج</span></button>
+  </div>
+</div>
+
+<div class="dialog-overlay" id="editNameDialog"><div class="dialog-box"><div class="dialog-icon edit"><i class="fas fa-user-pen"></i></div><div class="dialog-title" data-i18n="edit">تعديل الاسم</div><input id="editNameInput" class="dialog-input" data-i18n-placeholder="newNamePlaceholder" placeholder="الاسم الجديد"><div class="dialog-actions"><button class="dialog-btn dialog-btn-cancel" onclick="closeDialog('editNameDialog')" data-i18n="cancel">إلغاء</button><button class="dialog-btn dialog-btn-confirm" id="saveNameBtn" onclick="saveName()"><i class="fas fa-check"></i> <span data-i18n="save">حفظ</span></button></div></div></div>
+
+<div class="dialog-overlay" id="editEmailDialog"><div class="dialog-box"><div class="dialog-icon edit"><i class="fas fa-envelope"></i></div><div class="dialog-title" data-i18n="changeEmailTitle">تغيير البريد الإلكتروني</div><div class="dialog-msg" data-i18n="changeEmailMsg">أدخل البريد الجديد وكلمة المرور الحالية</div><input id="newEmailInput" type="email" class="dialog-input" data-i18n-placeholder="newEmailPlaceholder" placeholder="البريد الجديد"><input id="currentPasswordForEmail" type="password" class="dialog-input" data-i18n-placeholder="currentPasswordPlaceholder" placeholder="كلمة المرور الحالية"><div class="dialog-actions"><button class="dialog-btn dialog-btn-cancel" onclick="closeDialog('editEmailDialog')" data-i18n="cancel">إلغاء</button><button class="dialog-btn dialog-btn-confirm" id="saveEmailBtn" onclick="saveEmail()"><i class="fas fa-check"></i> <span data-i18n="update">تحديث</span></button></div></div></div>
+
+<div class="dialog-overlay" id="pinDialog"><div class="dialog-box"><div class="dialog-icon edit"><i class="fas fa-lock"></i></div><div class="dialog-title" id="pinDialogTitle" data-i18n="pinTitle">تعيين رمز PIN</div><div class="dialog-msg" id="pinDialogMsg" data-i18n="pinMsg">أدخل رمز PIN مكون من 4 أرقام</div><div class="pin-dots" id="pinDots"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div><div class="pin-keypad" id="pinKeypad"></div><div class="dialog-actions"><button class="dialog-btn dialog-btn-cancel" onclick="closePinDialog()" data-i18n="cancel">إلغاء</button><button class="dialog-btn dialog-btn-confirm" id="confirmPinBtn" onclick="confirmPinEntry()" data-i18n="confirm">تأكيد</button></div></div></div>
+
+<div class="dialog-overlay" id="confirmDialog"><div class="dialog-box"><div class="dialog-icon danger" id="confirmIcon"><i class="fas fa-triangle-exclamation"></i></div><div class="dialog-title" id="confirmTitle" data-i18n="confirm">تأكيد</div><div class="dialog-msg" id="confirmMsg">هل أنت متأكد؟</div><div class="dialog-actions"><button class="dialog-btn dialog-btn-cancel" id="confirmCancelBtn" data-i18n="cancel">إلغاء</button><button class="dialog-btn dialog-btn-danger" id="confirmOkBtn"><i class="fas fa-check"></i> <span data-i18n="confirm">تأكيد</span></button></div></div></div>
+
+<div class="toast-pro" id="toastPro"><div class="toast-pro-icon"><i class="fas fa-check"></i></div><div class="toast-pro-msg" id="toastProMsg">تم</div><div class="toast-pro-progress"></div></div>
+
+<script type="module">
+import { auth, db } from './firebase.js';
+import { onAuthStateChanged, updateProfile, updateEmail, sendPasswordResetEmail, signOut, EmailAuthProvider, reauthenticateWithCredential } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { ref, get, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+function t(key, params={}){ return window.KarniLang ? window.KarniLang.t(key, params) : key; }
+
+let currentUid=null;
+let currentUser=null;
+let profileData={};
+let confirmResolve=null;
+let pinStep='first';
+let pinFirst='';
+let pinCurrent='';
+
+function showToast(msg,type='success'){
+  const toast=document.getElementById('toastPro');
+  toast.className='toast-pro '+type;
+  toast.querySelector('.toast-pro-icon').innerHTML = type==='error'?'<i class="fas fa-xmark"></i>': type==='info'?'<i class="fas fa-info"></i>':'<i class="fas fa-check"></i>';
+  document.getElementById('toastProMsg').textContent=msg;
+  toast.classList.add('show');
+  const prog=toast.querySelector('.toast-pro-progress'); prog.style.animation='none'; prog.offsetHeight; prog.style.animation='toastProgress 3s linear forwards';
+  setTimeout(()=>toast.classList.remove('show'),3000);
+}
+window.showToast=showToast;
+
+function openDialog(id){ document.getElementById(id).classList.add('active'); }
+function closeDialog(id){ document.getElementById(id).classList.remove('active'); }
+window.closeDialog=closeDialog;
+
+function openConfirm({title=t('confirm'), message='', icon='triangle-exclamation', danger=false}){
+  return new Promise(resolve=>{
+    confirmResolve=resolve;
+    document.getElementById('confirmTitle').textContent=title;
+    document.getElementById('confirmMsg').textContent=message;
+    document.getElementById('confirmIcon').className='dialog-icon '+(danger?'danger':'info');
+    document.getElementById('confirmIcon').innerHTML=`<i class="fas fa-${icon}"></i>`;
+    document.getElementById('confirmOkBtn').className='dialog-btn '+(danger?'dialog-btn-danger':'dialog-btn-confirm');
+    openDialog('confirmDialog');
+  });
+}
+document.getElementById('confirmCancelBtn').onclick=()=>{ closeDialog('confirmDialog'); if(confirmResolve){ confirmResolve(false); confirmResolve=null; } };
+document.getElementById('confirmOkBtn').onclick=()=>{ closeDialog('confirmDialog'); if(confirmResolve){ confirmResolve(true); confirmResolve=null; } };
+document.getElementById('confirmDialog').addEventListener('click',e=>{ if(e.target===e.currentTarget){ closeDialog('confirmDialog'); if(confirmResolve){ confirmResolve(false); confirmResolve=null; } } });
+
+function applyTheme(theme){
+  let effective=theme;
+  if(theme==='auto'){ effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+  document.documentElement.setAttribute('data-theme',effective);
+  document.getElementById('themeLightBtn').classList.toggle('primary', theme==='light');
+  document.getElementById('themeDarkBtn').classList.toggle('primary', theme==='dark');
+  document.getElementById('themeAutoBtn').classList.toggle('primary', theme==='auto');
+}
+function loadLocalTheme(){ return localStorage.getItem('theme') || 'light'; }
+
+async function hashPin(pin){
+  const enc=new TextEncoder();
+  const data=enc.encode(pin);
+  const hashBuf=await crypto.subtle.digest('SHA-256',data);
+  return Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){ window.location.href='./login.html'; return; }
+  currentUser=user;
+  currentUid=user.uid;
+  try{
+    const snap=await get(ref(db,`users/${currentUid}/profile`));
+    if(snap.exists()){
+      profileData=snap.val();
+    }else{
+      profileData={
+        displayName:user.displayName||'',
+        email:user.email||'',
+        language: localStorage.getItem('karni_language')||'ar',
+        theme:'light',
+        notifications:true,
+        pinEnabled:false,
+        createdAt:user.metadata.creationTime||new Date().toISOString(),
+        lastLogin:new Date().toISOString()
+      };
+      await update(ref(db,`users/${currentUid}/profile`), profileData);
+    }
+    const now=new Date().toISOString();
+    await update(ref(db,`users/${currentUid}/profile`), {lastLogin:now, updatedAt:now});
+    profileData.lastLogin=now;
+    renderProfile();
+  }catch(e){ showToast('خطأ في تحميل البيانات: '+e.message,'error'); }
+});
+
+function renderProfile(){
+  const name = profileData.displayName || currentUser.displayName || 'مستخدم';
+  const email = profileData.email || currentUser.email || '';
+  document.getElementById('displayNameValue').textContent=name;
+  document.getElementById('emailValue').textContent=email;
+  document.getElementById('infoEmail').textContent=email;
+  document.getElementById('infoUid').textContent=currentUid;
+  document.getElementById('infoCreated').textContent= profileData.createdAt ? new Date(profileData.createdAt).toLocaleString('ar-MA') : (currentUser.metadata.creationTime || '-');
+  document.getElementById('infoLastLogin').textContent= profileData.lastLogin ? new Date(profileData.lastLogin).toLocaleString('ar-MA') : '-';
+  const lang = profileData.language||localStorage.getItem('karni_language')||'ar';
+  document.getElementById('languageSelect').value=lang;
+  if(window.KarniLang){
+    KarniLang.setLanguage(lang);
+    KarniLang.applyDirection(lang);
+    KarniLang.applyTranslations(document);
+    localStorage.setItem('karni_language', lang);
+  }
+  const theme=profileData.theme||loadLocalTheme()||'light';
+  applyTheme(theme);
+  localStorage.setItem('theme', theme==='auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') : theme);
+  const notifActive = profileData.notifications !== false;
+  document.getElementById('notifSwitch').classList.toggle('active', notifActive);
+  const pinEnabled = !!profileData.pinEnabled;
+  document.getElementById('pinSwitch').classList.toggle('active', pinEnabled);
+  document.getElementById('pinStatusText').textContent = pinEnabled ? t('pinEnabled') : t('pinNotEnabled');
+  applyLanguage(lang);
+}
+
+function applyLanguage(lang){
+  const html=document.documentElement;
+  if(lang==='ar'){ html.lang='ar'; html.dir='rtl'; }
+  else { html.lang=lang; html.dir='ltr'; }
+  if(window.KarniLang){
+    KarniLang.applyDirection(lang);
+    KarniLang.applyTranslations(document);
+  }
+}
+
+window.openEditName=()=>{
+  document.getElementById('editNameInput').value=profileData.displayName||'';
+  openDialog('editNameDialog');
+}
+window.saveName=async()=>{
+  const newName=document.getElementById('editNameInput').value.trim();
+  if(!newName){ showToast(t('fullNameRequired')||'أدخل الاسم','error'); return; }
+  const btn=document.getElementById('saveNameBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> جاري الحفظ';
+  try{
+    await updateProfile(currentUser,{displayName:newName});
+    await update(ref(db,`users/${currentUid}/profile`),{displayName:newName, updatedAt:new Date().toISOString()});
+    profileData.displayName=newName;
+    renderProfile();
+    closeDialog('editNameDialog');
+    showToast(t('nameUpdated')||'تم تحديث الاسم بنجاح','success');
+  }catch(e){ showToast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> '+t('save'); }
+}
+
+window.openEditEmail=()=>{
+  document.getElementById('newEmailInput').value='';
+  document.getElementById('currentPasswordForEmail').value='';
+  openDialog('editEmailDialog');
+}
+window.saveEmail=async()=>{
+  const newEmail=document.getElementById('newEmailInput').value.trim();
+  const currentPass=document.getElementById('currentPasswordForEmail').value;
+  if(!newEmail || !currentPass){ showToast(t('requiredFields')||'أدخل البريد وكلمة المرور','error'); return; }
+  const btn=document.getElementById('saveEmailBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> جاري التحديث';
+  try{
+    const cred=EmailAuthProvider.credential(currentUser.email, currentPass);
+    await reauthenticateWithCredential(currentUser, cred);
+    await updateEmail(currentUser, newEmail);
+    await update(ref(db,`users/${currentUid}/profile`),{email:newEmail, updatedAt:new Date().toISOString()});
+    profileData.email=newEmail;
+    renderProfile();
+    closeDialog('editEmailDialog');
+    showToast(t('customerUpdated')||'تم تحديث البريد الإلكتروني','success');
+  }catch(e){ showToast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> '+t('update'); }
+}
+
+window.changePassword=async()=>{
+  if(!currentUser?.email){ showToast('البريد غير متوفر','error'); return; }
+  const ok=await openConfirm({title:t('passwordChangeTitle'), message:t('passwordChangeMsg', {email: currentUser.email}), icon:'key'});
+  if(!ok) return;
+  try{
+    await sendPasswordResetEmail(auth, currentUser.email);
+    showToast(t('passwordResetSent')||'تم إرسال رابط تغيير كلمة المرور إلى بريدك','success');
+  }catch(e){ showToast(e.message,'error'); }
+}
+
+window.saveLanguage=async(lang)=>{
+  try{
+    await update(ref(db,`users/${currentUid}/profile`),{language:lang, updatedAt:new Date().toISOString()});
+    profileData.language=lang;
+    localStorage.setItem('karni_language', lang);
+    applyLanguage(lang);
+    if(window.KarniLang){ KarniLang.setLanguage(lang); KarniLang.applyTranslations(document); }
+    showToast(t('saved')||'تم حفظ اللغة','success');
+  }catch(e){ showToast(e.message,'error'); }
+}
+
+window.setThemeMode=async(mode)=>{
+  try{
+    applyTheme(mode);
+    localStorage.setItem('theme', mode==='auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') : mode);
+    await update(ref(db,`users/${currentUid}/profile`),{theme:mode, updatedAt:new Date().toISOString()});
+    profileData.theme=mode;
+    showToast(t('saved')||'تم حفظ المظهر','success');
+  }catch(e){ showToast(e.message,'error'); }
+}
+
+window.toggleNotifications=async()=>{
+  const current = profileData.notifications !== false;
+  const next = !current;
+  try{
+    await update(ref(db,`users/${currentUid}/profile`),{notifications:next, updatedAt:new Date().toISOString()});
+    profileData.notifications=next;
+    renderProfile();
+    showToast(next?t('pinEnabled'):t('pinNotEnabled'),'success');
+  }catch(e){ showToast(e.message,'error'); }
+}
+
+function buildKeypad(){
+  const kp=document.getElementById('pinKeypad');
+  kp.innerHTML='';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(k=>{
+    if(k===''){ const d=document.createElement('div'); kp.appendChild(d); return; }
+    const btn=document.createElement('button');
+    btn.className='pin-key';
+    btn.textContent=k;
+    btn.onclick=()=>{
+      if(k==='⌫'){ pinCurrent=pinCurrent.slice(0,-1); }
+      else { if(pinCurrent.length<4) pinCurrent+=k.toString(); }
+      updatePinDots();
+      if(pinCurrent.length===4){ setTimeout(()=>{ document.getElementById('confirmPinBtn').click(); },200); }
+    };
+    kp.appendChild(btn);
+  });
+}
+function updatePinDots(){
+  document.querySelectorAll('#pinDots .pin-dot').forEach((dot,i)=>{
+    dot.classList.toggle('filled', i<pinCurrent.length);
+  });
+}
+window.togglePin=async()=>{
+  const enabled=!!profileData.pinEnabled;
+  if(enabled){
+    const ok=await openConfirm({title:t('pinTitle'), message:t('disablePinConfirm'), icon:'lock-open', danger:true});
+    if(!ok) return;
+    try{
+      await remove(ref(db,`users/${currentUid}/profile/pinHash`));
+      await update(ref(db,`users/${currentUid}/profile`),{pinEnabled:false, updatedAt:new Date().toISOString()});
+      profileData.pinEnabled=false;
+      renderProfile();
+      showToast(t('pinDisabledSuccess')||'تم تعطيل رمز PIN','success');
+    }catch(e){ showToast(e.message,'error'); }
+  }else{
+    pinStep='first'; pinFirst=''; pinCurrent='';
+    document.getElementById('pinDialogTitle').textContent=t('pinTitle');
+    document.getElementById('pinDialogMsg').textContent=t('pinMsg');
+    buildKeypad(); updatePinDots();
+    openDialog('pinDialog');
+  }
+}
+window.confirmPinEntry=()=>{
+  if(pinCurrent.length!==4){ showToast(t('pinMsg')||'أدخل 4 أرقام','error'); return; }
+  if(pinStep==='first'){
+    pinFirst=pinCurrent;
+    pinCurrent='';
+    pinStep='confirm';
+    document.getElementById('pinDialogTitle').textContent=t('pinConfirmTitle');
+    document.getElementById('pinDialogMsg').textContent=t('pinConfirmMsg');
+    updatePinDots();
+  }else{
+    if(pinCurrent!==pinFirst){ showToast(t('pinMismatch')||'الرمز غير متطابق','error'); pinCurrent=''; pinStep='first'; pinFirst=''; document.getElementById('pinDialogTitle').textContent=t('pinTitle'); document.getElementById('pinDialogMsg').textContent=t('pinMsg'); updatePinDots(); return; }
+    (async()=>{
+      const btn=document.getElementById('confirmPinBtn');
+      btn.disabled=true; btn.innerHTML='<span class="spinner"></span> حفظ';
+      try{
+        const hash=await hashPin(pinCurrent);
+        await update(ref(db,`users/${currentUid}/profile`),{pinHash:hash, pinEnabled:true, updatedAt:new Date().toISOString()});
+        profileData.pinEnabled=true;
+        renderProfile();
+        closePinDialog();
+        showToast(t('pinEnabledSuccess')||'تم تفعيل رمز PIN بنجاح','success');
+      }catch(e){ showToast(e.message,'error'); }
+      finally{ btn.disabled=false; btn.textContent=t('confirm'); }
+    })();
+  }
+}
+window.closePinDialog=()=>{ closeDialog('pinDialog'); pinCurrent=''; pinFirst=''; pinStep='first'; }
+
+window.confirmLogout=async()=>{
+  const ok=await openConfirm({title:t('logoutTitle'), message:t('logoutConfirm'), icon:'right-from-bracket', danger:true});
+  if(!ok) return;
+  try{
+    await signOut(auth);
+    localStorage.removeItem('loggedIn');
+    window.location.href='./login.html';
+  }catch(e){ showToast(e.message,'error'); }
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
+  if(profileData.theme==='auto') applyTheme('auto');
+});
+
+document.querySelectorAll('.dialog-overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('active'); });
+});
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(window.KarniLang){
+    const saved = localStorage.getItem('karni_language')||'ar';
+    KarniLang.setLanguage(saved);
+    KarniLang.applyDirection(saved);
+    KarniLang.applyTranslations(document);
+  }
+});
+window.addEventListener('karniLanguageChanged', ()=>{
+  if(window.KarniLang){ KarniLang.applyTranslations(document); }
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
