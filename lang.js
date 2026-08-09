@@ -32,8 +32,6 @@ const translations = {
     error: "خطأ",
     warning: "تنبيه",
     info: "معلومة",
-
-    // Header & Stats
     totalAmount: "المبلغ الإجمالي",
     customers: "الزبناء",
     overdue: "متأخر",
@@ -46,8 +44,6 @@ const translations = {
     connected: "متصل بالإنترنت",
     offline: "لا يوجد اتصال",
     checking: "جارٍ التحقق...",
-
-    // Customer Card
     view: "عرض",
     changeDate: "التاريخ",
     overdueBadge: "متأخر",
@@ -55,8 +51,6 @@ const translations = {
     upcomingBadge: "قادم",
     noPhone: "لا يوجد هاتف",
     wallet: "المحفظة",
-
-    // Dialogs
     addCustomer: "إضافة زبون جديد",
     customerNamePlaceholder: "اسم الزبون *",
     phonePlaceholder: "رقم الهاتف",
@@ -90,11 +84,9 @@ const translations = {
     support: "الدعم",
     contactUs: "تواصل معنا",
     madeWithLove: "Karni Pro © 2026 • صنع بحب في المغرب",
-
     changePassword: "تغيير كلمة المرور",
     darkMode: "الوضع الليلي",
     lightMode: "الوضع النهاري",
-
     customerAdded: "تم إضافة الزبون",
     customerUpdated: "تم التحديث",
     customerDeleted: "تم الحذف",
@@ -111,7 +103,6 @@ const translations = {
     weakPassword: "كلمة المرور ضعيفة - 6 أحرف على الأقل",
     passwordMismatch: "كلمة المرور غير متطابقة",
     fullNameRequired: "الرجاء إدخال الاسم الكامل",
-
     login: "تسجيل الدخول",
     signup: "إنشاء حساب",
     loginToAccount: "تسجيل الدخول إلى حسابك",
@@ -130,7 +121,6 @@ const translations = {
     resend: "إعادة الإرسال",
     invalidCode: "رمز غير صحيح",
     codeExpired: "انتهت صلاحية الرمز",
-
     accountSettingsTitle: "إعدادات الحساب",
     accountSection: "الحساب",
     languageSection: "اللغة",
@@ -201,8 +191,6 @@ const translations = {
     reminderTitle: "تنبيه",
     addPhoneFirst: "أضف رقم هاتف {name} أولاً",
     noPhoneShort: "لا يوجد هاتف",
-
-    // === مفاتيح matjar.html المضافة ===
     chooseClientFromList: "اختيار العميل من القائمة",
     searchClient: "ابحث عن عميل...",
     loadingClients: "جاري تحميل العملاء...",
@@ -236,7 +224,6 @@ const translations = {
     noName: "بدون اسم",
     addToOrder: "إضافة للطلب"
   },
-
   fr: {
     appName: "Karni Pro",
     loading: "Chargement...",
@@ -421,7 +408,6 @@ const translations = {
     reminderTitle: "Rappel",
     addPhoneFirst: "Ajoutez téléphone pour {name}",
     noPhoneShort: "Pas de téléphone",
-
     chooseClientFromList: "Choisir client dans la liste",
     searchClient: "Rechercher un client...",
     loadingClients: "Chargement des clients...",
@@ -455,7 +441,6 @@ const translations = {
     noName: "Sans nom",
     addToOrder: "Ajouter à la commande"
   },
-
   en: {
     appName: "Karni Pro",
     loading: "Loading...",
@@ -640,7 +625,6 @@ const translations = {
     reminderTitle: "Reminder",
     addPhoneFirst: "Add phone for {name} first",
     noPhoneShort: "No phone",
-
     chooseClientFromList: "Choose client from list",
     searchClient: "Search for a client...",
     loadingClients: "Loading clients...",
