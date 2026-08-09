@@ -67,10 +67,15 @@ setTimeout(()=>{
       <a href="index.html" class="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></a>
       <h1 class="font-bold text-gray-900" data-i18n="myStore">متجري</h1>
     </div>
-    <button id="reportsBtn" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center relative">
-      <i class="fa-solid fa-file-invoice"></i>
-      <span id="orderCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
-    </button>
+    <div class="flex items-center gap-2">
+      <button id="shareStoreBtn" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100 transition" data-i18n-title="shareStore" title="مشاركة متجري">
+        <i class="fa-solid fa-share-nodes"></i>
+      </button>
+      <button id="reportsBtn" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center relative">
+        <i class="fa-solid fa-file-invoice"></i>
+        <span id="orderCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -143,7 +148,6 @@ setTimeout(()=>{
           <button type="button" onclick="changeQty(1)" class="w-14 h-14 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center text-2xl font-bold">+</button>
         </div>
       </div>
-    </div>
     <div class="p-4 border-t bg-white">
       <div class="flex gap-2">
         <button onclick="closeOrderModal()" class="px-8 py-4 bg-gray-100 rounded-xl font-bold" data-i18n="cancel">إلغاء</button>
@@ -189,7 +193,7 @@ let customersRef = null;
 let ordersRef = null;
 let profileRef = null;
 
-function t(key, params={}){ return window.KarniLang ? window.KarniLang.t(key, params) : key; }
+function t(key, params={}){ return window.KarniLang? window.KarniLang.t(key, params) : key; }
 
 function getProdCacheKey(){ return `products_${currentUid}`; }
 function getClientCacheKey(){ return `clients_${currentUid}`; }
@@ -223,7 +227,7 @@ function loadClientsFromPhone(){
     if(!currentUid) return null;
     const raw = localStorage.getItem(getClientCacheKey());
     const time = localStorage.getItem(getClientTimeKey());
-    if(!raw || !time) return null;
+    if(!raw ||!time) return null;
     if(Date.now() - parseInt(time) > 24*60*60*1000) return null;
     return JSON.parse(raw);
   } catch(e){ return null; }
@@ -255,7 +259,7 @@ function renderInstant(){
 }
 
 async function loadClients(){
-  if(!currentUid || !customersRef) return;
+  if(!currentUid ||!customersRef) return;
   try{
     const snap = await get(customersRef);
     let clients = [];
@@ -263,7 +267,7 @@ async function loadClients(){
       const val = snap.val();
       if(val._init) delete val._init;
       Object.values(val).forEach(c=>{
-        if(!c || !c.name) return;
+        if(!c ||!c.name) return;
         if(c.name) clients.push(c.name.trim());
       });
     }
@@ -288,20 +292,20 @@ async function loadClients(){
 }
 
 async function loadProducts(){
-  if(!currentUid || !productsRef) return;
+  if(!currentUid ||!productsRef) return;
   try{
     const snap = await get(productsRef);
     if(snap.exists()){
       const val = snap.val();
       if(val._init) delete val._init;
-      const fresh = Object.values(val).filter(v=>v && typeof v==='object' && !v._init).map(p=>{
-        if(p.image && !p.mainImage) p.mainImage = p.image;
+      const fresh = Object.values(val).filter(v=>v && typeof v==='object' &&!v._init).map(p=>{
+        if(p.image &&!p.mainImage) p.mainImage = p.image;
         if(p.mainImage && (!p.images || p.images.length===0)) p.images=[p.mainImage];
-        if(!p.images) p.images = p.mainImage ? [p.mainImage] : [];
+        if(!p.images) p.images = p.mainImage? [p.mainImage] : [];
         if(!p.mainImage && p.images.length>0) p.mainImage = p.images[0];
-        return {hidden:false, ...p};
+        return {hidden:false,...p};
       }).filter(p=>!p.hidden);
-      if(JSON.stringify(fresh.map(p=>p.id).sort()) !== JSON.stringify(products.map(p=>p.id).sort())){
+      if(JSON.stringify(fresh.map(p=>p.id).sort())!== JSON.stringify(products.map(p=>p.id).sort())){
         products = fresh;
         filteredProducts = [...fresh];
         saveProductsToPhone(fresh);
@@ -330,10 +334,10 @@ function renderProducts(reset=true){
   const html = nextSlice.map(p=>{
     const mainImg = p.mainImage || p.images?.[0] || 'https://via.placeholder.com/300';
     const inOrder = currentOrder.find(o=>o.productId==p.id);
-    const hasQty = inOrder ? inOrder.qty : 0;
+    const hasQty = inOrder? inOrder.qty : 0;
     const isZero = (parseInt(p.stock)||0) <= 0;
-    const badgeText = isZero ? t('outOfStock') : t('available');
-    const badgeClass = isZero ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700';
+    const badgeText = isZero? t('outOfStock') : t('available');
+    const badgeClass = isZero? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700';
     return `<div class="product-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="relative bg-gray-50 cursor-pointer" onclick="openOrderModal('${p.id}')">
         <img src="${mainImg}" alt="${p.name}" class="w-full h-48 object-cover" loading="lazy" decoding="async">
@@ -385,12 +389,12 @@ window.openOrderModal = function(productId){
   document.getElementById('orderProductName').textContent = p.name;
   document.getElementById('orderPrice').textContent = parseFloat(p.price||0).toFixed(2);
   document.getElementById('orderStock').textContent = p.stock||0;
-  document.getElementById('orderStockBadge').textContent = (parseInt(p.stock)||0) <=0 ? t('outOfStock') : t('available');
-  document.getElementById('orderStockBadge').className = `absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-bold ${(parseInt(p.stock)||0)<=0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}`;
+  document.getElementById('orderStockBadge').textContent = (parseInt(p.stock)||0) <=0? t('outOfStock') : t('available');
+  document.getElementById('orderStockBadge').className = `absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-bold ${(parseInt(p.stock)||0)<=0? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}`;
   document.getElementById('orderImagesCount').querySelector('span').textContent = p.images?.length||1;
   document.getElementById('orderThumbs').innerHTML = (p.images||[]).map((img,i)=>`<img src="${img}" class="w-16 h-16 rounded-xl object-cover border-2 ${i===0?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="setOrderMain('${img}',${i})">`).join('');
   const existing = currentOrder.find(o=>o.productId==p.id);
-  document.getElementById('orderQty').value = existing ? existing.qty : 1;
+  document.getElementById('orderQty').value = existing? existing.qty : 1;
   document.getElementById('orderModal').classList.add('active');
   if(window.KarniLang) KarniLang.applyTranslations(document.getElementById('orderModal'));
   galleryImages = p.images||[mainImg];
@@ -423,7 +427,7 @@ window.confirmOrder = function(){
 function updateProgress(){
   const bar = document.getElementById('orderProgress');
   const countEl = document.getElementById('orderCount');
-  if(currentOrder.length===0 && !activeClient){ bar.classList.add('hidden'); countEl.classList.add('hidden'); return; }
+  if(currentOrder.length===0 &&!activeClient){ bar.classList.add('hidden'); countEl.classList.add('hidden'); return; }
   bar.classList.remove('hidden');
   countEl.classList.remove('hidden');
   countEl.textContent = currentOrder.length;
@@ -437,22 +441,19 @@ window.finishOrder = async function(){
   if(!currentUid){ location.href="login.html"; return; }
   if(!activeClient){ showToast(t('chooseClientFirst'),'error'); return; }
   if(currentOrder.length===0){ showToast(t('noOrders'),'error'); return; }
-  
+
   const btn = document.getElementById('finishOrderBtn');
   const originalHTML = btn.innerHTML;
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin ml-2"></i> ${t('loadingClients')}`;
   btn.disabled = true;
-  
+
   try{
-    // 1. خصم الكمية من المخزون مباشرة - حتى لو أصبح 0 أو سالب مسموح
     for(const item of currentOrder){
       const product = products.find(p=>p.id==item.productId);
       if(product){
         const currentStock = parseInt(product.stock)||0;
         const newStock = currentStock - parseInt(item.qty);
-        // تحديث محلي
         product.stock = newStock;
-        // تحديث في Firebase - نسمح حتى لو 0 أو سالب
         try{
           await update(ref(db, `users/${currentUid}/products/${product.id}`), {
             stock: newStock,
@@ -463,30 +464,28 @@ window.finishOrder = async function(){
         }
       }
     }
-    
-    // حفظ المنتجات المحدثة محليا
+
     saveProductsToPhone(products);
-    
-    // 2. إنشاء الطلب
+
     const orderData = {
-      clientName:activeClient, 
-      items:currentOrder, 
-      totalItems:currentOrder.length, 
-      totalQty:currentOrder.reduce((s,i)=>s+i.qty,0), 
-      totalValue:currentOrder.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0), 
-      createdAt:new Date().toISOString(), 
+      clientName:activeClient,
+      items:currentOrder,
+      totalItems:currentOrder.length,
+      totalQty:currentOrder.reduce((s,i)=>s+i.qty,0),
+      totalValue:currentOrder.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0),
+      createdAt:new Date().toISOString(),
       status:'pending'
     };
     await push(ref(db, `users/${currentUid}/orders`), orderData);
     await push(ref(db, `users/${currentUid}/clientBons/${activeClient}/orders`), orderData);
-    
+
     showToast(t('orderSent', {client: activeClient, count: currentOrder.length}),'success');
-    currentOrder=[]; 
-    updateProgress(); 
+    currentOrder=[];
+    updateProgress();
     renderProducts(true);
     setTimeout(()=>{ window.location.href='reports.html'; }, 800);
-  } catch(e){ 
-    showToast(t('orderError')+': '+e.message,'error'); 
+  } catch(e){
+    showToast(t('orderError')+': '+e.message,'error');
     btn.innerHTML = originalHTML;
     btn.disabled = false;
     if(window.KarniLang) KarniLang.applyTranslations(btn);
@@ -498,7 +497,7 @@ function renderClientDropdown(filter){
   const dropdown = document.getElementById('clientDropdown');
   let list = allClients;
   if(filter) list = list.filter(c=>c.toLowerCase().includes(filter.toLowerCase()));
-  if(list.length===0 || !filter){ dropdown.classList.add('hidden'); return; }
+  if(list.length===0 ||!filter){ dropdown.classList.add('hidden'); return; }
   dropdown.innerHTML = list.slice(0,20).map(c=>`<div class="p-3 hover:bg-emerald-50 cursor-pointer border-b last:border-0 text-sm font-bold" onclick="selectClient('${c.replace(/'/g,"\'")}')"><i class="fa-solid fa-user ml-2 text-gray-400"></i>${c}</div>`).join('');
   dropdown.classList.remove('hidden');
 }
@@ -516,6 +515,47 @@ function setActiveClient(name){
   document.getElementById('orderClientLabel').textContent = `(${name})`;
   showToast(`${t('clientLabel')}: ${name}`,'success');
   updateProgress();
+}
+
+// === ميزة مشاركة متجري ===
+window.shareStore = async function(){
+  const storeTitle = t('myStore')!== 'myStore'? t('myStore') : 'متجري';
+  const shareText = t('shareStoreText')!== 'shareStoreText'? t('shareStoreText') : 'يمكنك زيارة متجري والاطلاع على المنتجات وإرسال طلبك بسهولة.';
+  const shareUrl = window.location.href;
+  const linkCopiedMsg = t('linkCopied')!== 'linkCopied'? t('linkCopied') : 'تم نسخ رابط المتجر بنجاح';
+  const shareFailedMsg = t('shareFailed')!== 'shareFailed'? t('shareFailed') : 'تعذر مشاركة المتجر';
+
+  if(navigator.share){
+    try{
+      await navigator.share({ title: storeTitle, text: shareText, url: shareUrl });
+    }catch(err){
+      if(err && err.name === 'AbortError') return;
+      // إذا فشل الـ share لسبب آخر، ننسخ الرابط كبديل
+      try{
+        await navigator.clipboard.writeText(shareUrl);
+        showToast(linkCopiedMsg,'success');
+      }catch(e){
+        showToast(shareFailedMsg,'error');
+      }
+    }
+  } else {
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl;
+        ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      showToast(linkCopiedMsg,'success');
+    }catch(e){
+      showToast(shareFailedMsg,'error');
+    }
+  }
 }
 
 window.openGalleryFromOrder = function(){ openGallery(galleryImages, galleryIndex); }
@@ -549,18 +589,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     try{
       const snap = await get(profileRef);
-      let profile = snap.exists() ? snap.val() : {};
-      console.log("Firebase profile:", profile);
-      console.log("Firebase language:", profile.language);
-      console.log("Current language:", window.KarniLang ? KarniLang.getLanguage() : 'no KarniLang');
-      console.log("LocalStorage:", localStorage.getItem("karni_language"));
+      let profile = snap.exists()? snap.val() : {};
       if(profile.language && window.KarniLang){
         await KarniLang.setLanguage(profile.language);
         KarniLang.applyDirection(profile.language);
         KarniLang.applyTranslations(document);
         localStorage.setItem("karni_language", profile.language);
-        console.log("Translation:", KarniLang.t("available"));
-        console.log("Document lang:", document.documentElement.lang);
       } else {
         if(window.KarniLang){
           const ls = localStorage.getItem("karni_language") || "ar";
@@ -574,13 +608,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const hasCache = renderInstant();
     document.getElementById('clientSearchInput').addEventListener('input', e=>renderClientDropdown(e.target.value));
     document.getElementById('clientSearchInput').addEventListener('focus', e=>renderClientDropdown(e.target.value));
-    document.addEventListener('click', e=>{ if(!e.target.closest('#clientSearchInput') && !e.target.closest('#clientDropdown')) document.getElementById('clientDropdown').classList.add('hidden'); });
+    document.addEventListener('click', e=>{ if(!e.target.closest('#clientSearchInput') &&!e.target.closest('#clientDropdown')) document.getElementById('clientDropdown').classList.add('hidden'); });
     document.getElementById('searchClientBtn').addEventListener('click', ()=>{ const v=document.getElementById('clientSearchInput').value.trim(); if(v) setActiveClient(v); });
     document.getElementById('changeClientBtn').addEventListener('click', ()=>{ document.getElementById('activeClientBar').classList.add('hidden'); document.getElementById('clientSearchInput').value=''; activeClient=''; localStorage.removeItem('activeClient'); updateProgress(); });
     document.getElementById('searchInput').addEventListener('input', ()=>{ renderProducts(true); });
     document.getElementById('finishOrderBtn').addEventListener('click', finishOrder);
     document.getElementById('clearOrderBtn').addEventListener('click', clearOrder);
     document.getElementById('reportsBtn').addEventListener('click', ()=>window.location.href='reports.html');
+    document.getElementById('shareStoreBtn').addEventListener('click', shareStore);
     const observer = new IntersectionObserver(entries=>{ if(entries[0].isIntersecting) renderProducts(false); }, {rootMargin:'300px'});
     observer.observe(document.getElementById('loadMoreTrigger'));
 
