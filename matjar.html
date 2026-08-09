@@ -148,6 +148,7 @@ setTimeout(()=>{
           <button type="button" onclick="changeQty(1)" class="w-14 h-14 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center text-2xl font-bold">+</button>
         </div>
       </div>
+    </div>
     <div class="p-4 border-t bg-white">
       <div class="flex gap-2">
         <button onclick="closeOrderModal()" class="px-8 py-4 bg-gray-100 rounded-xl font-bold" data-i18n="cancel">إلغاء</button>
@@ -517,22 +518,25 @@ function setActiveClient(name){
   updateProgress();
 }
 
-// === ميزة مشاركة متجري ===
+// === ميزة مشاركة متجري - ترسل رابط المتجر العام للزبائن ===
 window.shareStore = async function(){
+  if(!currentUid){
+    showToast(t('loginRequired')||'يجب تسجيل الدخول','error');
+    return;
+  }
+  const publicStoreUrl = window.location.origin + '/store.html?store=' + currentUid;
   const storeTitle = t('myStore')!== 'myStore'? t('myStore') : 'متجري';
   const shareText = t('shareStoreText')!== 'shareStoreText'? t('shareStoreText') : 'يمكنك زيارة متجري والاطلاع على المنتجات وإرسال طلبك بسهولة.';
-  const shareUrl = window.location.href;
   const linkCopiedMsg = t('linkCopied')!== 'linkCopied'? t('linkCopied') : 'تم نسخ رابط المتجر بنجاح';
   const shareFailedMsg = t('shareFailed')!== 'shareFailed'? t('shareFailed') : 'تعذر مشاركة المتجر';
 
   if(navigator.share){
     try{
-      await navigator.share({ title: storeTitle, text: shareText, url: shareUrl });
+      await navigator.share({ title: storeTitle, text: shareText, url: publicStoreUrl });
     }catch(err){
       if(err && err.name === 'AbortError') return;
-      // إذا فشل الـ share لسبب آخر، ننسخ الرابط كبديل
       try{
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(publicStoreUrl);
         showToast(linkCopiedMsg,'success');
       }catch(e){
         showToast(shareFailedMsg,'error');
@@ -541,10 +545,10 @@ window.shareStore = async function(){
   } else {
     try{
       if(navigator.clipboard && navigator.clipboard.writeText){
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(publicStoreUrl);
       } else {
         const ta = document.createElement('textarea');
-        ta.value = shareUrl;
+        ta.value = publicStoreUrl;
         ta.style.position='fixed'; ta.style.opacity='0';
         document.body.appendChild(ta);
         ta.select();
