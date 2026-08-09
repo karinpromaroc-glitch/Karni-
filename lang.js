@@ -3,12 +3,6 @@
  * المسؤول الوحيد عن جميع ترجمات التطبيق
  * يدعم: ar, fr, en - قابل للتوسعة بسهولة
  * التخزين: localStorage -> karni_language
- * 
- * طريقة الاستخدام المستقبلية:
- * <span data-i18n="customers"></span>
- * <input data-i18n-placeholder="searchPlaceholder">
- * <button data-i18n="save"></button>
- * lang.setLanguage('fr'); lang.t('successSaved');
  */
 
 const translations = {
@@ -97,12 +91,10 @@ const translations = {
     contactUs: "تواصل معنا",
     madeWithLove: "Karni Pro © 2026 • صنع بحب في المغرب",
 
-    // Drawer items
     changePassword: "تغيير كلمة المرور",
     darkMode: "الوضع الليلي",
     lightMode: "الوضع النهاري",
 
-    // Toasts & Messages
     customerAdded: "تم إضافة الزبون",
     customerUpdated: "تم التحديث",
     customerDeleted: "تم الحذف",
@@ -120,7 +112,6 @@ const translations = {
     passwordMismatch: "كلمة المرور غير متطابقة",
     fullNameRequired: "الرجاء إدخال الاسم الكامل",
 
-    // Auth
     login: "تسجيل الدخول",
     signup: "إنشاء حساب",
     loginToAccount: "تسجيل الدخول إلى حسابك",
@@ -140,7 +131,6 @@ const translations = {
     invalidCode: "رمز غير صحيح",
     codeExpired: "انتهت صلاحية الرمز",
 
-    // Account Settings
     accountSettingsTitle: "إعدادات الحساب",
     accountSection: "الحساب",
     languageSection: "اللغة",
@@ -181,7 +171,6 @@ const translations = {
     lastLogin: "آخر تسجيل دخول",
     logoutConfirm: "هل تريد تسجيل الخروج من حسابك؟",
     disablePinConfirm: "هل تريد تعطيل رمز PIN وحذفه؟",
-// Person page
     customerDetails: "تفاصيل الزبون",
     totalBoxLabel: "المبلغ الإجمالي",
     cityLabel: "المدينة",
@@ -212,6 +201,40 @@ const translations = {
     reminderTitle: "تنبيه",
     addPhoneFirst: "أضف رقم هاتف {name} أولاً",
     noPhoneShort: "لا يوجد هاتف",
+
+    // === مفاتيح matjar.html المضافة ===
+    chooseClientFromList: "اختيار العميل من القائمة",
+    searchClient: "ابحث عن عميل...",
+    loadingClients: "جاري تحميل العملاء...",
+    loadedClients: "تم تحميل {count} عميل",
+    loadedClientsFromPhone: "تم تحميل {count} عميل من الهاتف",
+    noClients: "لا يوجد عملاء",
+    client: "العميل",
+    clientLabel: "العميل",
+    change: "تغيير",
+    orderProgress: "تقدم الطلب",
+    finishAndSendOrder: "إنهاء وإرسال الطلب",
+    clear: "مسح",
+    searchForProduct: "البحث عن منتج...",
+    noProducts: "لا توجد منتجات",
+    setQuantity: "تحديد الكمية",
+    available: "متوفر",
+    outOfStock: "غير متوفر",
+    stockLabel: "المخزون",
+    dirham: "درهم",
+    requiredQuantityFor: "الكمية المطلوبة لـ",
+    backToProducts: "سيتم الرجوع إلى قائمة المنتجات",
+    done: "تم",
+    selectClientFirst: "اختر العميل أولا",
+    chooseClientFirst: "اختر العميل من القائمة أولا",
+    enterValidQty: "أدخل كمية صحيحة",
+    addedToOrder: "تمت إضافة {name} بكمية {qty}",
+    orderSent: "تم إرسال الطلب للعميل {client} - {count} منتجات",
+    orderError: "خطأ في إرسال الطلب",
+    noOrders: "لا توجد طلبات",
+    clearOrderConfirm: "هل أنت متأكد من مسح الطلب؟",
+    noName: "بدون اسم",
+    addToOrder: "إضافة للطلب"
   },
 
   fr: {
@@ -239,7 +262,6 @@ const translations = {
     error: "Erreur",
     warning: "Attention",
     info: "Info",
-
     totalAmount: "Montant total",
     customers: "Clients",
     overdue: "En retard",
@@ -252,7 +274,6 @@ const translations = {
     connected: "Connecté",
     offline: "Hors ligne",
     checking: "Vérification...",
-
     view: "Voir",
     changeDate: "Date",
     overdueBadge: "En retard",
@@ -260,7 +281,6 @@ const translations = {
     upcomingBadge: "À venir",
     noPhone: "Pas de téléphone",
     wallet: "Portefeuille",
-
     addCustomer: "Ajouter un client",
     customerNamePlaceholder: "Nom du client *",
     phonePlaceholder: "Numéro de téléphone",
@@ -269,7 +289,7 @@ const translations = {
     newNamePlaceholder: "Nouveau nom",
     saveName: "Enregistrer",
     deleteCustomerTitle: "Supprimer le client",
-    deleteCustomerMsg: "Voulez-vous supprimer {name} ?",
+    deleteCustomerMsg: "Voulez-vous supprimer {name}?",
     editPaymentDate: "Modifier la date",
     chooseNewDate: "Choisir une nouvelle date",
     saveDate: "Enregistrer",
@@ -281,7 +301,7 @@ const translations = {
     privacyMsg: "Vos données sont protégées",
     logout: "Déconnexion",
     logoutTitle: "Déconnexion",
-    logoutMsg: "Voulez-vous vous déconnecter ?",
+    logoutMsg: "Voulez-vous vous déconnecter?",
     mainMenu: "Menu principal",
     appProtected: "Application protégée",
     appProtectedSub: "Vos données sont sécurisées et chiffrées.",
@@ -294,11 +314,9 @@ const translations = {
     support: "Support",
     contactUs: "Nous contacter",
     madeWithLove: "Karni Pro © 2026 • Fait avec amour au Maroc",
-
     changePassword: "Changer le mot de passe",
     darkMode: "Mode sombre",
     lightMode: "Mode clair",
-
     customerAdded: "Client ajouté",
     customerUpdated: "Mis à jour",
     customerDeleted: "Supprimé",
@@ -315,7 +333,6 @@ const translations = {
     weakPassword: "Mot de passe faible - 6 caractères min",
     passwordMismatch: "Mots de passe différents",
     fullNameRequired: "Nom complet requis",
-
     login: "Connexion",
     signup: "Créer un compte",
     loginToAccount: "Connectez-vous à votre compte",
@@ -324,7 +341,7 @@ const translations = {
     password: "Mot de passe",
     confirmPassword: "Confirmer mot de passe",
     fullName: "Nom complet",
-    forgotPassword: "Mot de passe oublié ?",
+    forgotPassword: "Mot de passe oublié?",
     loginSuccess: "Connexion réussie",
     signupSuccess: "Compte créé",
     otpTitle: "Code de vérification",
@@ -334,7 +351,6 @@ const translations = {
     resend: "Renvoyer",
     invalidCode: "Code invalide",
     codeExpired: "Code expiré",
-
     accountSettingsTitle: "Paramètres du compte",
     accountSection: "Compte",
     languageSection: "Langue",
@@ -373,8 +389,71 @@ const translations = {
     uid: "UID",
     createdAt: "Créé le",
     lastLogin: "Dernière connexion",
-    logoutConfirm: "Voulez-vous vous déconnecter ?",
-    disablePinConfirm: "Désactiver et supprimer le PIN ?"
+    logoutConfirm: "Voulez-vous vous déconnecter?",
+    disablePinConfirm: "Désactiver et supprimer le PIN?",
+    customerDetails: "Détails client",
+    totalBoxLabel: "Montant total",
+    cityLabel: "Ville",
+    paymentDateLabel: "Date de paiement",
+    receivedLabel: "Reçu",
+    paidLabel: "Payé",
+    saveChanges: "Enregistrer",
+    historyTitle: "Historique",
+    selectCity: "Choisir ville",
+    paymentDateHistory: "Date paiement: --",
+    receivedDateHistory: "Date reçu: --",
+    customerNotFound: "Client introuvable",
+    loadingCustomer: "Chargement client...",
+    checkLogin: "Vérification connexion...",
+    noOperations: "Aucune opération",
+    paidOperation: "Payé",
+    receivedOperation: "Reçu",
+    deleteOperationTitle: "Supprimer opération",
+    deleteOperationMsg: "Supprimer cette opération?",
+    editOperationTitle: "Modifier opération",
+    editOperationMsg: "Modifier {type} - {amount}",
+    changesSaved: "Modifications enregistrées",
+    saved: "Enregistré",
+    saving: "Enregistrement...",
+    operationDeleted: "Opération supprimée",
+    operationUpdated: "Opération modifiée",
+    invalidAmount: "Montant invalide",
+    reminderTitle: "Rappel",
+    addPhoneFirst: "Ajoutez téléphone pour {name}",
+    noPhoneShort: "Pas de téléphone",
+
+    chooseClientFromList: "Choisir client dans la liste",
+    searchClient: "Rechercher un client...",
+    loadingClients: "Chargement des clients...",
+    loadedClients: "{count} clients chargés",
+    loadedClientsFromPhone: "{count} clients chargés depuis le téléphone",
+    noClients: "Aucun client",
+    client: "Client",
+    clientLabel: "Client",
+    change: "Changer",
+    orderProgress: "Progression commande",
+    finishAndSendOrder: "Terminer et envoyer la commande",
+    clear: "Effacer",
+    searchForProduct: "Rechercher un produit...",
+    noProducts: "Aucun produit",
+    setQuantity: "Définir la quantité",
+    available: "Disponible",
+    outOfStock: "Rupture de stock",
+    stockLabel: "Stock",
+    dirham: "DH",
+    requiredQuantityFor: "Quantité requise pour",
+    backToProducts: "Retour à la liste des produits",
+    done: "Terminé",
+    selectClientFirst: "Veuillez d'abord choisir un client",
+    chooseClientFirst: "Veuillez d'abord choisir un client",
+    enterValidQty: "Veuillez saisir une quantité valide",
+    addedToOrder: "{name} ajouté avec quantité {qty}",
+    orderSent: "Commande envoyée à {client} - {count} produits",
+    orderError: "Erreur lors de l'envoi de la commande",
+    noOrders: "Aucune commande",
+    clearOrderConfirm: "Voulez-vous vraiment effacer la commande?",
+    noName: "Sans nom",
+    addToOrder: "Ajouter à la commande"
   },
 
   en: {
@@ -402,7 +481,6 @@ const translations = {
     error: "Error",
     warning: "Warning",
     info: "Info",
-
     totalAmount: "Total Amount",
     customers: "Customers",
     overdue: "Overdue",
@@ -415,7 +493,6 @@ const translations = {
     connected: "Online",
     offline: "Offline",
     checking: "Checking...",
-
     view: "View",
     changeDate: "Date",
     overdueBadge: "Overdue",
@@ -423,7 +500,6 @@ const translations = {
     upcomingBadge: "Upcoming",
     noPhone: "No phone",
     wallet: "Wallet",
-
     addCustomer: "Add New Customer",
     customerNamePlaceholder: "Customer name *",
     phonePlaceholder: "Phone number",
@@ -457,11 +533,9 @@ const translations = {
     support: "Support",
     contactUs: "Contact us",
     madeWithLove: "Karni Pro © 2026 • Made with love in Morocco",
-
     changePassword: "Change password",
     darkMode: "Dark mode",
     lightMode: "Light mode",
-
     customerAdded: "Customer added",
     customerUpdated: "Updated",
     customerDeleted: "Deleted",
@@ -478,7 +552,6 @@ const translations = {
     weakPassword: "Weak password - at least 6 chars",
     passwordMismatch: "Passwords do not match",
     fullNameRequired: "Full name required",
-
     login: "Login",
     signup: "Sign up",
     loginToAccount: "Login to your account",
@@ -497,7 +570,6 @@ const translations = {
     resend: "Resend",
     invalidCode: "Invalid code",
     codeExpired: "Code expired",
-
     accountSettingsTitle: "Account Settings",
     accountSection: "Account",
     languageSection: "Language",
@@ -538,7 +610,6 @@ const translations = {
     lastLogin: "Last login",
     logoutConfirm: "Do you want to logout?",
     disablePinConfirm: "Disable and delete PIN?",
-// Person page
     customerDetails: "Customer Details",
     totalBoxLabel: "Total Amount",
     cityLabel: "City",
@@ -569,133 +640,112 @@ const translations = {
     reminderTitle: "Reminder",
     addPhoneFirst: "Add phone for {name} first",
     noPhoneShort: "No phone",
+
+    chooseClientFromList: "Choose client from list",
+    searchClient: "Search for a client...",
+    loadingClients: "Loading clients...",
+    loadedClients: "{count} clients loaded",
+    loadedClientsFromPhone: "{count} clients loaded from phone",
+    noClients: "No clients",
+    client: "Client",
+    clientLabel: "Client",
+    change: "Change",
+    orderProgress: "Order progress",
+    finishAndSendOrder: "Finish and send order",
+    clear: "Clear",
+    searchForProduct: "Search for a product...",
+    noProducts: "No products",
+    setQuantity: "Set quantity",
+    available: "Available",
+    outOfStock: "Out of stock",
+    stockLabel: "Stock",
+    dirham: "MAD",
+    requiredQuantityFor: "Required quantity for",
+    backToProducts: "Will return to product list",
+    done: "Done",
+    selectClientFirst: "Please select a client first",
+    chooseClientFirst: "Please select a client first",
+    enterValidQty: "Please enter a valid quantity",
+    addedToOrder: "{name} added with quantity {qty}",
+    orderSent: "Order sent to {client} - {count} products",
+    orderError: "Error sending order",
+    noOrders: "No orders",
+    clearOrderConfirm: "Are you sure you want to clear the order?",
+    noName: "No name",
+    addToOrder: "Add to order"
   }
 };
 
-/**
- * Karni i18n Engine
- */
 const KarniLang = (() => {
   const STORAGE_KEY = "karni_language";
   const DEFAULT_LANG = "ar";
   const SUPPORTED = ["ar", "fr", "en"];
-
   let currentLang = DEFAULT_LANG;
-
-  function isSupported(lang) {
-    return SUPPORTED.includes(lang);
-  }
-
-  function getLanguage() {
-    return currentLang;
-  }
-
-  function saveLanguage(lang) {
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch (e) {}
-  }
-
+  function isSupported(lang) { return SUPPORTED.includes(lang); }
+  function getLanguage() { return currentLang; }
+  function saveLanguage(lang) { try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {} }
   function loadLanguage() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved && isSupported(saved)) {
-        currentLang = saved;
-      } else {
-        // محاولة اكتشاف من المتصفح
+      if (saved && isSupported(saved)) { currentLang = saved; }
+      else {
         const browser = (navigator.language || "ar").slice(0, 2).toLowerCase();
         if (isSupported(browser)) currentLang = browser;
         else currentLang = DEFAULT_LANG;
       }
-    } catch (e) {
-      currentLang = DEFAULT_LANG;
-    }
+    } catch (e) { currentLang = DEFAULT_LANG; }
     return currentLang;
   }
-
   function setLanguage(lang) {
-    if (!isSupported(lang)) {
-      console.warn(`[KarniLang] Language ${lang} not supported`);
-      return false;
-    }
+    if (!isSupported(lang)) { console.warn(`[KarniLang] Language ${lang} not supported`); return false; }
     currentLang = lang;
     saveLanguage(lang);
     applyDirection(lang);
     applyTranslations();
-    // حدث مخصص يمكن للصفحات الاستماع له
     window.dispatchEvent(new CustomEvent("karniLanguageChanged", { detail: { lang } }));
     return true;
   }
-
   function applyDirection(lang) {
-    const dir = lang === "ar" ? "rtl" : "ltr";
+    const dir = lang === "ar"? "rtl" : "ltr";
     document.documentElement.lang = lang;
     document.documentElement.dir = dir;
   }
-
-  /**
-   * t(key, params, langOverride)
-   * مثال: t('deleteCustomerMsg', {name: 'Ahmed'})
-   */
   function t(key, params = {}, langOverride = null) {
     const lang = langOverride || currentLang;
     const dict = translations[lang] || translations[DEFAULT_LANG];
     let text = dict[key];
-
-    if (text === undefined) {
-      // fallback إلى الإنجليزية ثم العربية
-      text = translations.en[key] || translations.ar[key] || key;
-    }
-
-    // استبدال المتغيرات {var}
+    if (text === undefined) { text = translations.en[key] || translations.ar[key] || key; }
     if (params && typeof params === "object") {
-      Object.keys(params).forEach(k => {
-        text = text.replaceAll(`{${k}}`, params[k]);
-      });
+      Object.keys(params).forEach(k => { text = text.replaceAll(`{${k}}`, params[k]); });
     }
-
     return text;
   }
-
   function applyTranslations(root = document) {
-    // data-i18n -> textContent
     root.querySelectorAll("[data-i18n]").forEach(el => {
       const key = el.getAttribute("data-i18n");
       if (!key) return;
       const paramsAttr = el.getAttribute("data-i18n-params");
       let params = {};
-      if (paramsAttr) {
-        try { params = JSON.parse(paramsAttr); } catch (e) {}
-      }
+      if (paramsAttr) { try { params = JSON.parse(paramsAttr); } catch (e) {} }
       el.textContent = t(key, params);
     });
-
-    // data-i18n-placeholder
     root.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       const key = el.getAttribute("data-i18n-placeholder");
       el.placeholder = t(key);
     });
-
-    // data-i18n-title
     root.querySelectorAll("[data-i18n-title]").forEach(el => {
       const key = el.getAttribute("data-i18n-title");
       el.title = t(key);
     });
-
-    // data-i18n-value (للأزرار input)
     root.querySelectorAll("[data-i18n-value]").forEach(el => {
       const key = el.getAttribute("data-i18n-value");
       el.value = t(key);
     });
-
-    // data-i18n-html (يسمح بـ HTML بسيط - استخدم بحذر)
     root.querySelectorAll("[data-i18n-html]").forEach(el => {
       const key = el.getAttribute("data-i18n-html");
       el.innerHTML = t(key);
     });
   }
-
-  // تهيئة تلقائية عند التحميل
   function init() {
     loadLanguage();
     applyDirection(currentLang);
@@ -705,10 +755,7 @@ const KarniLang = (() => {
       applyTranslations();
     }
   }
-
   init();
-
-  // API العام
   return {
     translations,
     t,
@@ -723,13 +770,8 @@ const KarniLang = (() => {
   };
 })();
 
-// تصدير للاستخدام كـ module أو global
-if (typeof window !== "undefined") {
+if (typeof window!== "undefined") {
   window.KarniLang = KarniLang;
-  window.t = KarniLang.t; // اختصار عالمي
-  window.lang = KarniLang; // alias
+  window.t = KarniLang.t;
+  window.lang = KarniLang;
 }
-
-// دعم ES Module
-// export removed - global only
-// export default removed - global only
