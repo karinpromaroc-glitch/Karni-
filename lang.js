@@ -1,0 +1,735 @@
+/**
+ * lang.js - Karni Pro - نظام الترجمة المركزي
+ * المسؤول الوحيد عن جميع ترجمات التطبيق
+ * يدعم: ar, fr, en - قابل للتوسعة بسهولة
+ * التخزين: localStorage -> karni_language
+ * 
+ * طريقة الاستخدام المستقبلية:
+ * <span data-i18n="customers"></span>
+ * <input data-i18n-placeholder="searchPlaceholder">
+ * <button data-i18n="save"></button>
+ * lang.setLanguage('fr'); lang.t('successSaved');
+ */
+
+const translations = {
+  ar: {
+    // Common
+    appName: "Karni Pro",
+    loading: "جاري التحميل...",
+    save: "حفظ",
+    cancel: "إلغاء",
+    delete: "حذف",
+    edit: "تعديل",
+    close: "إغلاق",
+    confirm: "تأكيد",
+    yes: "نعم",
+    no: "لا",
+    search: "بحث",
+    today: "اليوم",
+    all: "الكل",
+    city: "المدينة",
+    phone: "الهاتف",
+    name: "الاسم",
+    amount: "المبلغ",
+    date: "التاريخ",
+    status: "الحالة",
+    actions: "الإجراءات",
+    success: "نجاح",
+    error: "خطأ",
+    warning: "تنبيه",
+    info: "معلومة",
+
+    // Header & Stats
+    totalAmount: "المبلغ الإجمالي",
+    customers: "الزبناء",
+    overdue: "متأخر",
+    upcoming: "قادم",
+    reports: "التقارير",
+    route: "المسار",
+    searchPlaceholder: "ابحث عن زبون...",
+    noResults: "لا توجد نتائج",
+    noCustomers: "لا توجد زبناء",
+    connected: "متصل بالإنترنت",
+    offline: "لا يوجد اتصال",
+    checking: "جارٍ التحقق...",
+
+    // Customer Card
+    view: "عرض",
+    changeDate: "التاريخ",
+    overdueBadge: "متأخر",
+    todayBadge: "اليوم",
+    upcomingBadge: "قادم",
+    noPhone: "لا يوجد هاتف",
+    wallet: "المحفظة",
+
+    // Dialogs
+    addCustomer: "إضافة زبون جديد",
+    customerNamePlaceholder: "اسم الزبون *",
+    phonePlaceholder: "رقم الهاتف",
+    cityPlaceholder: "المدينة",
+    editCustomerName: "تغيير اسم الزبون",
+    newNamePlaceholder: "الاسم الجديد",
+    saveName: "حفظ الاسم",
+    deleteCustomerTitle: "حذف الزبون",
+    deleteCustomerMsg: "هل أنت متأكد من حذف {name}؟",
+    editPaymentDate: "تعديل تاريخ الأداء",
+    chooseNewDate: "اختر التاريخ الجديد",
+    saveDate: "حفظ التاريخ",
+    accountSettings: "إعدادات الحساب",
+    comingSoon: "قريباً",
+    aboutApp: "حول التطبيق",
+    aboutAppMsg: "نظام إدارة الكرني الذكي",
+    privacyPolicy: "سياسة الخصوصية",
+    privacyMsg: "بياناتك محمية ومشفرة",
+    logout: "تسجيل الخروج",
+    logoutTitle: "تسجيل الخروج",
+    logoutMsg: "هل تريد تسجيل الخروج؟",
+    mainMenu: "القائمة الرئيسية",
+    appProtected: "التطبيق محمي بالكامل",
+    appProtectedSub: "جميع بياناتك محفوظة بأمان ومشفرة.",
+    account: "الحساب",
+    store: "المتجر",
+    myStore: "متجري",
+    storeSettings: "إعدادات المتجر",
+    data: "البيانات",
+    backup: "النسخ الاحتياطي",
+    support: "الدعم",
+    contactUs: "تواصل معنا",
+    madeWithLove: "Karni Pro © 2026 • صنع بحب في المغرب",
+
+    // Drawer items
+    changePassword: "تغيير كلمة المرور",
+    darkMode: "الوضع الليلي",
+    lightMode: "الوضع النهاري",
+
+    // Toasts & Messages
+    customerAdded: "تم إضافة الزبون",
+    customerUpdated: "تم التحديث",
+    customerDeleted: "تم الحذف",
+    nameUpdated: "تم تحديث الاسم",
+    loginRequired: "يجب تسجيل الدخول",
+    noData: "لا توجد بيانات",
+    backupDone: "تم النسخ - {count} زبون",
+    allCities: "تم عرض جميع المدن",
+    cityFilter: "مدينة: {city}",
+    passwordResetSent: "تم إرسال رابط تغيير كلمة المرور",
+    sendFailed: "فشل الإرسال",
+    invalidEmail: "البريد غير صحيح",
+    requiredFields: "الرجاء إدخال البريد وكلمة المرور",
+    weakPassword: "كلمة المرور ضعيفة - 6 أحرف على الأقل",
+    passwordMismatch: "كلمة المرور غير متطابقة",
+    fullNameRequired: "الرجاء إدخال الاسم الكامل",
+
+    // Auth
+    login: "تسجيل الدخول",
+    signup: "إنشاء حساب",
+    loginToAccount: "تسجيل الدخول إلى حسابك",
+    createNewAccount: "إنشاء حساب جديد",
+    email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    confirmPassword: "تأكيد كلمة المرور",
+    fullName: "الاسم الكامل",
+    forgotPassword: "نسيت كلمة المرور؟",
+    loginSuccess: "تم تسجيل الدخول بنجاح",
+    signupSuccess: "تم إنشاء الحساب بنجاح",
+    otpTitle: "رمز التحقق",
+    otpSent: "تم إرسال رمز مكون من 6 أرقام إلى",
+    otpExpiry: "الصلاحية:",
+    verifyCode: "تأكيد الرمز",
+    resend: "إعادة الإرسال",
+    invalidCode: "رمز غير صحيح",
+    codeExpired: "انتهت صلاحية الرمز",
+
+    // Account Settings
+    accountSettingsTitle: "إعدادات الحساب",
+    accountSection: "الحساب",
+    languageSection: "اللغة",
+    appearance: "المظهر",
+    notifications: "الإشعارات",
+    security: "الأمان",
+    accountInfo: "معلومات الحساب",
+    displayName: "الاسم",
+    emailAddress: "البريد الإلكتروني",
+    changeEmail: "تغيير",
+    changeEmailTitle: "تغيير البريد الإلكتروني",
+    changeEmailMsg: "أدخل البريد الجديد وكلمة المرور الحالية",
+    newEmailPlaceholder: "البريد الجديد",
+    currentPasswordPlaceholder: "كلمة المرور الحالية",
+    update: "تحديث",
+    passwordChangeTitle: "تغيير كلمة المرور",
+    passwordChangeMsg: "سيتم إرسال رابط إعادة تعيين كلمة المرور إلى {email}",
+    languageLabel: "اختر اللغة",
+    arabic: "العربية",
+    french: "Français",
+    english: "English",
+    themeLight: "فاتح",
+    themeDark: "داكن",
+    themeAuto: "تلقائي",
+    enableNotifications: "تفعيل الإشعارات",
+    enablePin: "تفعيل رمز PIN",
+    pinNotEnabled: "غير مفعل",
+    pinEnabled: "مفعل - محمي بـ PIN",
+    pinTitle: "تعيين رمز PIN",
+    pinMsg: "أدخل رمز PIN مكون من 4 أرقام",
+    pinConfirmTitle: "تأكيد رمز PIN",
+    pinConfirmMsg: "أعد إدخال الرمز للتأكيد",
+    pinMismatch: "الرمز غير متطابق",
+    pinEnabledSuccess: "تم تفعيل رمز PIN بنجاح",
+    pinDisabledSuccess: "تم تعطيل رمز PIN",
+    uid: "UID",
+    createdAt: "تاريخ إنشاء الحساب",
+    lastLogin: "آخر تسجيل دخول",
+    logoutConfirm: "هل تريد تسجيل الخروج من حسابك؟",
+    disablePinConfirm: "هل تريد تعطيل رمز PIN وحذفه؟",
+// Person page
+    customerDetails: "تفاصيل الزبون",
+    totalBoxLabel: "المبلغ الإجمالي",
+    cityLabel: "المدينة",
+    paymentDateLabel: "تاريخ الأداء",
+    receivedLabel: "استلام",
+    paidLabel: "دفع",
+    saveChanges: "حفظ التغييرات",
+    historyTitle: "سجل العمليات",
+    selectCity: "اختر المدينة",
+    paymentDateHistory: "تاريخ الدفع: --",
+    receivedDateHistory: "تاريخ الاستلام: --",
+    customerNotFound: "الزبون غير موجود",
+    loadingCustomer: "جاري تحميل الزبون...",
+    checkLogin: "جاري التحقق من تسجيل الدخول...",
+    noOperations: "لا توجد عمليات بعد",
+    paidOperation: "دفع",
+    receivedOperation: "استلام",
+    deleteOperationTitle: "حذف العملية",
+    deleteOperationMsg: "هل أنت متأكد من حذف هذه العملية؟",
+    editOperationTitle: "تعديل العملية",
+    editOperationMsg: "تعديل {type} - {amount}",
+    changesSaved: "تم حفظ التغييرات بنجاح",
+    saved: "تم الحفظ",
+    saving: "جاري الحفظ...",
+    operationDeleted: "تم حذف العملية",
+    operationUpdated: "تم تعديل العملية",
+    invalidAmount: "المبلغ غير صحيح",
+    reminderTitle: "تنبيه",
+    addPhoneFirst: "أضف رقم هاتف {name} أولاً",
+    noPhoneShort: "لا يوجد هاتف",
+  },
+
+  fr: {
+    appName: "Karni Pro",
+    loading: "Chargement...",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    delete: "Supprimer",
+    edit: "Modifier",
+    close: "Fermer",
+    confirm: "Confirmer",
+    yes: "Oui",
+    no: "Non",
+    search: "Rechercher",
+    today: "Aujourd'hui",
+    all: "Tout",
+    city: "Ville",
+    phone: "Téléphone",
+    name: "Nom",
+    amount: "Montant",
+    date: "Date",
+    status: "Statut",
+    actions: "Actions",
+    success: "Succès",
+    error: "Erreur",
+    warning: "Attention",
+    info: "Info",
+
+    totalAmount: "Montant total",
+    customers: "Clients",
+    overdue: "En retard",
+    upcoming: "À venir",
+    reports: "Rapports",
+    route: "Itinéraire",
+    searchPlaceholder: "Rechercher un client...",
+    noResults: "Aucun résultat",
+    noCustomers: "Aucun client",
+    connected: "Connecté",
+    offline: "Hors ligne",
+    checking: "Vérification...",
+
+    view: "Voir",
+    changeDate: "Date",
+    overdueBadge: "En retard",
+    todayBadge: "Aujourd'hui",
+    upcomingBadge: "À venir",
+    noPhone: "Pas de téléphone",
+    wallet: "Portefeuille",
+
+    addCustomer: "Ajouter un client",
+    customerNamePlaceholder: "Nom du client *",
+    phonePlaceholder: "Numéro de téléphone",
+    cityPlaceholder: "Ville",
+    editCustomerName: "Modifier le nom",
+    newNamePlaceholder: "Nouveau nom",
+    saveName: "Enregistrer",
+    deleteCustomerTitle: "Supprimer le client",
+    deleteCustomerMsg: "Voulez-vous supprimer {name} ?",
+    editPaymentDate: "Modifier la date",
+    chooseNewDate: "Choisir une nouvelle date",
+    saveDate: "Enregistrer",
+    accountSettings: "Paramètres du compte",
+    comingSoon: "Bientôt",
+    aboutApp: "À propos",
+    aboutAppMsg: "Système intelligent de gestion Karni",
+    privacyPolicy: "Confidentialité",
+    privacyMsg: "Vos données sont protégées",
+    logout: "Déconnexion",
+    logoutTitle: "Déconnexion",
+    logoutMsg: "Voulez-vous vous déconnecter ?",
+    mainMenu: "Menu principal",
+    appProtected: "Application protégée",
+    appProtectedSub: "Vos données sont sécurisées et chiffrées.",
+    account: "Compte",
+    store: "Boutique",
+    myStore: "Ma boutique",
+    storeSettings: "Paramètres boutique",
+    data: "Données",
+    backup: "Sauvegarde",
+    support: "Support",
+    contactUs: "Nous contacter",
+    madeWithLove: "Karni Pro © 2026 • Fait avec amour au Maroc",
+
+    changePassword: "Changer le mot de passe",
+    darkMode: "Mode sombre",
+    lightMode: "Mode clair",
+
+    customerAdded: "Client ajouté",
+    customerUpdated: "Mis à jour",
+    customerDeleted: "Supprimé",
+    nameUpdated: "Nom mis à jour",
+    loginRequired: "Connexion requise",
+    noData: "Aucune donnée",
+    backupDone: "Sauvegarde - {count} clients",
+    allCities: "Toutes les villes",
+    cityFilter: "Ville: {city}",
+    passwordResetSent: "Lien de réinitialisation envoyé",
+    sendFailed: "Échec d'envoi",
+    invalidEmail: "Email invalide",
+    requiredFields: "Veuillez remplir email et mot de passe",
+    weakPassword: "Mot de passe faible - 6 caractères min",
+    passwordMismatch: "Mots de passe différents",
+    fullNameRequired: "Nom complet requis",
+
+    login: "Connexion",
+    signup: "Créer un compte",
+    loginToAccount: "Connectez-vous à votre compte",
+    createNewAccount: "Créer un nouveau compte",
+    email: "Email",
+    password: "Mot de passe",
+    confirmPassword: "Confirmer mot de passe",
+    fullName: "Nom complet",
+    forgotPassword: "Mot de passe oublié ?",
+    loginSuccess: "Connexion réussie",
+    signupSuccess: "Compte créé",
+    otpTitle: "Code de vérification",
+    otpSent: "Code à 6 chiffres envoyé à",
+    otpExpiry: "Validité:",
+    verifyCode: "Vérifier",
+    resend: "Renvoyer",
+    invalidCode: "Code invalide",
+    codeExpired: "Code expiré",
+
+    accountSettingsTitle: "Paramètres du compte",
+    accountSection: "Compte",
+    languageSection: "Langue",
+    appearance: "Apparence",
+    notifications: "Notifications",
+    security: "Sécurité",
+    accountInfo: "Infos du compte",
+    displayName: "Nom",
+    emailAddress: "Email",
+    changeEmail: "Changer",
+    changeEmailTitle: "Changer l'email",
+    changeEmailMsg: "Nouvel email et mot de passe actuel",
+    newEmailPlaceholder: "Nouvel email",
+    currentPasswordPlaceholder: "Mot de passe actuel",
+    update: "Mettre à jour",
+    passwordChangeTitle: "Changer mot de passe",
+    passwordChangeMsg: "Un lien sera envoyé à {email}",
+    languageLabel: "Choisir la langue",
+    arabic: "العربية",
+    french: "Français",
+    english: "English",
+    themeLight: "Clair",
+    themeDark: "Sombre",
+    themeAuto: "Auto",
+    enableNotifications: "Activer notifications",
+    enablePin: "Activer code PIN",
+    pinNotEnabled: "Désactivé",
+    pinEnabled: "Activé - Protégé par PIN",
+    pinTitle: "Définir code PIN",
+    pinMsg: "Entrez un code PIN à 4 chiffres",
+    pinConfirmTitle: "Confirmer PIN",
+    pinConfirmMsg: "Retapez le code",
+    pinMismatch: "Code différent",
+    pinEnabledSuccess: "PIN activé",
+    pinDisabledSuccess: "PIN désactivé",
+    uid: "UID",
+    createdAt: "Créé le",
+    lastLogin: "Dernière connexion",
+    logoutConfirm: "Voulez-vous vous déconnecter ?",
+    disablePinConfirm: "Désactiver et supprimer le PIN ?"
+  },
+
+  en: {
+    appName: "Karni Pro",
+    loading: "Loading...",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    edit: "Edit",
+    close: "Close",
+    confirm: "Confirm",
+    yes: "Yes",
+    no: "No",
+    search: "Search",
+    today: "Today",
+    all: "All",
+    city: "City",
+    phone: "Phone",
+    name: "Name",
+    amount: "Amount",
+    date: "Date",
+    status: "Status",
+    actions: "Actions",
+    success: "Success",
+    error: "Error",
+    warning: "Warning",
+    info: "Info",
+
+    totalAmount: "Total Amount",
+    customers: "Customers",
+    overdue: "Overdue",
+    upcoming: "Upcoming",
+    reports: "Reports",
+    route: "Route",
+    searchPlaceholder: "Search for a customer...",
+    noResults: "No results",
+    noCustomers: "No customers",
+    connected: "Online",
+    offline: "Offline",
+    checking: "Checking...",
+
+    view: "View",
+    changeDate: "Date",
+    overdueBadge: "Overdue",
+    todayBadge: "Today",
+    upcomingBadge: "Upcoming",
+    noPhone: "No phone",
+    wallet: "Wallet",
+
+    addCustomer: "Add New Customer",
+    customerNamePlaceholder: "Customer name *",
+    phonePlaceholder: "Phone number",
+    cityPlaceholder: "City",
+    editCustomerName: "Change customer name",
+    newNamePlaceholder: "New name",
+    saveName: "Save name",
+    deleteCustomerTitle: "Delete customer",
+    deleteCustomerMsg: "Are you sure to delete {name}?",
+    editPaymentDate: "Edit payment date",
+    chooseNewDate: "Choose new date",
+    saveDate: "Save date",
+    accountSettings: "Account Settings",
+    comingSoon: "Coming soon",
+    aboutApp: "About app",
+    aboutAppMsg: "Smart Karni management system",
+    privacyPolicy: "Privacy Policy",
+    privacyMsg: "Your data is protected and encrypted",
+    logout: "Logout",
+    logoutTitle: "Logout",
+    logoutMsg: "Do you want to logout?",
+    mainMenu: "Main Menu",
+    appProtected: "App fully protected",
+    appProtectedSub: "All your data is safe and encrypted.",
+    account: "Account",
+    store: "Store",
+    myStore: "My Store",
+    storeSettings: "Store Settings",
+    data: "Data",
+    backup: "Backup",
+    support: "Support",
+    contactUs: "Contact us",
+    madeWithLove: "Karni Pro © 2026 • Made with love in Morocco",
+
+    changePassword: "Change password",
+    darkMode: "Dark mode",
+    lightMode: "Light mode",
+
+    customerAdded: "Customer added",
+    customerUpdated: "Updated",
+    customerDeleted: "Deleted",
+    nameUpdated: "Name updated",
+    loginRequired: "Login required",
+    noData: "No data",
+    backupDone: "Backup done - {count} customers",
+    allCities: "All cities shown",
+    cityFilter: "City: {city}",
+    passwordResetSent: "Password reset link sent",
+    sendFailed: "Failed to send",
+    invalidEmail: "Invalid email",
+    requiredFields: "Please enter email and password",
+    weakPassword: "Weak password - at least 6 chars",
+    passwordMismatch: "Passwords do not match",
+    fullNameRequired: "Full name required",
+
+    login: "Login",
+    signup: "Sign up",
+    loginToAccount: "Login to your account",
+    createNewAccount: "Create new account",
+    email: "Email",
+    password: "Password",
+    confirmPassword: "Confirm password",
+    fullName: "Full name",
+    forgotPassword: "Forgot password?",
+    loginSuccess: "Logged in successfully",
+    signupSuccess: "Account created successfully",
+    otpTitle: "Verification code",
+    otpSent: "6-digit code sent to",
+    otpExpiry: "Expiry:",
+    verifyCode: "Verify code",
+    resend: "Resend",
+    invalidCode: "Invalid code",
+    codeExpired: "Code expired",
+
+    accountSettingsTitle: "Account Settings",
+    accountSection: "Account",
+    languageSection: "Language",
+    appearance: "Appearance",
+    notifications: "Notifications",
+    security: "Security",
+    accountInfo: "Account Information",
+    displayName: "Name",
+    emailAddress: "Email",
+    changeEmail: "Change",
+    changeEmailTitle: "Change email",
+    changeEmailMsg: "Enter new email and current password",
+    newEmailPlaceholder: "New email",
+    currentPasswordPlaceholder: "Current password",
+    update: "Update",
+    passwordChangeTitle: "Change password",
+    passwordChangeMsg: "Reset link will be sent to {email}",
+    languageLabel: "Choose language",
+    arabic: "العربية",
+    french: "Français",
+    english: "English",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeAuto: "Auto",
+    enableNotifications: "Enable notifications",
+    enablePin: "Enable PIN code",
+    pinNotEnabled: "Not enabled",
+    pinEnabled: "Enabled - PIN protected",
+    pinTitle: "Set PIN code",
+    pinMsg: "Enter 4-digit PIN",
+    pinConfirmTitle: "Confirm PIN",
+    pinConfirmMsg: "Re-enter to confirm",
+    pinMismatch: "PIN mismatch",
+    pinEnabledSuccess: "PIN enabled successfully",
+    pinDisabledSuccess: "PIN disabled",
+    uid: "UID",
+    createdAt: "Account created",
+    lastLogin: "Last login",
+    logoutConfirm: "Do you want to logout?",
+    disablePinConfirm: "Disable and delete PIN?",
+// Person page
+    customerDetails: "Customer Details",
+    totalBoxLabel: "Total Amount",
+    cityLabel: "City",
+    paymentDateLabel: "Payment Date",
+    receivedLabel: "Received",
+    paidLabel: "Paid",
+    saveChanges: "Save Changes",
+    historyTitle: "Operations History",
+    selectCity: "Select City",
+    paymentDateHistory: "Payment date: --",
+    receivedDateHistory: "Received date: --",
+    customerNotFound: "Customer not found",
+    loadingCustomer: "Loading customer...",
+    checkLogin: "Checking login...",
+    noOperations: "No operations yet",
+    paidOperation: "Paid",
+    receivedOperation: "Received",
+    deleteOperationTitle: "Delete Operation",
+    deleteOperationMsg: "Are you sure you want to delete this operation?",
+    editOperationTitle: "Edit Operation",
+    editOperationMsg: "Edit {type} - {amount}",
+    changesSaved: "Changes saved successfully",
+    saved: "Saved",
+    saving: "Saving...",
+    operationDeleted: "Operation deleted",
+    operationUpdated: "Operation updated",
+    invalidAmount: "Invalid amount",
+    reminderTitle: "Reminder",
+    addPhoneFirst: "Add phone for {name} first",
+    noPhoneShort: "No phone",
+  }
+};
+
+/**
+ * Karni i18n Engine
+ */
+const KarniLang = (() => {
+  const STORAGE_KEY = "karni_language";
+  const DEFAULT_LANG = "ar";
+  const SUPPORTED = ["ar", "fr", "en"];
+
+  let currentLang = DEFAULT_LANG;
+
+  function isSupported(lang) {
+    return SUPPORTED.includes(lang);
+  }
+
+  function getLanguage() {
+    return currentLang;
+  }
+
+  function saveLanguage(lang) {
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch (e) {}
+  }
+
+  function loadLanguage() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && isSupported(saved)) {
+        currentLang = saved;
+      } else {
+        // محاولة اكتشاف من المتصفح
+        const browser = (navigator.language || "ar").slice(0, 2).toLowerCase();
+        if (isSupported(browser)) currentLang = browser;
+        else currentLang = DEFAULT_LANG;
+      }
+    } catch (e) {
+      currentLang = DEFAULT_LANG;
+    }
+    return currentLang;
+  }
+
+  function setLanguage(lang) {
+    if (!isSupported(lang)) {
+      console.warn(`[KarniLang] Language ${lang} not supported`);
+      return false;
+    }
+    currentLang = lang;
+    saveLanguage(lang);
+    applyDirection(lang);
+    applyTranslations();
+    // حدث مخصص يمكن للصفحات الاستماع له
+    window.dispatchEvent(new CustomEvent("karniLanguageChanged", { detail: { lang } }));
+    return true;
+  }
+
+  function applyDirection(lang) {
+    const dir = lang === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = lang;
+    document.documentElement.dir = dir;
+  }
+
+  /**
+   * t(key, params, langOverride)
+   * مثال: t('deleteCustomerMsg', {name: 'Ahmed'})
+   */
+  function t(key, params = {}, langOverride = null) {
+    const lang = langOverride || currentLang;
+    const dict = translations[lang] || translations[DEFAULT_LANG];
+    let text = dict[key];
+
+    if (text === undefined) {
+      // fallback إلى الإنجليزية ثم العربية
+      text = translations.en[key] || translations.ar[key] || key;
+    }
+
+    // استبدال المتغيرات {var}
+    if (params && typeof params === "object") {
+      Object.keys(params).forEach(k => {
+        text = text.replaceAll(`{${k}}`, params[k]);
+      });
+    }
+
+    return text;
+  }
+
+  function applyTranslations(root = document) {
+    // data-i18n -> textContent
+    root.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      if (!key) return;
+      const paramsAttr = el.getAttribute("data-i18n-params");
+      let params = {};
+      if (paramsAttr) {
+        try { params = JSON.parse(paramsAttr); } catch (e) {}
+      }
+      el.textContent = t(key, params);
+    });
+
+    // data-i18n-placeholder
+    root.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+      const key = el.getAttribute("data-i18n-placeholder");
+      el.placeholder = t(key);
+    });
+
+    // data-i18n-title
+    root.querySelectorAll("[data-i18n-title]").forEach(el => {
+      const key = el.getAttribute("data-i18n-title");
+      el.title = t(key);
+    });
+
+    // data-i18n-value (للأزرار input)
+    root.querySelectorAll("[data-i18n-value]").forEach(el => {
+      const key = el.getAttribute("data-i18n-value");
+      el.value = t(key);
+    });
+
+    // data-i18n-html (يسمح بـ HTML بسيط - استخدم بحذر)
+    root.querySelectorAll("[data-i18n-html]").forEach(el => {
+      const key = el.getAttribute("data-i18n-html");
+      el.innerHTML = t(key);
+    });
+  }
+
+  // تهيئة تلقائية عند التحميل
+  function init() {
+    loadLanguage();
+    applyDirection(currentLang);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => applyTranslations());
+    } else {
+      applyTranslations();
+    }
+  }
+
+  init();
+
+  // API العام
+  return {
+    translations,
+    t,
+    getLanguage,
+    setLanguage,
+    saveLanguage,
+    loadLanguage,
+    applyTranslations,
+    applyDirection,
+    SUPPORTED,
+    STORAGE_KEY
+  };
+})();
+
+// تصدير للاستخدام كـ module أو global
+if (typeof window !== "undefined") {
+  window.KarniLang = KarniLang;
+  window.t = KarniLang.t; // اختصار عالمي
+  window.lang = KarniLang; // alias
+}
+
+// دعم ES Module
+// export removed - global only
+// export default removed - global only
