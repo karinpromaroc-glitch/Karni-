@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><!-- PLAYABLE_TOUCH_PATCH_V1 --><script>
+(function() {
+  if (window.__playableTouchPatchInstalled) return;
+  window.__playableTouchPatchInstalled = true;
+  var origAdd = EventTarget.prototype.addEventListener;
+  var blockedTypes = { touchstart: 1, touchmove: 1, wheel: 1 };
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (blockedTypes[type]) {
+      if (options === undefined || options === null) {
+        options = { passive: true };
+      } else if (typeof options === 'boolean') {
+        options = { capture: options, passive: true };
+      } else {
+        options = Object.assign({}, options, { passive: true });
+      }
+    }
+    return origAdd.call(this, type, listener, options);
+  };
+})();
+</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return s;}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Karni Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="lang.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
+body{background:#f5f7fa;min-height:100vh}
+.header{background:linear-gradient(135deg, #00b894 0%, #00cec9 100%);padding:30px 20px 60px;border-radius:0 0 30px 30px;position:relative}
+.header h1{color:white;font-size:26px;text-align:center;font-weight:800}
+.back-btn{position:absolute;top:20px;right:20px;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.25);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.container{padding:20px;margin-top:-40px;position:relative;z-index:2;max-width:600px;margin:auto}
+.card{background:white;border-radius:24px;padding:22px;margin-bottom:15px;box-shadow:0 8px 24px rgba(0,0,0,0.06);border:1px solid #f0f0f0}
+.avatar{width:76px;height:76px;border-radius:20px;background:linear-gradient(135deg, #00b894, #00cec9);color:white;font-size:32px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.name{text-align:center;font-size:22px;font-weight:800;color:#2d3436;margin-bottom:4px}
+.phone{text-align:center;color:#636e72;font-size:14px;margin-bottom:18px}
+.total-box{background:linear-gradient(135deg, #00b894 0%, #00cec9 100%);color:white;padding:18px;border-radius:18px;text-align:center;margin-bottom:18px}
+.total-label{font-size:12px;opacity:0.9;margin-bottom:4px;font-weight:600}
+.total-value{font-size:30px;font-weight:800}
+.label{display:flex;align-items:center;gap:6px;font-weight:700;color:#2d3436;margin:14px 0 7px;font-size:13.5px}
+.label i{color:#00b894}
+.input{width:100%;padding:13px 14px;border:1.5px solid #e9ecef;border-radius:12px;font-size:14px;background:#f8f9fa;font-family:'Cairo'}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save-btn{width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg, #00b894 0%, #00cec9 100%);color:white;font-size:15px;font-weight:800;cursor:pointer;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px}
+.loading{text-align:center;padding:60px 20px;color:#636e72}
+.date-label{font-size:11px;color:#74b9ff;margin-top:5px}
+.paid-input{border-color:#ff6b6b!important;background:#fff5f5!important}
+.received-input{border-color:#00b894!important;background:#f0fdf4!important}
+.history-title{font-size:15px;font-weight:800;color:#2d3436;margin:22px 0 12px;display:flex;align-items:center;gap:8px}
+.history-item{background:white;border:1px solid #f0f0f0;border-right:4px solid #00b894;padding:14px;border-radius:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.history-paid{border-right-color:#ff6b6b!important}
+.history-amount{font-weight:800;font-size:14px}
+.history-date{font-size:11.5px;color:#636e72;margin-top:3px}
+.history-actions{display:flex;gap:6px}
+.h-btn{width:34px;height:34px;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+.h-btn-wa{background:#25D366;color:white} .h-btn-ok{background:#2563eb;color:white} .h-btn-edit{background:#f1f5f9;color:#64748b} .h-btn-del{background:#fff1f2;color:#e11d48}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-120px);background:rgba(255,255,255,0.95);padding:14px 18px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.14);display:flex;align-items:center;gap:12px;z-index:4000;transition:all 0.45s;opacity:0;min-width:280px;max-width:90vw}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(12px);z-index:5000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.active{display:flex}
+.modal-box{background:white;border-radius:22px;padding:22px;width:100%;max-width:380px}
+.modal-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px}
+.modal-icon.warning{background:#fef3c7;color:#d97706} .modal-icon.danger{background:#fee2e2;color:#dc2626} .modal-icon.info{background:#e0f2f1;color:#0f766e}
+.modal-title{text-align:center;font-size:16px;font-weight:800;margin-bottom:6px}
+.modal-message{text-align:center;font-size:13px;color:#64748b;margin-bottom:16px}
+.modal-input{width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;margin-bottom:14px;font-family:'Cairo';background:#f8fafc}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-btn{padding:12px;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.modal-btn-cancel{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0} .modal-btn-confirm{background:linear-gradient(135deg, #00b894 0%, #00cec9 100%);color:white} .modal-btn-danger{background:#ef4444;color:white}
+</style>
+</head>
+<body>
+<div class="header">
+<button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i></button>
+<h1><i class="fas fa-book" style="margin-left:8px"></i>Karni Pro</h1>
+</div>
+<div class="container">
+<div id="loading" class="loading"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="checkLogin">جاري التحقق من تسجيل الدخول...</span></div>
+<div id="content" style="display:none">
+<div class="card">
+<div class="avatar" id="avatar">B</div>
+<div class="name" id="name">...</div>
+<div class="phone" id="phone">...</div>
+<div class="total-box">
+<div class="total-label"><i class="fas fa-wallet"></i> <span data-i18n="totalBoxLabel">المبلغ الإجمالي</span></div>
+<div class="total-value" id="totalAmount">0 <span data-i18n="amount">درهم</span></div>
+</div>
+<label class="label"><i class="fas fa-map-marker-alt"></i> <span data-i18n="cityLabel">المدينة</span></label>
+<select id="city" class="input"><option value="" data-i18n="selectCity">اختر المدينة</option></select>
+<input type="number" id="amount" style="display:none">
+<label class="label"><i class="fas fa-calendar-alt"></i> <span data-i18n="paymentDateLabel">تاريخ الأداء</span></label>
+<input type="date" id="date" class="input">
+<div class="row">
+<div>
+<label class="label"><i class="fas fa-arrow-down" style="color:#00b894"></i> <span data-i18n="receivedLabel">استلام</span></label>
+<input type="number" inputmode="decimal" step="any" id="received" class="input received-input" placeholder="0">
+<div class="date-label" id="paidDate"><span data-i18n="paymentDateHistory">تاريخ الدفع: --</span></div>
+</div>
+<div>
+<label class="label"><i class="fas fa-arrow-up" style="color:#ff6b6b"></i> <span data-i18n="paidLabel">دفع</span></label>
+<input type="number" inputmode="decimal" step="any" id="paid" class="input paid-input" placeholder="0">
+<div class="date-label" id="receivedDate"><span data-i18n="receivedDateHistory">تاريخ الاستلام: --</span></div>
+</div>
+</div>
+<button class="save-btn" id="saveBtn"><i class="fas fa-save"></i> <span data-i18n="saveChanges">حفظ التغييرات</span></button>
+<div class="history-title"><i class="fas fa-history" style="color:#00b894"></i> <span data-i18n="historyTitle">سجل العمليات</span></div>
+<div id="historyList" style="max-height:420px;overflow-y:auto;padding:2px"></div>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="customModal">
+<div class="modal-box">
+<div class="modal-icon info" id="modalIcon"><i class="fas fa-info"></i></div>
+<div class="modal-title" id="modalTitle">تأكيد</div>
+<div class="modal-message" id="modalMessage">هل أنت متأكد؟</div>
+<input type="number" inputmode="decimal" step="any" class="modal-input" id="modalInput" style="display:none">
+<input type="date" class="modal-input" id="modalDateInput" style="display:none">
+<div class="modal-actions">
+<button class="modal-btn modal-btn-cancel" id="modalCancel"><i class="fas fa-times"></i> <span data-i18n="cancel">إلغاء</span></button>
+<button class="modal-btn modal-btn-confirm" id="modalConfirm"><i class="fas fa-check"></i> <span data-i18n="save">حفظ</span></button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"><div class="toast-icon"><i class="fas fa-check"></i></div><div class="toast-msg" id="toastMsg">تم</div></div>
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+function formatAmount(value){
+    const num = Number(value);
+    if(!isFinite(num) || isNaN(num)) return "0";
+    const fixed = Number(num.toFixed(10));
+    if(Number.isInteger(fixed))
+        return fixed.toString();
+    return fixed.toString().replace(/\.?0+$/, "");
+}
+function t(k,p={}){ return window.KarniLang ? window.KarniLang.t(k,p) : k; }
+
+const urlParams = new URLSearchParams(window.location.search);
+const customerId = urlParams.get('id');
+const loading = document.getElementById('loading');
+const content = document.getElementById('content');
+if(!customerId){ showToast(t('customerNotFound'),'error'); setTimeout(()=>location.href='index.html',800); }
+
+let customerRef=null, allCustomersRef=null, profileRef=null, currentUid=null;
+let customerOperations=[], customerDataCache=null, baseAmount=0, modalResolve=null;
+
+function showModal({title='', message='', icon='info', iconClass='info', hasInput=false, inputValue='', hasDate=false, dateValue='', confirmText='', cancelText='', danger=false}){
+ return new Promise((resolve)=>{
+  modalResolve=resolve;
+  document.getElementById('modalTitle').textContent=title||t('confirm');
+  document.getElementById('modalMessage').textContent=message;
+  const iconEl=document.getElementById('modalIcon'); iconEl.className='modal-icon '+iconClass; iconEl.innerHTML=`<i class="fas fa-${icon}"></i>`;
+  const inputEl=document.getElementById('modalInput'); const dateEl=document.getElementById('modalDateInput');
+  inputEl.style.display=hasInput?'block':'none'; dateEl.style.display=hasDate?'block':'none';
+  if(hasInput){ inputEl.value=inputValue!==''?formatAmount(inputValue):''; setTimeout(()=>inputEl.focus(),100); }
+  if(hasDate) dateEl.value=dateValue;
+  document.getElementById('modalConfirm').innerHTML=`<i class="fas fa-${danger?'trash':'check'}"></i> ${confirmText||t('save')}`;
+  document.getElementById('modalConfirm').className='modal-btn '+(danger?'modal-btn-danger':'modal-btn-confirm');
+  document.getElementById('modalCancel').innerHTML=`<i class="fas fa-times"></i> ${cancelText||t('cancel')}`;
+  document.getElementById('customModal').classList.add('active');
+  if(window.KarniLang) KarniLang.applyTranslations(document.getElementById('customModal'));
+ });
+}
+function closeModal(r){ document.getElementById('customModal').classList.remove('active'); if(modalResolve){ modalResolve(r); modalResolve=null; } }
+document.getElementById('modalCancel').onclick=()=>closeModal(null);
+document.getElementById('modalConfirm').onclick=()=>{
+ const hasInput=document.getElementById('modalInput').style.display!=='none';
+ const hasDate=document.getElementById('modalDateInput').style.display!=='none';
+ if(hasInput&&hasDate){ closeModal({amount:document.getElementById('modalInput').value, date:document.getElementById('modalDateInput').value}); }
+ else if(hasInput){ closeModal(document.getElementById('modalInput').value); }
+ else if(hasDate){ closeModal(document.getElementById('modalDateInput').value); }
+ else { closeModal(true); }
+};
+document.getElementById('customModal').onclick=(e)=>{ if(e.target===e.currentTarget) closeModal(null); };
+
+onAuthStateChanged(auth, async (user)=>{
+ if(!user){ location.href='login.html'; return; }
+ currentUid=user.uid;
+ customerRef=ref(db, `users/${currentUid}/customers/${customerId}`);
+ allCustomersRef=ref(db, `users/${currentUid}/customers`);
+ profileRef=ref(db, `users/${currentUid}/profile`);
+ try{
+  const snap=await get(profileRef);
+  let profile=snap.exists()?snap.val():{};
+  console.log("Firebase profile:", profile);
+  console.log("Firebase language:", profile.language);
+  console.log("Current language:", window.KarniLang?KarniLang.getLanguage():'no KarniLang');
+  console.log("LocalStorage:", localStorage.getItem("karni_language"));
+  if(profile.language && window.KarniLang){
+   await KarniLang.setLanguage(profile.language);
+   KarniLang.applyDirection(profile.language);
+   KarniLang.applyTranslations(document);
+   localStorage.setItem("karni_language", profile.language);
+   console.log("Translation:", KarniLang.t("totalAmount"));
+   console.log("Document lang:", document.documentElement.lang);
+  } else {
+   if(window.KarniLang){ const ls=localStorage.getItem("karni_language")||"ar"; await KarniLang.setLanguage(ls); KarniLang.applyDirection(ls); KarniLang.applyTranslations(document); }
+  }
+ }catch(e){ console.warn(e); if(window.KarniLang){ const ls=localStorage.getItem("karni_language")||"ar"; await KarniLang.setLanguage(ls); KarniLang.applyDirection(ls); KarniLang.applyTranslations(document); } }
+ loading.innerHTML='<i class="fas fa-spinner fa-spin"></i> '+t('loadingCustomer');
+ await loadAllCities();
+ await loadCustomer();
+});
+
+async function loadAllCities(){
+ try{
+  if(!allCustomersRef) return;
+  const snap=await get(allCustomersRef);
+  const citiesSet=new Set();
+  if(snap.exists()){
+   const val=snap.val(); if(val._init) delete val._init;
+   Object.values(val).forEach(c=>{ if(!c||!c.name) return; if(c.city&&c.city.trim()) citiesSet.add(c.city.trim()); if(c.ville&&c.ville.trim()) citiesSet.add(c.ville.trim()); });
+  }
+  const citySelect=document.getElementById('city');
+  citySelect.innerHTML=`<option value="">${t('selectCity')}</option>`;
+  Array.from(citiesSet).sort().forEach(city=>{ const opt=document.createElement('option'); opt.value=city; opt.textContent=city; citySelect.appendChild(opt); });
+ }catch(e){ console.error(e); }
+}
+
+async function loadCustomer(){
+ try{
+  if(!customerRef){ location.href='login.html'; return; }
+  const snapshot=await get(customerRef);
+  if(!snapshot.exists()){ await showModal({title:t('customerNotFound'), message:t('customerNotFound'), icon:'exclamation', iconClass:'danger', confirmText:t('close')}); location.href='index.html'; return; }
+  const data=snapshot.val();
+  loading.style.display='none'; content.style.display='block';
+  customerDataCache=data;
+  baseAmount=parseFloat(data.amount)||0;
+  const name=data.name||'...';
+  document.getElementById('name').textContent=name;
+  document.getElementById('phone').textContent=data.phone||t('noPhone');
+  document.getElementById('avatar').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('amount').value=formatAmount(baseAmount);
+  const cityValue=(data.city||data.ville||'').trim();
+  const citySelect=document.getElementById('city');
+  if(cityValue){ if(!Array.from(citySelect.options).some(o=>o.value===cityValue)){ const opt=document.createElement('option'); opt.value=cityValue; opt.textContent=cityValue; citySelect.appendChild(opt); } citySelect.value=cityValue; }
+  document.getElementById('date').value=data.paymentDate||data.date||'';
+  document.getElementById('paid').value=''; document.getElementById('received').value='';
+  customerOperations=data.operations||[];
+  calculateTotal(); showHistory(data);
+  if(window.KarniLang) KarniLang.applyTranslations(document);
+ }catch(error){
+  console.error(error);
+  if(error.message?.includes('Permission denied')){ location.href='login.html'; } else { await showModal({title:t('error'), message:error.message, icon:'times', iconClass:'danger'}); location.href='index.html'; }
+ }
+}
+
+function calculateTotal(){
+ let totalPaid=0, totalReceived=0;
+ customerOperations.forEach(op=>{ if(op.type==='paid') totalPaid+=Number(op.amount)||0; if(op.type==='received') totalReceived+=Number(op.amount)||0; });
+ const total=baseAmount+totalPaid-totalReceived;
+ document.getElementById('totalAmount').innerHTML=`${formatAmount(total)} ${t('amount')}`;
+ return total;
+}
+
+function showHistory(data){
+ const list=document.getElementById('historyList'); list.innerHTML='';
+ customerOperations=data.operations||[];
+ if(customerOperations.length===0){ list.innerHTML=`<div style="text-align:center;color:#94a3b8;padding:24px;font-size:13px"><i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;opacity:0.3"></i>${t('noOperations')}</div>`; return; }
+ customerOperations.slice().reverse().forEach((op,index)=>{
+  const realIndex=customerOperations.length-1-index;
+  const isPaid=op.type==='paid';
+  const typeText=isPaid?t('paidOperation'):t('receivedOperation');
+  const div=document.createElement('div'); div.className='history-item '+(isPaid?'history-paid':'history-received');
+  div.innerHTML=`<div style="flex:1;min-width:0"><div class="history-amount"><i class="fas fa-${isPaid?'arrow-up':'arrow-down'}"></i> ${formatAmount(op.amount)} ${t('amount')} - ${typeText}</div><div class="history-date"><i class="far fa-calendar"></i> ${op.date||'--'} ${op.time?`<i class="far fa-clock" style="margin-right:6px"></i>${op.time}`:''}</div></div><div class="history-actions"><button class="h-btn h-btn-wa" onclick="sendReminderWhatsapp(${realIndex})" title="${t('paidOperation')}"><i class="fab fa-whatsapp"></i></button><button class="h-btn h-btn-ok" onclick="sendConfirmWhatsapp(${realIndex})" title="${t('receivedOperation')}"><i class="fas fa-circle-check"></i></button><button class="h-btn h-btn-edit" onclick="editOperation(${realIndex})" title="${t('edit')}"><i class="fas fa-pen"></i></button><button class="h-btn h-btn-del" onclick="deleteOperation(${realIndex})" title="${t('delete')}"><i class="fas fa-trash"></i></button></div>`;
+  list.appendChild(div);
+ });
+}
+
+function showToast(msg, type='success'){
+ const toast=document.getElementById('toast');
+ toast.className='toast '+type+' show';
+ document.getElementById('toastMsg').textContent=msg;
+ setTimeout(()=>toast.classList.remove('show'),2800);
+}
+window.showToast=showToast;
+
+document.getElementById('paid').addEventListener('input', calculateTotal);
+document.getElementById('received').addEventListener('input', calculateTotal);
+
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+ if(!currentUid||!customerRef){ location.href='login.html'; return; }
+ const btn=document.getElementById('saveBtn'); const original=btn.innerHTML;
+ btn.innerHTML=`<i class="fas fa-spinner fa-spin"></i> ${t('saving')}`; btn.disabled=true;
+ const date=document.getElementById('date').value;
+ const paid=parseFloat(document.getElementById('paid').value)||0;
+ const received=parseFloat(document.getElementById('received').value)||0;
+ const city=document.getElementById('city').value.trim();
+ const now=new Date(); const today=now.toISOString().split('T')[0]; const currentTime=now.toTimeString().slice(0,5);
+ let operations=[...customerOperations];
+ if(received>0) operations.push({type:'received', amount:received, date:today, time:currentTime});
+ if(paid>0) operations.push({type:'paid', amount:paid, date:today, time:currentTime});
+ const newTotal=(()=>{ let p=0,r=0; operations.forEach(o=>{ if(o.type==='paid') p+=Number(o.amount)||0; else r+=Number(o.amount)||0; }); return baseAmount+p-r; })();
+ const updateData={ date:date, paymentDate:date, city:city, ville:city, operations:operations, currentBalance:newTotal, updatedAt:new Date().toISOString() };
+ try{
+  await update(customerRef, updateData);
+  customerOperations=operations; customerDataCache={...customerDataCache, ...updateData};
+  document.getElementById('paid').value=''; document.getElementById('received').value='';
+  calculateTotal(); showHistory({operations});
+  btn.innerHTML=`<i class="fas fa-check"></i> ${t('saved')}`; showToast(t('changesSaved'));
+  setTimeout(()=>{ btn.innerHTML=original; if(window.KarniLang) KarniLang.applyTranslations(btn); btn.disabled=false; },1200);
+ }catch(e){ console.error(e); showToast(t('error')+': '+e.message,'error'); btn.innerHTML=original; btn.disabled=false; }
+});
+
+window.deleteOperation=async function(index){
+ if(!currentUid||!customerRef) return;
+ const ok=await showModal({title:t('deleteOperationTitle'), message:t('deleteOperationMsg'), icon:'trash', iconClass:'danger', confirmText:t('delete'), cancelText:t('cancel'), danger:true});
+ if(!ok) return;
+ customerOperations.splice(index,1);
+ const newTotal=(()=>{ let p=0,r=0; customerOperations.forEach(o=>{ if(o.type==='paid') p+=Number(o.amount)||0; else r+=Number(o.amount)||0; }); return baseAmount+p-r; })();
+ try{ await update(customerRef,{operations:customerOperations, currentBalance:newTotal, updatedAt:new Date().toISOString()}); calculateTotal(); showHistory({operations:customerOperations}); showToast(t('operationDeleted')); }catch(e){ showToast(t('error')+': '+e.message,'error'); }
+}
+
+window.editOperation=async function(index){
+ if(!currentUid||!customerRef) return;
+ const op=customerOperations[index];
+ const typeText=op.type==='paid'?t('paidOperation'):t('receivedOperation');
+ const result=await showModal({ title:t('editOperationTitle'), message:t('editOperationMsg',{type:typeText, amount:formatAmount(op.amount)}), icon:'pen', iconClass:'info', hasInput:true, inputValue:op.amount, hasDate:true, dateValue:op.date, confirmText:t('saveChanges'), cancelText:t('cancel') });
+ if(!result) return;
+ const newAmount=parseFloat(result.amount);
+ if(isNaN(newAmount)||newAmount<=0){ showToast(t('invalidAmount'),'error'); return; }
+ customerOperations[index].amount=newAmount; customerOperations[index].date=result.date;
+ const newTotal=(()=>{ let p=0,r=0; customerOperations.forEach(o=>{ if(o.type==='paid') p+=Number(o.amount)||0; else r+=Number(o.amount)||0; }); return baseAmount+p-r; })();
+ try{ await update(customerRef,{operations:customerOperations, currentBalance:newTotal, updatedAt:new Date().toISOString()}); calculateTotal(); showHistory({operations:customerOperations}); showToast(t('operationUpdated')); }catch(e){ showToast(t('error')+': '+e.message,'error'); }
+}
+
+window.sendReminderWhatsapp=function(index){
+ const phone=document.getElementById('phone').textContent.trim();
+ const customerName=document.getElementById('name').textContent;
+ const totalText=document.getElementById('totalAmount').textContent;
+ const noPhone=t('noPhone');
+ if(!phone||phone===noPhone){ showModal({title:t('reminderTitle'), message:t('addPhoneFirst',{name:customerName}), icon:'phone', iconClass:'warning', confirmText:t('confirm')}); return; }
+ const cleanPhone=phone.replace(/\D/g,'');
+ const lang=window.KarniLang?KarniLang.getLanguage():'ar';
+ let message='';
+ if(lang==='fr'){ message=`Rappel de paiement\n\nBonjour ${customerName}\n\nMontant dû:\n${totalText}\n\nMerci.`; }
+ else if(lang==='en'){ message=`Payment reminder\n\nHello ${customerName}\n\nAmount due:\n${totalText}\n\nThank you.`; }
+ else { message=`📌 إشعار أداء\n\nالسلام عليكم ${customerName}\n\n💵 المبلغ الواجب أداؤه:\n${totalText}\n\n🤝 شكراً لتعاونكم.`; }
+ window.open('https://wa.me/212'+cleanPhone.replace(/^0/,'')+'?text='+encodeURIComponent(message),'_blank');
+}
+
+window.sendConfirmWhatsapp=function(index){
+ const phone=document.getElementById('phone').textContent.trim();
+ const customerName=document.getElementById('name').textContent;
+ const totalText=document.getElementById('totalAmount').textContent;
+ const noPhone=t('noPhone');
+ if(!phone||phone===noPhone){ showModal({title:t('reminderTitle'), message:t('addPhoneFirst',{name:customerName}), icon:'phone', iconClass:'warning', confirmText:t('confirm')}); return; }
+ const op=customerOperations[index];
+ const cleanPhone=phone.replace(/\D/g,'');
+ const lang=window.KarniLang?KarniLang.getLanguage():'ar';
+ let message='';
+ if(lang==='fr'){ message=`Paiement reçu: ${formatAmount(op.amount)} ${t('amount')}\nReste: ${totalText}\nMerci ${customerName}`; }
+ else if(lang==='en'){ message=`Payment received: ${formatAmount(op.amount)} ${t('amount')}\nRemaining: ${totalText}\nThank you ${customerName}`; }
+ else { message=`✅ تم استلام ${formatAmount(op.amount)} ${t('amount')}\nالمتبقي: ${totalText}\nشكراً ${customerName}`; }
+ window.open('https://wa.me/212'+cleanPhone.replace(/^0/,'')+'?text='+encodeURIComponent(message),'_blank');
+}
+
+document.getElementById('backBtn').addEventListener('click', ()=>{ location.href='index.html'; });
+window.addEventListener('karniLanguageChanged', ()=>{ if(window.KarniLang){ KarniLang.applyTranslations(document); calculateTotal(); if(customerDataCache) showHistory(customerDataCache); } });
+</script>
+<script>
+const appVersion="10";
+if(localStorage.getItem("appVersion") && localStorage.getItem("appVersion")!==appVersion){
+ const theme=localStorage.getItem("theme"); const lang=localStorage.getItem("karni_language");
+ localStorage.clear(); if(theme) localStorage.setItem("theme",theme); if(lang) localStorage.setItem("karni_language",lang);
+ localStorage.setItem("appVersion",appVersion); location.href="login.html";
+}
+</script>
+</body>
+</html>
