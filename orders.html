@@ -14,34 +14,381 @@
 <div id="empty" class="hidden text-center py-16"><i class="fa-solid fa-inbox text-4xl text-gray-300"></i><p class="text-gray-500 mt-2">لا توجد طلبات بعد</p></div>
 </main>
 <script type="module">
+<script type="module">
 import { auth, db } from "./firebase.js";
 import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function escapeHtml(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+/* تحويل رقم الهاتف إلى صيغة WhatsApp */
+function normalizeWhatsAppPhone(phone){
+  let p = String(phone || '').trim();
+
+  // حذف المسافات والشرطات والأقواس
+  p = p.replace(/[\s\-().]/g,'');
+
+  // 00212xxxxxxxxx -> +212xxxxxxxxx
+  if(p.startsWith('00')){
+    p = '+' + p.substring(2);
+  }
+
+  // 06xxxxxxxx أو 07xxxxxxxx -> +2126xxxxxxxx / +2127xxxxxxxx
+  if(p.startsWith('0')){
+    p = '+212' + p.substring(1);
+  }
+
+  // 212xxxxxxxxx -> +212xxxxxxxxx
+  if(p.startsWith('212')){
+    p = '+' + p;
+  }
+
+  // إزالة + لاستخدام wa.me
+  p = p.replace(/\D/g,'');
+
+  return p;
+}
+
+/* إنشاء رسالة WhatsApp */
+function buildWhatsAppMessage(order){
+
+  const name = order.clientName || 'زبوننا الكريم';
+
+  const items = (order.items || []).map(item => {
+    const price = parseFloat(item.price || 0);
+    const qty = parseInt(item.qty || 0);
+    const total = price * qty;
+
+    return `• ${item.name} × ${qty} = ${total.toFixed(2)} درهم`;
+  }).join('\n');
+
+  const total = parseFloat(order.totalValue || 0).toFixed(2);
+
+  const payment =
+    order.paymentMethod === 'cod'
+      ? 'الدفع عند الاستلام'
+      : 'الدفع الآن';
+
+  return `السلام عليكم ${name} 👋
+
+شكراً جزيلاً لطلبك وثقتك بنا ❤️
+
+نؤكد لك أن طلبك تم قبوله بنجاح ✅
+
+📦 تفاصيل الطلب:
+${items}
+
+💰 الإجمالي: ${total} درهم
+💳 طريقة الدفع: ${payment}
+
+📍 المدينة: ${order.city || ''}
+📍 العنوان: ${order.address || ''}
+
+طلبك الآن قيد التجهيز، وسيتم توصيله إليك إن شاء الله في أقرب وقت ممكن 🚚📦
+
+شكراً لاختيارك لنا، ونتمنى أن تنال خدمتنا رضاك 🙏
+
+Karni Pro`;
+}
+
+/* فتح WhatsApp */
+function openWhatsApp(order){
+
+  const phone = normalizeWhatsAppPhone(order.phone);
+
+  if(!phone){
+    alert('رقم هاتف الزبون غير صالح لإرسال رسالة WhatsApp.');
+    return;
+  }
+
+  const message = buildWhatsAppMessage(order);
+
+  const whatsappUrl =
+    `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.location.href = whatsappUrl;
+}
+
 onAuthStateChanged(auth, (user)=>{
-  if(!user){ location.href='login.html'; return; }
+
+  if(!user){
+    location.href='login.html';
+    return;
+  }
+
   const ordersRef = ref(db, `users/${user.uid}/orders`);
+
   onValue(ordersRef, (snap)=>{
+
     const list = document.getElementById('ordersList');
-    if(!snap.exists()){ list.innerHTML=''; document.getElementById('empty').classList.remove('hidden'); return; }
+
+    if(!snap.exists()){
+      list.innerHTML='';
+      document.getElementById('empty').classList.remove('hidden');
+      return;
+    }
+
     document.getElementById('empty').classList.add('hidden');
-    const orders = Object.values(snap.val()).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
-    list.innerHTML = orders.map(o=>`
-      <div class="bg-white rounded-2xl border p-4">
-        <div class="flex justify-between mb-2"><span class="font-bold">${escapeHtml(o.clientName)} - ${escapeHtml(o.phone||'')}</span><span class="text-xs ${o.status==='new'?'bg-red-100 text-red-600':'bg-emerald-100 text-emerald-700'} px-2 py-1 rounded-full">${o.status||'new'}</span></div>
-        <p class="text-xs text-gray-500 mb-2">${new Date(o.createdAt).toLocaleString('ar-MA')} - ${o.city||''} - ${o.paymentMethod==='cod'?'الدفع عند الاستلام':'الدفع الآن'}</p>
-        <div class="bg-gray-50 rounded-xl p-2 space-y-1 text-sm">${(o.items||[]).map(i=>`<div class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.qty}</span><span class="font-bold">${(i.price*i.qty).toFixed(2)}</span></div>`).join('')}</div>
-        <div class="flex justify-between font-bold mt-2 pt-2 border-t"><span>الإجمالي</span><span class="text-emerald-600">${(o.totalValue||0).toFixed(2)} درهم</span></div>
-        <div class="flex gap-2 mt-3">
-          <button onclick="acceptOrder('${o.orderId}')" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-sm">قبول</button>
-          <button onclick="closeOrder('${o.orderId}')" class="flex-1 bg-gray-100 py-2 rounded-xl text-sm">تم التوصيل</button>
+
+    /*
+      مهم:
+      Firebase يعطي كل طلب ID من المفتاح الخاص به.
+      لذلك نأخذ key ونضعه داخل id.
+    */
+    const orders = Object.entries(snap.val())
+      .map(([id, order]) => ({
+        id,
+        ...order
+      }))
+      .sort((a,b)=>
+        new Date(b.createdAt || 0) -
+        new Date(a.createdAt || 0)
+      );
+
+    list.innerHTML = orders.map(o=>{
+
+      const status = o.status || 'new';
+
+      let statusClass = 'bg-gray-100 text-gray-600';
+      let statusText = status;
+
+      if(status === 'new'){
+        statusClass = 'bg-red-100 text-red-600';
+        statusText = 'new';
+      }
+
+      if(status === 'pending'){
+        statusClass = 'bg-emerald-100 text-emerald-700';
+        statusText = 'pending';
+      }
+
+      if(status === 'accepted'){
+        statusClass = 'bg-blue-100 text-blue-700';
+        statusText = 'تم القبول';
+      }
+
+      if(status === 'delivered'){
+        statusClass = 'bg-gray-100 text-gray-600';
+        statusText = 'تم التوصيل';
+      }
+
+      return `
+        <div class="bg-white rounded-2xl border p-4">
+
+          <div class="flex justify-between mb-2">
+
+            <span class="font-bold">
+              ${escapeHtml(o.clientName)} -
+              ${escapeHtml(o.phone || '')}
+            </span>
+
+            <span class="text-xs ${statusClass} px-2 py-1 rounded-full">
+              ${escapeHtml(statusText)}
+            </span>
+
+          </div>
+
+          <p class="text-xs text-gray-500 mb-2">
+            ${new Date(o.createdAt || Date.now()).toLocaleString('ar-MA')}
+            -
+            ${escapeHtml(o.city || '')}
+            -
+            ${o.paymentMethod === 'cod'
+              ? 'الدفع عند الاستلام'
+              : 'الدفع الآن'}
+          </p>
+
+          <div class="bg-gray-50 rounded-xl p-2 space-y-1 text-sm">
+
+            ${(o.items || []).map(i=>`
+
+              <div class="flex justify-between">
+
+                <span>
+                  ${escapeHtml(i.name)} × ${i.qty}
+                </span>
+
+                <span class="font-bold">
+                  ${(parseFloat(i.price || 0) * parseInt(i.qty || 0)).toFixed(2)}
+                </span>
+
+              </div>
+
+            `).join('')}
+
+          </div>
+
+          <div class="flex justify-between font-bold mt-2 pt-2 border-t">
+
+            <span>الإجمالي</span>
+
+            <span class="text-emerald-600">
+              ${(parseFloat(o.totalValue || 0)).toFixed(2)} درهم
+            </span>
+
+          </div>
+
+          <div class="flex gap-2 mt-3">
+
+            ${
+              status === 'accepted'
+              ?
+              `<button
+                  disabled
+                  class="flex-1 bg-blue-100 text-blue-700 py-2 rounded-xl text-sm font-bold">
+                  ✓ تم قبول الطلب
+               </button>`
+              :
+              status === 'delivered'
+              ?
+              `<button
+                  disabled
+                  class="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm">
+                  تم التوصيل
+               </button>`
+              :
+              `<button
+                  onclick="acceptOrder('${o.id}')"
+                  class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-sm font-bold">
+                  قبول
+               </button>`
+            }
+
+            ${
+              status !== 'delivered'
+              ?
+              `<button
+                  onclick="closeOrder('${o.id}')"
+                  class="flex-1 bg-gray-100 py-2 rounded-xl text-sm">
+                  تم التوصيل
+               </button>`
+              :
+              ''
+            }
+
+          </div>
+
         </div>
-      </div>
-    `).join('');
+      `;
+
+    }).join('');
+
   });
+
 });
-window.acceptOrder = (id)=>{ const u=auth.currentUser; if(!u)return; update(ref(db, `users/${u.uid}/orders/${id}`), {status:'accepted'}); }
-window.closeOrder = (id)=>{ const u=auth.currentUser; if(!u)return; update(ref(db, `users/${u.uid}/orders/${id}`), {status:'delivered'}); }
+
+
+/* =========================
+   قبول الطلب + WhatsApp
+========================= */
+
+window.acceptOrder = async (id)=>{
+
+  const u = auth.currentUser;
+
+  if(!u) return;
+
+  try{
+
+    /*
+      الحصول على الطلب نفسه
+      حتى نرسل بياناته إلى WhatsApp
+    */
+
+    const orderRef = ref(db, `users/${u.uid}/orders/${id}`);
+
+    const { get } =
+      await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js");
+
+    const snap = await get(orderRef);
+
+    if(!snap.exists()){
+      alert('هذا الطلب لم يعد موجوداً.');
+      return;
+    }
+
+    const order = {
+      id,
+      ...snap.val()
+    };
+
+    /*
+      إذا كان مقبولاً مسبقاً
+      لا نرسل الرسالة مرة أخرى
+    */
+
+    if(order.status === 'accepted'){
+      alert('هذا الطلب مقبول بالفعل.');
+      return;
+    }
+
+    /*
+      أولاً نغير حالة الطلب
+    */
+
+    await update(orderRef, {
+      status: 'accepted',
+      acceptedAt: new Date().toISOString()
+    });
+
+    /*
+      ثم نفتح WhatsApp برسالة جاهزة
+    */
+
+    openWhatsApp(order);
+
+  }catch(error){
+
+    console.error('Accept order error:', error);
+
+    alert(
+      'حدث خطأ أثناء قبول الطلب:\n' +
+      (error.message || error)
+    );
+
+  }
+
+};
+
+
+/* =========================
+   تم التوصيل
+========================= */
+
+window.closeOrder = async (id)=>{
+
+  const u = auth.currentUser;
+
+  if(!u) return;
+
+  try{
+
+    await update(
+      ref(db, `users/${u.uid}/orders/${id}`),
+      {
+        status:'delivered',
+        deliveredAt:new Date().toISOString()
+      }
+    );
+
+  }catch(error){
+
+    console.error('Delivered order error:', error);
+
+    alert(
+      'حدث خطأ أثناء تحديث الطلب:\n' +
+      (error.message || error)
+    );
+
+  }
+
+};
+
 </script>
 </body>
 </html>
