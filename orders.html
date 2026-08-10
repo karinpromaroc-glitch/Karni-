@@ -26,7 +26,7 @@
     <p class="text-[13px] text-gray-500 mb-6">سيتم حذف الطلب نهائياً ولا يمكن التراجع</p>
     <div class="flex gap-3">
       <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-sm">إلغاء</button>
-      <button onclick="confirmDeleteOrder()" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm">حذف الطلب</button>
+      <button onclick="confirmDeleteOrder()" id="confirmDeleteBtn" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm">حذف الطلب</button>
     </div>
   </div>
 </div>
@@ -35,7 +35,7 @@
 
 <script type="module">
 import { auth, db } from "./firebase.js";
-import { ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
@@ -84,7 +84,7 @@ onAuthStateChanged(auth, (user)=>{
     const entries = Object.entries(snap.val());
     cachedOrders = entries.map(([firebaseId, data])=>({
       firebaseId: firebaseId,
-     ...data
+    ...data
     })).sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
 
     list.innerHTML = cachedOrders.map(o=>{
@@ -117,25 +117,49 @@ onAuthStateChanged(auth, (user)=>{
 });
 
 window.openDeleteModal = (firebaseId)=>{
-  pendingDeleteId = firebaseId;
+  pendingDeleteId = String(firebaseId);
   document.getElementById('deleteModal').classList.add('active');
 }
 window.closeDeleteModal = ()=>{
   pendingDeleteId = null;
   document.getElementById('deleteModal').classList.remove('active');
 }
+
 window.confirmDeleteOrder = async ()=>{
-  if(!pendingDeleteId) return;
+  if(!pendingDeleteId){
+    showToast('معرف الطلب غير موجود');
+    return;
+  }
   try{
     const u = auth.currentUser;
     if(!u){ showToast('يجب تسجيل الدخول'); return; }
-    await remove(ref(db, `users/${u.uid}/orders/${pendingDeleteId}`));
-    showToast('تم حذف الطلب بنجاح');
+
+    const btn = document.getElementById('confirmDeleteBtn');
+    if(btn){ btn.disabled=true; btn.textContent='جاري الحذف...'; }
+
+    console.log('[ORDERS] Deleting order with update null method:', pendingDeleteId);
+
+    // الطريقة الآمنة: update على مسار orders الرئيسي مع null
+    const ordersRef = ref(db, `users/${u.uid}/orders`);
+    const updates = {};
+    updates[pendingDeleteId] = null;
+
+    await update(ordersRef, updates);
+
+    console.log('[ORDERS] Order deleted successfully');
     closeDeleteModal();
+    showToast('تم حذف الطلب بنجاح');
+
   }catch(e){
-    console.error(e);
+    console.error('[ORDERS] delete error:', e);
     showToast('فشل حذف الطلب: '+(e.message||e));
+    const btn = document.getElementById('confirmDeleteBtn');
+    if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
+    // لا نغلق النافذة عند الفشل
+    return;
   }
+  const btn = document.getElementById('confirmDeleteBtn');
+  if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
 }
 
 window.acceptOrder = async (firebaseId)=>{
@@ -152,7 +176,6 @@ window.acceptOrder = async (firebaseId)=>{
     const btn = document.getElementById(`btn-accept-${firebaseId}`);
     if(btn){ btn.disabled=true; btn.textContent='جاري القبول...'; }
 
-    // تحويل رقم الهاتف
     const normalized = normalizePhone(order.phone);
     if(!normalized){
       showToast('رقم الهاتف غير صالح: '+(order.phone||''));
@@ -187,16 +210,12 @@ ${order.address? `📍 العنوان: ${order.address}` : ''}
 Karni Pro`;
 
     const waUrl = `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
-    console.log('[ORDERS] WhatsApp URL ready:', waUrl);
 
-    // تحديث Firebase أولاً - إذا فشل لا نفتح واتساب
     await update(ref(db, `users/${u.uid}/orders/${firebaseId}`), {
       status: 'accepted',
       acceptedAt: new Date().toISOString()
     });
-    console.log('[ORDERS] Order accepted');
 
-    // فتح WhatsApp مباشرة بعد النجاح بدون about:blank
     window.open(waUrl, '_blank');
 
   }catch(e){
