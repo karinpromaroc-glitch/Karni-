@@ -1,4 +1,4 @@
-// firebase.js - Karni Pro - الإعداد الرسمي الموحد
+// firebase.js - Karni Pro - الإعداد الرسمي الموحد - v10.12.2
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
