@@ -34,9 +34,10 @@
 <div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg"><span id="toastMessage" class="text-sm"></span></div></div>
 
 <script type="module">
+// توحيد الإصدار مع firebase.js لتفادي t.split is not a function
 import { auth, db } from "./firebase.js";
-import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 
@@ -83,8 +84,8 @@ onAuthStateChanged(auth, (user)=>{
     empty.classList.add('hidden');
     const entries = Object.entries(snap.val());
     cachedOrders = entries.map(([firebaseId, data])=>({
-      firebaseId: firebaseId,
-    ...data
+      firebaseId: String(firebaseId),
+   ...data
     })).sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
 
     list.innerHTML = cachedOrders.map(o=>{
@@ -93,11 +94,20 @@ onAuthStateChanged(auth, (user)=>{
       const itemsHtml = (o.items||[]).map(i=>`<div class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.qty}</span><span class="font-bold">${(parseFloat(i.price||0)*parseInt(i.qty||0)).toFixed(2)}</span></div>`).join('');
       const statusClass = o.status==='new'? 'bg-red-100 text-red-600' : o.status==='pending'? 'bg-amber-100 text-amber-700' : o.status==='accepted'? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700';
       return `
-      <div class="bg-white rounded-2xl border p-4 relative">
-        <button onclick="openDeleteModal('${o.firebaseId}')" class="absolute top-3 left-3 w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-full flex items-center justify-center transition" title="حذف الطلب">
-          <i class="fa-solid fa-trash text-[13px]"></i>
-        </button>
-        <div class="flex justify-between mb-2 pr-2"><span class="font-bold text-[14px]">${escapeHtml(o.clientName||'زبون')} - ${escapeHtml(o.phone||'')}</span><span class="text-xs ${statusClass} px-2 py-1 rounded-full">${escapeHtml(o.status||'new')}</span></div>
+      <div class="bg-white rounded-2xl border p-4">
+        <!-- رأس احترافي بدون تداخل -->
+        <div class="flex justify-between items-start gap-3 mb-3">
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button data-id="${escapeHtml(o.firebaseId)}" onclick="openDeleteModal(this.dataset.id)" class="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-full flex items-center justify-center transition flex-shrink-0" title="حذف الطلب">
+              <i class="fa-solid fa-trash text-[12px]"></i>
+            </button>
+            <span class="text-xs ${statusClass} px-2.5 py-1 rounded-full font-bold whitespace-nowrap">${escapeHtml(o.status||'new')}</span>
+          </div>
+          <div class="text-right flex-1 min-w-0">
+            <div class="font-bold text-[14px] truncate">${escapeHtml(o.clientName||'زبون')} - ${escapeHtml(o.phone||'')}</div>
+          </div>
+        </div>
+
         <p class="text-xs text-gray-500 mb-2">${o.createdAt? new Date(o.createdAt).toLocaleString('ar-MA') : ''} - ${escapeHtml(o.city||'')} - ${formatPay(o.paymentMethod)}</p>
         <div class="bg-gray-50 rounded-xl p-2 space-y-1 text-sm">${itemsHtml}</div>
         <div class="flex justify-between font-bold mt-2 pt-2 border-t"><span>الإجمالي</span><span class="text-emerald-600">${(parseFloat(o.totalValue||0)).toFixed(2)} درهم</span></div>
@@ -107,9 +117,9 @@ onAuthStateChanged(auth, (user)=>{
             `<button disabled class="flex-1 bg-blue-100 text-blue-700 py-2 rounded-xl text-sm font-bold cursor-not-allowed"><i class="fa-solid fa-check ml-1"></i> ✓ تم قبول الطلب</button>` :
             isDelivered?
             `<button disabled class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-xl text-sm font-bold cursor-not-allowed">✓ تم التوصيل</button>` :
-            `<button onclick="acceptOrder('${o.firebaseId}')" id="btn-accept-${o.firebaseId}" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-sm font-bold transition">قبول</button>`
+            `<button data-id="${escapeHtml(o.firebaseId)}" onclick="acceptOrder(this.dataset.id)" id="btn-accept-${escapeHtml(o.firebaseId)}" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-sm font-bold transition">قبول</button>`
           }
-          <button onclick="closeOrder('${o.firebaseId}')" ${isDelivered?'disabled':''} class="flex-1 ${isDelivered?'bg-gray-100 text-gray-400 cursor-not-allowed':'bg-gray-100 hover:bg-gray-200'} py-2 rounded-xl text-sm">تم التوصيل</button>
+          <button data-id="${escapeHtml(o.firebaseId)}" onclick="closeOrder(this.dataset.id)" ${isDelivered?'disabled':''} class="flex-1 ${isDelivered?'bg-gray-100 text-gray-400 cursor-not-allowed':'bg-gray-100 hover:bg-gray-200'} py-2 rounded-xl text-sm">تم التوصيل</button>
         </div>
       </div>
     `}).join('');
@@ -117,16 +127,19 @@ onAuthStateChanged(auth, (user)=>{
 });
 
 window.openDeleteModal = (firebaseId)=>{
-  pendingDeleteId = String(firebaseId);
+  pendingDeleteId = String(firebaseId||'').trim();
+  if(!pendingDeleteId){ showToast('معرف الطلب غير صالح'); return; }
   document.getElementById('deleteModal').classList.add('active');
 }
 window.closeDeleteModal = ()=>{
   pendingDeleteId = null;
+  const btn = document.getElementById('confirmDeleteBtn');
+  if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
   document.getElementById('deleteModal').classList.remove('active');
 }
 
 window.confirmDeleteOrder = async ()=>{
-  if(!pendingDeleteId){
+  if(!pendingDeleteId || typeof pendingDeleteId!== 'string'){
     showToast('معرف الطلب غير موجود');
     return;
   }
@@ -137,16 +150,15 @@ window.confirmDeleteOrder = async ()=>{
     const btn = document.getElementById('confirmDeleteBtn');
     if(btn){ btn.disabled=true; btn.textContent='جاري الحذف...'; }
 
-    console.log('[ORDERS] Deleting order with update null method:', pendingDeleteId);
+    console.log('[ORDERS] Deleting with safe update:', pendingDeleteId);
 
-    // الطريقة الآمنة: update على مسار orders الرئيسي مع null
     const ordersRef = ref(db, `users/${u.uid}/orders`);
     const updates = {};
     updates[pendingDeleteId] = null;
 
     await update(ordersRef, updates);
 
-    console.log('[ORDERS] Order deleted successfully');
+    console.log('[ORDERS] Delete success');
     closeDeleteModal();
     showToast('تم حذف الطلب بنجاح');
 
@@ -155,18 +167,14 @@ window.confirmDeleteOrder = async ()=>{
     showToast('فشل حذف الطلب: '+(e.message||e));
     const btn = document.getElementById('confirmDeleteBtn');
     if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
-    // لا نغلق النافذة عند الفشل
-    return;
   }
-  const btn = document.getElementById('confirmDeleteBtn');
-  if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
 }
 
 window.acceptOrder = async (firebaseId)=>{
   try{
     const u = auth.currentUser;
     if(!u){ showToast('يجب تسجيل الدخول'); return; }
-    if(!firebaseId){ showToast('معرف الطلب غير موجود'); return; }
+    if(!firebaseId || typeof firebaseId!== 'string'){ showToast('معرف الطلب غير موجود'); return; }
 
     const order = cachedOrders.find(o=>o.firebaseId===firebaseId);
     if(!order){ showToast('الطلب غير موجود'); return; }
@@ -230,7 +238,7 @@ window.closeOrder = async (firebaseId)=>{
   try{
     const u=auth.currentUser;
     if(!u) return;
-    if(!firebaseId){ showToast('معرف الطلب غير موجود'); return; }
+    if(!firebaseId || typeof firebaseId!== 'string'){ showToast('معرف الطلب غير موجود'); return; }
     await update(ref(db, `users/${u.uid}/orders/${firebaseId}`), {
       status:'delivered',
       deliveredAt: new Date().toISOString()
