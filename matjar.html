@@ -38,7 +38,7 @@
 .max-w-7xl{max-width:80rem}.mx-auto{margin-left:auto;margin-right:auto}
 .pb-6{padding-bottom:1.5rem}.pt-4{padding-top:1rem}.px-4{padding-left:1rem;padding-right:1rem}
 .product-card{contain:layout style paint;content-visibility:auto;contain-intrinsic-size:200px}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
 @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 <script>
@@ -68,7 +68,7 @@ setTimeout(()=>{
       <h1 class="font-bold text-gray-900" data-i18n="myStore">متجري</h1>
     </div>
     <div class="flex items-center gap-2">
-      <button id="shareStoreBtn" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100 transition" data-i18n-title="shareStore" title="مشاركة متجري">
+      <button id="shareStoreBtn" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100 transition" title="مشاركة متجري">
         <i class="fa-solid fa-share-nodes"></i>
       </button>
       <button id="reportsBtn" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center relative">
@@ -174,7 +174,7 @@ setTimeout(()=>{
 
 <script type="module">
 import { auth, db } from "./firebase.js";
-import { ref, get, push, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { ref, get, push, update, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 let products = [];
@@ -195,7 +195,10 @@ let ordersRef = null;
 let profileRef = null;
 
 function t(key, params={}){ return window.KarniLang? window.KarniLang.t(key, params) : key; }
-
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
 function getProdCacheKey(){ return `products_${currentUid}`; }
 function getClientCacheKey(){ return `clients_${currentUid}`; }
 function getClientTimeKey(){ return `clients_time_${currentUid}`; }
@@ -204,7 +207,7 @@ function saveProductsToPhone(data){
   try{
     if(!currentUid) return;
     localStorage.setItem(getProdCacheKey(), JSON.stringify({v:'v3', t:Date.now(), d:data}));
-  } catch(e){}
+  } catch(e){ console.error('saveProducts cache failed', e); }
 }
 function loadProductsFromPhone(){
   try{
@@ -214,14 +217,14 @@ function loadProductsFromPhone(){
     const p = JSON.parse(raw);
     if(Date.now() - p.t > 24*60*60*1000) return null;
     return p.d;
-  } catch(e){ return null; }
+  } catch(e){ console.error('loadProducts cache failed', e); return null; }
 }
 function saveClientsToPhone(clients){
   try{
     if(!currentUid) return;
     localStorage.setItem(getClientCacheKey(), JSON.stringify(clients));
     localStorage.setItem(getClientTimeKey(), Date.now().toString());
-  } catch(e){}
+  } catch(e){ console.error('saveClients failed', e); }
 }
 function loadClientsFromPhone(){
   try{
@@ -231,7 +234,7 @@ function loadClientsFromPhone(){
     if(!raw ||!time) return null;
     if(Date.now() - parseInt(time) > 24*60*60*1000) return null;
     return JSON.parse(raw);
-  } catch(e){ return null; }
+  } catch(e){ console.error('loadClients failed', e); return null; }
 }
 
 function renderInstant(){
@@ -250,9 +253,9 @@ function renderInstant(){
     setTimeout(()=>document.getElementById('clientsLoading').classList.add('hidden'), 1200);
     hasData = true;
     if(activeClient){
-      document.getElementById('activeClientName').textContent = activeClient;
+      document.getElementById('activeClientName').textContent = escapeHtml(activeClient);
       document.getElementById('activeClientBar').classList.remove('hidden');
-      document.getElementById('orderClientLabel').textContent = `(${activeClient})`;
+      document.getElementById('orderClientLabel').textContent = `(${escapeHtml(activeClient)})`;
       document.getElementById('clientSearchInput').value = activeClient;
     }
   }
@@ -279,16 +282,16 @@ async function loadClients(){
       document.getElementById('clientsLoading').innerHTML = t('loadedClients', {count: clients.length});
       setTimeout(()=>document.getElementById('clientsLoading').classList.add('hidden'), 1200);
       if(activeClient && clients.includes(activeClient)){
-        document.getElementById('activeClientName').textContent = activeClient;
+        document.getElementById('activeClientName').textContent = escapeHtml(activeClient);
         document.getElementById('activeClientBar').classList.remove('hidden');
-        document.getElementById('orderClientLabel').textContent = `(${activeClient})`;
+        document.getElementById('orderClientLabel').textContent = `(${escapeHtml(activeClient)})`;
         document.getElementById('clientSearchInput').value = activeClient;
       }
     } else if(allClients.length===0){
-      document.getElementById('clientsLoading').innerHTML = `<span class="text-red-400 text-xs">${t('noClients')}</span>`;
+      document.getElementById('clientsLoading').innerHTML = `<span class="text-red-400 text-xs">${escapeHtml(t('noClients'))}</span>`;
     }
-  }catch(e){
-    console.error(e);
+  }catch(error){
+    console.error('Firebase loadClients error:', error);
   }
 }
 
@@ -311,9 +314,37 @@ async function loadProducts(){
         filteredProducts = [...fresh];
         saveProductsToPhone(fresh);
         renderProducts(true);
+        await syncPublicStore();
       }
     }
-  } catch(e){}
+  } catch(error){ console.error('Firebase loadProducts error:', error); }
+}
+
+// مزامنة المتجر العام - يحول فقط المنتجات العامة إلى publicStores
+async function syncPublicStore(){
+  if(!currentUid) return;
+  try{
+    const publicData = {
+      owner: currentUid,
+      name: document.getElementById('activeClientBar')? 'متجر' : 'متجر',
+      updatedAt: new Date().toISOString(),
+      products: products.filter(p=>!p.hidden).map(p=>({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        stock: p.stock,
+        mainImage: p.mainImage||'',
+        images: (p.images||[]).slice(0,5)
+      }))
+    };
+    const profSnap = await get(ref(db, `users/${currentUid}/profile`));
+    if(profSnap.exists()){
+      const prof = profSnap.val();
+      publicData.name = prof.storeName || prof.displayName || 'المتجر';
+      publicData.logo = prof.logo || '';
+    }
+    await set(ref(db, `publicStores/${currentUid}`), publicData);
+  }catch(error){ console.error('syncPublicStore failed', error); }
 }
 
 function renderProducts(reset=true){
@@ -333,31 +364,31 @@ function renderProducts(reset=true){
   const nextSlice = list.slice(renderedCount, renderedCount+PAGE_SIZE);
   if(nextSlice.length===0) return;
   const html = nextSlice.map(p=>{
-    const mainImg = p.mainImage || p.images?.[0] || 'https://via.placeholder.com/300';
+    const mainImg = escapeHtml(p.mainImage || p.images?.[0] || 'https://via.placeholder.com/300');
     const inOrder = currentOrder.find(o=>o.productId==p.id);
     const hasQty = inOrder? inOrder.qty : 0;
     const isZero = (parseInt(p.stock)||0) <= 0;
-    const badgeText = isZero? t('outOfStock') : t('available');
+    const badgeText = isZero? escapeHtml(t('outOfStock')) : escapeHtml(t('available'));
     const badgeClass = isZero? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700';
     return `<div class="product-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="relative bg-gray-50 cursor-pointer" onclick="openOrderModal('${p.id}')">
-        <img src="${mainImg}" alt="${p.name}" class="w-full h-48 object-cover" loading="lazy" decoding="async">
+      <div class="relative bg-gray-50 cursor-pointer" onclick="openOrderModal('${escapeHtml(p.id)}')">
+        <img src="${mainImg}" alt="${escapeHtml(p.name)}" class="w-full h-48 object-cover" loading="lazy" decoding="async">
         <span class="absolute top-2 right-2 ${badgeClass} text-[11px] px-2.5 py-1 rounded-full font-bold">${badgeText}</span>
         ${hasQty>0?`<span class="absolute top-2 left-2 bg-emerald-600 text-white text-xs w-7 h-7 rounded-full flex items-center justify-center font-bold">${hasQty}</span>`:''}
       </div>
       <div class="p-3">
-        <h3 class="font-bold text-[13px] text-gray-900 line-clamp-1 mb-2 text-center">${p.name||t('noName')}</h3>
-        <p class="font-bold text-emerald-600 text-[13px] text-center mb-1">${parseFloat(p.price||0).toFixed(2)} ${t('dirham')}</p>
-        <p class="text-[11px] text-gray-400 text-center mb-2">${t('stockLabel')}: ${p.stock||0}</p>
+        <h3 class="font-bold text-[13px] text-gray-900 line-clamp-1 mb-2 text-center">${escapeHtml(p.name)||escapeHtml(t('noName'))}</h3>
+        <p class="font-bold text-emerald-600 text-[13px] text-center mb-1">${parseFloat(p.price||0).toFixed(2)} ${escapeHtml(t('dirham'))}</p>
+        <p class="text-[11px] text-gray-400 text-center mb-2">${escapeHtml(t('stockLabel'))}: ${parseInt(p.stock||0)}</p>
         ${hasQty>0?`
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2 flex items-center justify-between gap-1">
-          <button onclick="editProductQty('${p.id}',-1)" class="w-8 h-8 bg-white border rounded-full flex items-center justify-center font-bold">-</button>
+          <button onclick="editProductQty('${escapeHtml(p.id)}',-1)" class="w-8 h-8 bg-white border rounded-full flex items-center justify-center font-bold">-</button>
           <span class="flex-1 text-center font-bold text-sm">${hasQty}</span>
-          <button onclick="editProductQty('${p.id}',1)" class="w-8 h-8 bg-white border rounded-full flex items-center justify-center font-bold">+</button>
-          <button onclick="deleteFromOrder('${p.id}')" class="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center ml-1"><i class="fa-solid fa-trash text-[11px]"></i></button>
+          <button onclick="editProductQty('${escapeHtml(p.id)}',1)" class="w-8 h-8 bg-white border rounded-full flex items-center justify-center font-bold">+</button>
+          <button onclick="deleteFromOrder('${escapeHtml(p.id)}')" class="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center ml-1"><i class="fa-solid fa-trash text-[11px]"></i></button>
         </div>
         `:`
-        <button onclick="openOrderModal('${p.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs"><i class="fa-solid fa-cart-plus ml-1"></i>${t('addToOrder')}</button>
+        <button onclick="openOrderModal('${escapeHtml(p.id)}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs"><i class="fa-solid fa-cart-plus ml-1"></i>${escapeHtml(t('addToOrder'))}</button>
         `}
       </div>
     </div>`;
@@ -393,7 +424,7 @@ window.openOrderModal = function(productId){
   document.getElementById('orderStockBadge').textContent = (parseInt(p.stock)||0) <=0? t('outOfStock') : t('available');
   document.getElementById('orderStockBadge').className = `absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-bold ${(parseInt(p.stock)||0)<=0? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}`;
   document.getElementById('orderImagesCount').querySelector('span').textContent = p.images?.length||1;
-  document.getElementById('orderThumbs').innerHTML = (p.images||[]).map((img,i)=>`<img src="${img}" class="w-16 h-16 rounded-xl object-cover border-2 ${i===0?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="setOrderMain('${img}',${i})">`).join('');
+  document.getElementById('orderThumbs').innerHTML = (p.images||[]).map((img,i)=>`<img src="${escapeHtml(img)}" class="w-16 h-16 rounded-xl object-cover border-2 ${i===0?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="setOrderMain('${escapeHtml(img)}',${i})">`).join('');
   const existing = currentOrder.find(o=>o.productId==p.id);
   document.getElementById('orderQty').value = existing? existing.qty : 1;
   document.getElementById('orderModal').classList.add('active');
@@ -416,6 +447,7 @@ window.confirmOrder = function(){
   if(qty<=0){ showToast(t('enterValidQty'),'error'); return; }
   const p = products[currentProductIndex];
   if(!p) return;
+  if(qty > (parseInt(p.stock)||0)){ showToast('الكمية أكبر من المخزون المتاح: '+p.stock,'error'); return; }
   const existingIdx = currentOrder.findIndex(o=>o.productId==p.id);
   if(existingIdx>-1) currentOrder[existingIdx].qty = qty;
   else currentOrder.push({productId:p.id, name:p.name, qty, price:p.price, mainImage:p.mainImage||p.images?.[0]});
@@ -435,7 +467,7 @@ function updateProgress(){
   document.getElementById('progressText').textContent = `${currentOrder.length} / ${window._lastFiltered?.length||products.length||0}`;
   const total = window._lastFiltered?.length||products.length||1;
   document.getElementById('progressBar').style.width = `${(currentOrder.length/total)*100}%`;
-  document.getElementById('orderSummary').innerHTML = currentOrder.map(o=>`<div class="bg-gray-50 rounded-lg p-2.5 flex justify-between items-center"><span class="font-bold text-xs truncate">${o.name}</span><div class="flex items-center gap-2"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold text-xs">${o.qty}</span><button onclick="deleteFromOrder('${o.productId}')" class="w-6 h-6 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark text-[10px]"></i></button></div></div>`).join('');
+  document.getElementById('orderSummary').innerHTML = currentOrder.map(o=>`<div class="bg-gray-50 rounded-lg p-2.5 flex justify-between items-center"><span class="font-bold text-xs truncate">${escapeHtml(o.name)}</span><div class="flex items-center gap-2"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold text-xs">${o.qty}</span><button onclick="deleteFromOrder('${escapeHtml(o.productId)}')" class="w-6 h-6 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark text-[10px]"></i></button></div></div>`).join('');
 }
 
 window.finishOrder = async function(){
@@ -453,7 +485,13 @@ window.finishOrder = async function(){
       const product = products.find(p=>p.id==item.productId);
       if(product){
         const currentStock = parseInt(product.stock)||0;
+        if(item.qty > currentStock){
+          throw new Error('INSUFFICIENT_STOCK:'+product.name);
+        }
         const newStock = currentStock - parseInt(item.qty);
+        if(newStock < 0){
+          throw new Error('NEGATIVE_STOCK');
+        }
         product.stock = newStock;
         try{
           await update(ref(db, `users/${currentUid}/products/${product.id}`), {
@@ -461,12 +499,14 @@ window.finishOrder = async function(){
             updatedAt: new Date().toISOString()
           });
         }catch(e){
-          console.warn("Stock update failed for", product.id, e);
+          console.error('Firebase stock update failed for', product.id, e);
+          throw e;
         }
       }
     }
 
     saveProductsToPhone(products);
+    await syncPublicStore();
 
     const orderData = {
       clientName:activeClient,
@@ -478,15 +518,19 @@ window.finishOrder = async function(){
       status:'pending'
     };
     await push(ref(db, `users/${currentUid}/orders`), orderData);
-    await push(ref(db, `users/${currentUid}/clientBons/${activeClient}/orders`), orderData);
 
     showToast(t('orderSent', {client: activeClient, count: currentOrder.length}),'success');
     currentOrder=[];
     updateProgress();
     renderProducts(true);
     setTimeout(()=>{ window.location.href='reports.html'; }, 800);
-  } catch(e){
-    showToast(t('orderError')+': '+e.message,'error');
+  } catch(error){
+    console.error('finishOrder error:', error);
+    if(String(error.message).includes('INSUFFICIENT_STOCK')){
+      showToast('الكمية غير كافية - '+error.message.split(':')[1],'error');
+    } else {
+      showToast(t('orderError')+': '+error.message,'error');
+    }
     btn.innerHTML = originalHTML;
     btn.disabled = false;
     if(window.KarniLang) KarniLang.applyTranslations(btn);
@@ -499,7 +543,7 @@ function renderClientDropdown(filter){
   let list = allClients;
   if(filter) list = list.filter(c=>c.toLowerCase().includes(filter.toLowerCase()));
   if(list.length===0 ||!filter){ dropdown.classList.add('hidden'); return; }
-  dropdown.innerHTML = list.slice(0,20).map(c=>`<div class="p-3 hover:bg-emerald-50 cursor-pointer border-b last:border-0 text-sm font-bold" onclick="selectClient('${c.replace(/'/g,"\'")}')"><i class="fa-solid fa-user ml-2 text-gray-400"></i>${c}</div>`).join('');
+  dropdown.innerHTML = list.slice(0,20).map(c=>`<div class="p-3 hover:bg-emerald-50 cursor-pointer border-b last:border-0 text-sm font-bold" onclick="selectClient('${escapeHtml(c).replace(/'/g,"\\'")}')"><i class="fa-solid fa-user ml-2 text-gray-400"></i>${escapeHtml(c)}</div>`).join('');
   dropdown.classList.remove('hidden');
 }
 window.selectClient = function(name){
@@ -518,13 +562,17 @@ function setActiveClient(name){
   updateProgress();
 }
 
-// === ميزة مشاركة متجري - ترسل رابط المتجر العام للزبائن ===
+// === إصلاح رابط المشاركة - يحل مشكلة 404 ===
 window.shareStore = async function(){
   if(!currentUid){
     showToast(t('loginRequired')||'يجب تسجيل الدخول','error');
     return;
   }
-  const publicStoreUrl = window.location.origin + '/store.html?store=' + currentUid;
+  // استخدام URL نسبي آمن يعمل على GitHub Pages وغيره
+  const base = new URL('store.html', window.location.href);
+  const publicStoreUrl = base.href + '?store=' + encodeURIComponent(currentUid);
+  console.log('Generated public store URL:', publicStoreUrl);
+
   const storeTitle = t('myStore')!== 'myStore'? t('myStore') : 'متجري';
   const shareText = t('shareStoreText')!== 'shareStoreText'? t('shareStoreText') : 'يمكنك زيارة متجري والاطلاع على المنتجات وإرسال طلبك بسهولة.';
   const linkCopiedMsg = t('linkCopied')!== 'linkCopied'? t('linkCopied') : 'تم نسخ رابط المتجر بنجاح';
@@ -535,10 +583,12 @@ window.shareStore = async function(){
       await navigator.share({ title: storeTitle, text: shareText, url: publicStoreUrl });
     }catch(err){
       if(err && err.name === 'AbortError') return;
+      console.error('Web Share failed:', err);
       try{
         await navigator.clipboard.writeText(publicStoreUrl);
         showToast(linkCopiedMsg,'success');
       }catch(e){
+        console.error('Clipboard fallback failed:', e);
         showToast(shareFailedMsg,'error');
       }
     }
@@ -557,6 +607,7 @@ window.shareStore = async function(){
       }
       showToast(linkCopiedMsg,'success');
     }catch(e){
+      console.error('Copy failed:', e);
       showToast(shareFailedMsg,'error');
     }
   }
@@ -569,7 +620,7 @@ function showGallery(){
   document.getElementById('galleryImage').src=galleryImages[galleryIndex];
   document.getElementById('galleryCounter').textContent=`${galleryIndex+1} / ${galleryImages.length}`;
   document.getElementById('galleryDots').innerHTML=galleryImages.map((_,i)=>`<div class="w-2 h-2 rounded-full ${i===galleryIndex?'bg-white w-6':'bg-white/40'}" onclick="goGallery(${i})"></div>`).join('');
-  document.getElementById('galleryThumbs').innerHTML=galleryImages.map((img,i)=>`<img src="${img}" class="w-14 h-14 rounded-lg object-cover border-2 ${i===galleryIndex?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="goGallery(${i})">`).join('');
+  document.getElementById('galleryThumbs').innerHTML=galleryImages.map((img,i)=>`<img src="${escapeHtml(img)}" class="w-14 h-14 rounded-lg object-cover border-2 ${i===galleryIndex?'border-emerald-500':'border-transparent'} cursor-pointer" onclick="goGallery(${i})">`).join('');
 }
 window.nextGallery=function(){ galleryIndex=(galleryIndex+1)%galleryImages.length; showGallery(); }
 window.prevGallery=function(){ galleryIndex=(galleryIndex-1+galleryImages.length)%galleryImages.length; showGallery(); }
