@@ -38,7 +38,7 @@
 .max-w-7xl{max-width:80rem}.mx-auto{margin-left:auto;margin-right:auto}
 .pb-6{padding-bottom:1.5rem}.pt-4{padding-top:1rem}.px-4{padding-left:1rem;padding-right:1rem}
 .product-card{contain:layout style paint;content-visibility:auto;contain-intrinsic-size:200px}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
 @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 <script>
@@ -196,7 +196,7 @@ let profileRef = null;
 
 function t(key, params={}){ return window.KarniLang? window.KarniLang.t(key, params) : key; }
 function escapeHtml(str){
-  if(!str) return '';
+  if(str==null) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 function getProdCacheKey(){ return `products_${currentUid}`; }
@@ -207,7 +207,7 @@ function saveProductsToPhone(data){
   try{
     if(!currentUid) return;
     localStorage.setItem(getProdCacheKey(), JSON.stringify({v:'v3', t:Date.now(), d:data}));
-  } catch(e){ console.error('saveProducts cache failed', e); }
+  } catch(e){ console.error('[MATJAR] saveProducts cache failed', e); }
 }
 function loadProductsFromPhone(){
   try{
@@ -217,14 +217,14 @@ function loadProductsFromPhone(){
     const p = JSON.parse(raw);
     if(Date.now() - p.t > 24*60*60*1000) return null;
     return p.d;
-  } catch(e){ console.error('loadProducts cache failed', e); return null; }
+  } catch(e){ console.error('[MATJAR] loadProducts cache failed', e); return null; }
 }
 function saveClientsToPhone(clients){
   try{
     if(!currentUid) return;
     localStorage.setItem(getClientCacheKey(), JSON.stringify(clients));
     localStorage.setItem(getClientTimeKey(), Date.now().toString());
-  } catch(e){ console.error('saveClients failed', e); }
+  } catch(e){ console.error('[MATJAR] saveClients failed', e); }
 }
 function loadClientsFromPhone(){
   try{
@@ -234,7 +234,7 @@ function loadClientsFromPhone(){
     if(!raw ||!time) return null;
     if(Date.now() - parseInt(time) > 24*60*60*1000) return null;
     return JSON.parse(raw);
-  } catch(e){ console.error('loadClients failed', e); return null; }
+  } catch(e){ console.error('[MATJAR] loadClients failed', e); return null; }
 }
 
 function renderInstant(){
@@ -253,9 +253,9 @@ function renderInstant(){
     setTimeout(()=>document.getElementById('clientsLoading').classList.add('hidden'), 1200);
     hasData = true;
     if(activeClient){
-      document.getElementById('activeClientName').textContent = escapeHtml(activeClient);
+      document.getElementById('activeClientName').textContent = activeClient;
       document.getElementById('activeClientBar').classList.remove('hidden');
-      document.getElementById('orderClientLabel').textContent = `(${escapeHtml(activeClient)})`;
+      document.getElementById('orderClientLabel').textContent = `(${activeClient})`;
       document.getElementById('clientSearchInput').value = activeClient;
     }
   }
@@ -282,69 +282,96 @@ async function loadClients(){
       document.getElementById('clientsLoading').innerHTML = t('loadedClients', {count: clients.length});
       setTimeout(()=>document.getElementById('clientsLoading').classList.add('hidden'), 1200);
       if(activeClient && clients.includes(activeClient)){
-        document.getElementById('activeClientName').textContent = escapeHtml(activeClient);
+        document.getElementById('activeClientName').textContent = activeClient;
         document.getElementById('activeClientBar').classList.remove('hidden');
-        document.getElementById('orderClientLabel').textContent = `(${escapeHtml(activeClient)})`;
+        document.getElementById('orderClientLabel').textContent = `(${activeClient})`;
         document.getElementById('clientSearchInput').value = activeClient;
       }
     } else if(allClients.length===0){
       document.getElementById('clientsLoading').innerHTML = `<span class="text-red-400 text-xs">${escapeHtml(t('noClients'))}</span>`;
     }
   }catch(error){
-    console.error('Firebase loadClients error:', error);
+    console.error('[MATJAR] Firebase loadClients error:', error);
   }
 }
 
+// إصلاح جذري لـ loadProducts - مصدر الحقيقة Firebase وليس Cache
 async function loadProducts(){
   if(!currentUid ||!productsRef) return;
   try{
     const snap = await get(productsRef);
     if(snap.exists()){
-      const val = snap.val();
-      if(val._init) delete val._init;
-      const fresh = Object.values(val).filter(v=>v && typeof v==='object' &&!v._init).map(p=>{
+      const rawVal = snap.val();
+      console.log('[MATJAR] Firebase users/'+currentUid+'/products raw keys:', Object.keys(rawVal).length);
+      if(rawVal._init) delete rawVal._init;
+      // تطبيع من Object إلى Array بأمان
+      const values = Object.values(rawVal).filter(v=>v && typeof v==='object' &&!v._init);
+      const normalized = values.map(p=>{
+        if(!p) return null;
         if(p.image &&!p.mainImage) p.mainImage = p.image;
         if(p.mainImage && (!p.images || p.images.length===0)) p.images=[p.mainImage];
         if(!p.images) p.images = p.mainImage? [p.mainImage] : [];
         if(!p.mainImage && p.images.length>0) p.mainImage = p.images[0];
-        return {hidden:false,...p};
-      }).filter(p=>!p.hidden);
-      if(JSON.stringify(fresh.map(p=>p.id).sort())!== JSON.stringify(products.map(p=>p.id).sort())){
-        products = fresh;
-        filteredProducts = [...fresh];
-        saveProductsToPhone(fresh);
-        renderProducts(true);
-        await syncPublicStore();
-      }
+        if(!p.id) p.id = p.productId || Math.random().toString(36).slice(2);
+        return p;
+      }).filter(p=>p && p.id &&!p.hidden);
+      console.log('[MATJAR] Normalized products:', normalized.length, 'visible');
+      products = normalized;
+      filteredProducts = [...normalized];
+      saveProductsToPhone(normalized);
+      renderProducts(true);
+      // المزامنة دائماً بعد تحميل Firebase، وليس فقط عند اختلاف IDs
+      await syncPublicStore();
+    } else {
+      console.log('[MATJAR] No products in users/'+currentUid+'/products');
+      products = [];
+      filteredProducts = [];
+      renderProducts(true);
+      await syncPublicStore();
     }
-  } catch(error){ console.error('Firebase loadProducts error:', error); }
+  } catch(error){
+    console.error('[MATJAR] Firebase loadProducts error:', error);
+  }
 }
 
-// مزامنة المتجر العام - يحول فقط المنتجات العامة إلى publicStores
+// مزامنة قوية وواضحة للمتجر العام
 async function syncPublicStore(){
   if(!currentUid) return;
   try{
+    let storeName = 'المتجر';
+    let logo = '';
+    try{
+      const profSnap = await get(ref(db, `users/${currentUid}/profile`));
+      if(profSnap.exists()){
+        const prof = profSnap.val();
+        storeName = prof.storeName || prof.displayName || 'المتجر';
+        logo = prof.logo || prof.storeLogo || '';
+      }
+    }catch(e){ console.error('[MATJAR] profile fetch error', e); }
+
+    // فقط المنتجات الظاهرة، بدون hidden
+    const publicProducts = products.filter(p=>!p.hidden).map(p=>({
+      id: p.id,
+      name: p.name||'',
+      price: parseFloat(p.price||0),
+      stock: parseInt(p.stock||0),
+      mainImage: p.mainImage||'',
+      images: (p.images||[]).slice(0,5)
+    }));
+
     const publicData = {
       owner: currentUid,
-      name: document.getElementById('activeClientBar')? 'متجر' : 'متجر',
+      name: storeName,
+      logo: logo,
       updatedAt: new Date().toISOString(),
-      products: products.filter(p=>!p.hidden).map(p=>({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        stock: p.stock,
-        mainImage: p.mainImage||'',
-        images: (p.images||[]).slice(0,5)
-      }))
+      products: publicProducts
     };
-    const profSnap = await get(ref(db, `users/${currentUid}/profile`));
-    if(profSnap.exists()){
-      const prof = profSnap.val();
-      publicData.name = prof.storeName || prof.displayName || 'المتجر';
-      publicData.logo = prof.logo || '';
-    }
+    console.log('[MATJAR] Syncing publicStores/'+currentUid+' with', publicProducts.length, 'products');
     await set(ref(db, `publicStores/${currentUid}`), publicData);
-  }catch(error){ console.error('syncPublicStore failed', error); }
+    console.log('[MATJAR] publicStores sync success');
+  }catch(error){
+    console.error('[MATJAR] syncPublicStore failed', error);
+  }
 }
 
 function renderProducts(reset=true){
@@ -499,7 +526,7 @@ window.finishOrder = async function(){
             updatedAt: new Date().toISOString()
           });
         }catch(e){
-          console.error('Firebase stock update failed for', product.id, e);
+          console.error('[MATJAR] Firebase stock update failed for', product.id, e);
           throw e;
         }
       }
@@ -525,7 +552,7 @@ window.finishOrder = async function(){
     renderProducts(true);
     setTimeout(()=>{ window.location.href='reports.html'; }, 800);
   } catch(error){
-    console.error('finishOrder error:', error);
+    console.error('[MATJAR] finishOrder error:', error);
     if(String(error.message).includes('INSUFFICIENT_STOCK')){
       showToast('الكمية غير كافية - '+error.message.split(':')[1],'error');
     } else {
@@ -562,16 +589,14 @@ function setActiveClient(name){
   updateProgress();
 }
 
-// === إصلاح رابط المشاركة - يحل مشكلة 404 ===
 window.shareStore = async function(){
   if(!currentUid){
     showToast(t('loginRequired')||'يجب تسجيل الدخول','error');
     return;
   }
-  // استخدام URL نسبي آمن يعمل على GitHub Pages وغيره
   const base = new URL('store.html', window.location.href);
   const publicStoreUrl = base.href + '?store=' + encodeURIComponent(currentUid);
-  console.log('Generated public store URL:', publicStoreUrl);
+  console.log('[MATJAR] Generated public store URL:', publicStoreUrl);
 
   const storeTitle = t('myStore')!== 'myStore'? t('myStore') : 'متجري';
   const shareText = t('shareStoreText')!== 'shareStoreText'? t('shareStoreText') : 'يمكنك زيارة متجري والاطلاع على المنتجات وإرسال طلبك بسهولة.';
@@ -583,12 +608,12 @@ window.shareStore = async function(){
       await navigator.share({ title: storeTitle, text: shareText, url: publicStoreUrl });
     }catch(err){
       if(err && err.name === 'AbortError') return;
-      console.error('Web Share failed:', err);
+      console.error('[MATJAR] Web Share failed:', err);
       try{
         await navigator.clipboard.writeText(publicStoreUrl);
         showToast(linkCopiedMsg,'success');
       }catch(e){
-        console.error('Clipboard fallback failed:', e);
+        console.error('[MATJAR] Clipboard fallback failed:', e);
         showToast(shareFailedMsg,'error');
       }
     }
@@ -607,7 +632,7 @@ window.shareStore = async function(){
       }
       showToast(linkCopiedMsg,'success');
     }catch(e){
-      console.error('Copy failed:', e);
+      console.error('[MATJAR] Copy failed:', e);
       showToast(shareFailedMsg,'error');
     }
   }
