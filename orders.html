@@ -19,12 +19,11 @@
 <div id="empty" class="hidden text-center py-16"><i class="fa-solid fa-inbox text-4xl text-gray-300"></i><p class="text-gray-500 mt-2">لا توجد طلبات بعد</p></div>
 </main>
 
-<!-- نافذة تأكيد الحذف -->
 <div id="deleteModal" class="modal" style="z-index:95">
   <div class="bg-white rounded-[24px] w-full max-w-sm p-6 text-center animate-pop">
     <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-trash text-2xl text-red-500"></i></div>
     <h3 class="font-bold text-[16px] mb-2">هل أنت متأكد من حذف هذا الطلب؟</h3>
-    <p class="text-[13px] text-gray-500 mb-6">سيتم حذف الطلب نهائياً ولا يمكن التراجع عن هذا الإجراء</p>
+    <p class="text-[13px] text-gray-500 mb-6">سيتم حذف الطلب نهائياً ولا يمكن التراجع</p>
     <div class="flex gap-3">
       <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-sm">إلغاء</button>
       <button onclick="confirmDeleteOrder()" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm">حذف الطلب</button>
@@ -55,20 +54,15 @@ function normalizePhone(raw){
   if(p.startsWith('+')) p = p.slice(1);
   p = p.replace(/\D/g,'');
   if(!p) return null;
-  if(p.startsWith('212')){
-    return p;
-  }
-  if(p.startsWith('0')){
-    return '212' + p.slice(1);
-  }
-  if(/^[67]\d{8}$/.test(p)){
-    return '212' + p;
-  }
+  if(p.startsWith('212')) return p;
+  if(p.startsWith('0')) return '212' + p.slice(1);
+  if(/^[67]\d{8}$/.test(p)) return '212' + p;
+  if(p.length===9 && /^[67]/.test(p)) return '212' + p;
   return null;
 }
 
 function formatPay(method){
-  return method==='cod'? 'الدفع عند الاستلام' : method==='online'? 'الدفع الآن' : method||'الدفع عند الاستلام';
+  return method==='cod'? 'الدفع عند الاستلام' : method==='online'? 'الدفع الآن' : 'الدفع عند الاستلام';
 }
 
 let cachedOrders = [];
@@ -90,7 +84,7 @@ onAuthStateChanged(auth, (user)=>{
     const entries = Object.entries(snap.val());
     cachedOrders = entries.map(([firebaseId, data])=>({
       firebaseId: firebaseId,
-    ...data
+     ...data
     })).sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
 
     list.innerHTML = cachedOrders.map(o=>{
@@ -119,9 +113,6 @@ onAuthStateChanged(auth, (user)=>{
         </div>
       </div>
     `}).join('');
-  }, (error)=>{
-    console.error('[ORDERS] onValue error:', error);
-    showToast('خطأ في تحميل الطلبات');
   });
 });
 
@@ -138,18 +129,16 @@ window.confirmDeleteOrder = async ()=>{
   try{
     const u = auth.currentUser;
     if(!u){ showToast('يجب تسجيل الدخول'); return; }
-    console.log('[ORDERS] Deleting order:', pendingDeleteId);
     await remove(ref(db, `users/${u.uid}/orders/${pendingDeleteId}`));
     showToast('تم حذف الطلب بنجاح');
     closeDeleteModal();
   }catch(e){
-    console.error('[ORDERS] delete error:', e);
+    console.error(e);
     showToast('فشل حذف الطلب: '+(e.message||e));
   }
 }
 
 window.acceptOrder = async (firebaseId)=>{
-  let waWindow = null;
   try{
     const u = auth.currentUser;
     if(!u){ showToast('يجب تسجيل الدخول'); return; }
@@ -160,14 +149,15 @@ window.acceptOrder = async (firebaseId)=>{
     if(order.status==='accepted'){ showToast('الطلب مقبول مسبقاً'); return; }
     if(order.status==='delivered'){ showToast('الطلب تم توصيله مسبقاً'); return; }
 
-    // تجهيز رقم الهاتف والرسالة قبل أي await للحفاظ على موثوقية فتح WhatsApp
+    const btn = document.getElementById(`btn-accept-${firebaseId}`);
+    if(btn){ btn.disabled=true; btn.textContent='جاري القبول...'; }
+
+    // تحويل رقم الهاتف
     const normalized = normalizePhone(order.phone);
     if(!normalized){
       showToast('رقم الهاتف غير صالح: '+(order.phone||''));
-      // نكمل تحديث الحالة حتى لو الرقم غير صالح؟ لا، نوقف حسب المطلوب
-      // لكن نسمح بالقبول بدون واتساب
-      const confirmNoPhone = confirm('رقم الهاتف غير صالح، هل تريد قبول الطلب بدون فتح WhatsApp؟');
-      if(!confirmNoPhone) return;
+      if(btn){ btn.disabled=false; btn.textContent='قبول'; }
+      return;
     }
 
     const itemsDetails = (order.items||[]).map(i=>{
@@ -188,7 +178,7 @@ ${itemsDetails}
 💳 طريقة الدفع: ${formatPay(order.paymentMethod)}
 
 📍 المدينة: ${order.city||'-'}
-📍 العنوان: ${order.address||'-'}
+${order.address? `📍 العنوان: ${order.address}` : ''}
 
 طلبك الآن قيد التجهيز، وسيتم توصيله إليك إن شاء الله في أقرب وقت ممكن 🚚📦
 
@@ -196,47 +186,22 @@ ${itemsDetails}
 
 Karni Pro`;
 
-    let waUrl = null;
-    if(normalized){
-      waUrl = `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
-    }
+    const waUrl = `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
+    console.log('[ORDERS] WhatsApp URL ready:', waUrl);
 
-    // فتح نافذة فارغة فوراً لتجاوز حظر المتصفح - هذا يحافظ على gesture
-    if(waUrl){
-      waWindow = window.open('about:blank', '_blank');
-    }
-
-    const btn = document.getElementById(`btn-accept-${firebaseId}`);
-    if(btn){ btn.disabled=true; btn.textContent='جاري القبول...'; }
-
-    // 1. تحديث Firebase أولاً
-    console.log('[ORDERS] Updating status to accepted:', firebaseId);
+    // تحديث Firebase أولاً - إذا فشل لا نفتح واتساب
     await update(ref(db, `users/${u.uid}/orders/${firebaseId}`), {
       status: 'accepted',
       acceptedAt: new Date().toISOString()
     });
-    console.log('[ORDERS] Status updated');
+    console.log('[ORDERS] Order accepted');
 
-    // 2. فتح WhatsApp بعد النجاح بطريقة موثوقة
-    if(waUrl){
-      if(waWindow &&!waWindow.closed){
-        waWindow.location.href = waUrl;
-      } else {
-        // fallback إذا تم حظر النافذة الفارغة
-        const a = document.createElement('a');
-        a.href = waUrl;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(()=>a.remove(), 1000);
-      }
-    }
+    // فتح WhatsApp مباشرة بعد النجاح بدون about:blank
+    window.open(waUrl, '_blank');
 
   }catch(e){
     console.error('[ORDERS] acceptOrder error:', e);
     showToast('فشل قبول الطلب: '+(e.message||e));
-    if(waWindow &&!waWindow.closed) waWindow.close();
     const btn = document.getElementById(`btn-accept-${firebaseId}`);
     if(btn){ btn.disabled=false; btn.textContent='قبول'; }
   }
@@ -247,20 +212,17 @@ window.closeOrder = async (firebaseId)=>{
     const u=auth.currentUser;
     if(!u) return;
     if(!firebaseId){ showToast('معرف الطلب غير موجود'); return; }
-    const order = cachedOrders.find(o=>o.firebaseId===firebaseId);
-    if(!order){ showToast('الطلب غير موجود'); return; }
     await update(ref(db, `users/${u.uid}/orders/${firebaseId}`), {
       status:'delivered',
       deliveredAt: new Date().toISOString()
     });
     showToast('تم تحديث الطلب إلى تم التوصيل');
   }catch(e){
-    console.error('[ORDERS] closeOrder error:', e);
+    console.error(e);
     showToast('خطأ: '+(e.message||e));
   }
 }
 
-// إغلاق نافذة الحذف عند الضغط خارجها
 document.getElementById('deleteModal').addEventListener('click', (e)=>{
   if(e.target.id==='deleteModal') closeDeleteModal();
 });
