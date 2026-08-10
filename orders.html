@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبات الزبائن - Karni Pro</title>
+<script src="lang.js"></script>
+<script>setTimeout(()=>{var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);},80);</script>
+</head>
+<body class="bg-gray-50">
+<header class="bg-white border-b sticky top-0 z-20"><div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center"><a href="matjar.html" class="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></a><h1 class="font-bold">طلبات الزبائن</h1><div class="w-9"></div></div></header>
+<main class="max-w-4xl mx-auto px-4 pt-4">
+<div id="ordersList" class="space-y-3"></div>
+<div id="empty" class="hidden text-center py-16"><i class="fa-solid fa-inbox text-4xl text-gray-300"></i><p class="text-gray-500 mt-2">لا توجد طلبات بعد</p></div>
+</main>
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+onAuthStateChanged(auth, (user)=>{
+  if(!user){ location.href='login.html'; return; }
+  const ordersRef = ref(db, `users/${user.uid}/orders`);
+  onValue(ordersRef, (snap)=>{
+    const list = document.getElementById('ordersList');
+    if(!snap.exists()){ list.innerHTML=''; document.getElementById('empty').classList.remove('hidden'); return; }
+    document.getElementById('empty').classList.add('hidden');
+    const orders = Object.values(snap.val()).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+    list.innerHTML = orders.map(o=>`
+      <div class="bg-white rounded-2xl border p-4">
+        <div class="flex justify-between mb-2"><span class="font-bold">${escapeHtml(o.clientName)} - ${escapeHtml(o.phone||'')}</span><span class="text-xs ${o.status==='new'?'bg-red-100 text-red-600':'bg-emerald-100 text-emerald-700'} px-2 py-1 rounded-full">${o.status||'new'}</span></div>
+        <p class="text-xs text-gray-500 mb-2">${new Date(o.createdAt).toLocaleString('ar-MA')} - ${o.city||''} - ${o.paymentMethod==='cod'?'الدفع عند الاستلام':'الدفع الآن'}</p>
+        <div class="bg-gray-50 rounded-xl p-2 space-y-1 text-sm">${(o.items||[]).map(i=>`<div class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.qty}</span><span class="font-bold">${(i.price*i.qty).toFixed(2)}</span></div>`).join('')}</div>
+        <div class="flex justify-between font-bold mt-2 pt-2 border-t"><span>الإجمالي</span><span class="text-emerald-600">${(o.totalValue||0).toFixed(2)} درهم</span></div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="acceptOrder('${o.orderId}')" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-sm">قبول</button>
+          <button onclick="closeOrder('${o.orderId}')" class="flex-1 bg-gray-100 py-2 rounded-xl text-sm">تم التوصيل</button>
+        </div>
+      </div>
+    `).join('');
+  });
+});
+window.acceptOrder = (id)=>{ const u=auth.currentUser; if(!u)return; update(ref(db, `users/${u.uid}/orders/${id}`), {status:'accepted'}); }
+window.closeOrder = (id)=>{ const u=auth.currentUser; if(!u)return; update(ref(db, `users/${u.uid}/orders/${id}`), {status:'delivered'}); }
+</script>
+</body>
+</html>
