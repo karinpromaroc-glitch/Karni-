@@ -68,6 +68,10 @@ setTimeout(()=>{
       <h1 class="font-bold text-gray-900" data-i18n="myStore">متجري</h1>
     </div>
     <div class="flex items-center gap-2">
+      <button id="customerOrdersBtn" class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center relative hover:bg-orange-100 transition" title="طلبات الزبائن">
+        <i class="fa-solid fa-inbox"></i>
+        <span id="customerOrdersCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+      </button>
       <button id="shareStoreBtn" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100 transition" title="مشاركة متجري">
         <i class="fa-solid fa-share-nodes"></i>
       </button>
@@ -174,7 +178,7 @@ setTimeout(()=>{
 
 <script type="module">
 import { auth, db } from "./firebase.js";
-import { ref, get, push, update, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { ref, get, push, update, set, onValue, onChildAdded } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 let products = [];
@@ -295,7 +299,6 @@ async function loadClients(){
   }
 }
 
-// إصلاح جذري لـ loadProducts - مصدر الحقيقة Firebase وليس Cache
 async function loadProducts(){
   if(!currentUid ||!productsRef) return;
   try{
@@ -304,7 +307,6 @@ async function loadProducts(){
       const rawVal = snap.val();
       console.log('[MATJAR] Firebase users/'+currentUid+'/products raw keys:', Object.keys(rawVal).length);
       if(rawVal._init) delete rawVal._init;
-      // تطبيع من Object إلى Array بأمان
       const values = Object.values(rawVal).filter(v=>v && typeof v==='object' &&!v._init);
       const normalized = values.map(p=>{
         if(!p) return null;
@@ -320,7 +322,6 @@ async function loadProducts(){
       filteredProducts = [...normalized];
       saveProductsToPhone(normalized);
       renderProducts(true);
-      // المزامنة دائماً بعد تحميل Firebase، وليس فقط عند اختلاف IDs
       await syncPublicStore();
     } else {
       console.log('[MATJAR] No products in users/'+currentUid+'/products');
@@ -334,7 +335,6 @@ async function loadProducts(){
   }
 }
 
-// مزامنة قوية وواضحة للمتجر العام
 async function syncPublicStore(){
   if(!currentUid) return;
   try{
@@ -348,8 +348,6 @@ async function syncPublicStore(){
         logo = prof.logo || prof.storeLogo || '';
       }
     }catch(e){ console.error('[MATJAR] profile fetch error', e); }
-
-    // فقط المنتجات الظاهرة، بدون hidden
     const publicProducts = products.filter(p=>!p.hidden).map(p=>({
       id: p.id,
       name: p.name||'',
@@ -358,7 +356,6 @@ async function syncPublicStore(){
       mainImage: p.mainImage||'',
       images: (p.images||[]).slice(0,5)
     }));
-
     const publicData = {
       owner: currentUid,
       name: storeName,
@@ -372,6 +369,42 @@ async function syncPublicStore(){
   }catch(error){
     console.error('[MATJAR] syncPublicStore failed', error);
   }
+}
+
+// نظام استقبال طلبات الزبائن فوري
+function listenCustomerOrders(){
+  if(!currentUid) return;
+  const custRef = ref(db, `users/${currentUid}/orders`);
+  console.log('[MATJAR] Listening to users/'+currentUid+'/orders for real-time customer orders');
+
+  onValue(custRef, (snap)=>{
+    const badge = document.getElementById('customerOrdersCount');
+    if(!badge) return;
+    if(!snap.exists()){
+      badge.classList.add('hidden');
+      return;
+    }
+    const allOrders = Object.values(snap.val());
+    const newOrders = allOrders.filter(o=> o.status==='new' );
+    console.log('[MATJAR] Total orders:', allOrders.length, 'new:', newOrders.length);
+    if(newOrders.length>0){
+      badge.textContent = newOrders.length>99? '99+' : newOrders.length;
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+    } else {
+      badge.classList.add('hidden');
+    }
+  });
+
+  onChildAdded(custRef, (snap)=>{
+    const order = snap.val();
+    if(!order) return;
+    // إشعار فقط للطلبات الجديدة القادمة من المتجر العام
+    if(order.source==='public_store' && order.status==='new'){
+      console.log('[MATJAR] New customer order received:', order.orderId);
+      showToast(`طلب جديد من: ${order.clientName||'زبون'}`, 'success');
+    }
+  });
 }
 
 function renderProducts(reset=true){
@@ -535,16 +568,25 @@ window.finishOrder = async function(){
     saveProductsToPhone(products);
     await syncPublicStore();
 
+    // مسار موحد مع الحقول المطلوبة
+    const newOrderRef = push(ref(db, `users/${currentUid}/orders`));
+    const orderId = newOrderRef.key;
     const orderData = {
-      clientName:activeClient,
-      items:currentOrder,
-      totalItems:currentOrder.length,
-      totalQty:currentOrder.reduce((s,i)=>s+i.qty,0),
-      totalValue:currentOrder.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0),
-      createdAt:new Date().toISOString(),
-      status:'pending'
+      orderId: orderId,
+      clientName: activeClient,
+      phone: '',
+      address: '',
+      city: '',
+      items: currentOrder,
+      totalItems: currentOrder.length,
+      totalQty: currentOrder.reduce((s,i)=>s+i.qty,0),
+      totalValue: currentOrder.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0),
+      paymentMethod: 'cod',
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      source: 'matjar'
     };
-    await push(ref(db, `users/${currentUid}/orders`), orderData);
+    await set(newOrderRef, orderData);
 
     showToast(t('orderSent', {client: activeClient, count: currentOrder.length}),'success');
     currentOrder=[];
@@ -667,6 +709,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     ordersRef = ref(db, `users/${currentUid}/orders`);
     profileRef = ref(db, `users/${currentUid}/profile`);
 
+    // تشغيل الاستماع الفوري لطلبات الزبائن
+    listenCustomerOrders();
+
     try{
       const snap = await get(profileRef);
       let profile = snap.exists()? snap.val() : {};
@@ -695,6 +740,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('finishOrderBtn').addEventListener('click', finishOrder);
     document.getElementById('clearOrderBtn').addEventListener('click', clearOrder);
     document.getElementById('reportsBtn').addEventListener('click', ()=>window.location.href='reports.html');
+    document.getElementById('customerOrdersBtn').addEventListener('click', ()=>window.location.href='orders.html');
     document.getElementById('shareStoreBtn').addEventListener('click', shareStore);
     const observer = new IntersectionObserver(entries=>{ if(entries[0].isIntersecting) renderProducts(false); }, {rootMargin:'300px'});
     observer.observe(document.getElementById('loadMoreTrigger'));
