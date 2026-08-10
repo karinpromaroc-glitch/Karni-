@@ -9,8 +9,7 @@
 *{font-family:'Cairo',sans-serif;box-sizing:border-box}body{background:#f8fafc;margin:0}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
 @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.product-card{transition:.2s}
-.product-card:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,.08)}
+.product-card{transition:.2s}.product-card:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,.08)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center;padding:16px}
 .modal.active{display:flex}
 .slider-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:none;align-items:center;justify-content:center}
@@ -18,256 +17,138 @@
 .animate-pop{animation:pop.28s cubic-bezier(.34,1.56,.64,1)} @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 <script>setTimeout(()=>{var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';document.head.appendChild(f);},80);</script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-*{font-family:'Cairo',sans-serif} body{background:#f8fafc}
-</style>
+<style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');*{font-family:'Cairo',sans-serif} body{background:#f8fafc}</style>
 </head>
 <body class="pb-28">
-
 <header class="bg-white border-b sticky top-0 z-40">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg" id="storeLogo">K</div>
-      <div>
-        <h1 id="storeName" class="font-bold text-gray-900 text-[15px]">المتجر</h1>
-        <p class="text-[11px] text-gray-500" id="storeSub">مرحبا بكم - اطلب الآن</p>
-      </div>
+      <div><h1 id="storeName" class="font-bold text-gray-900 text-[15px]">المتجر</h1><p class="text-[11px] text-gray-500" id="storeSub">مرحبا بكم - اطلب الآن</p></div>
     </div>
-    <button id="cartBtn" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center relative">
-      <i class="fa-solid fa-bag-shopping"></i>
-      <span id="cartCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
-    </button>
+    <button id="cartBtn" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center relative"><i class="fa-solid fa-bag-shopping"></i><span id="cartCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span></button>
   </div>
 </header>
-
 <main class="max-w-7xl mx-auto px-4 pt-4">
-  <!-- رسائل الخطأ الواضحة -->
   <div id="errorBox" class="hidden bg-white border border-red-200 rounded-2xl p-8 text-center mb-4">
     <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i></div>
     <h2 class="font-bold text-[16px] mb-2" id="errorTitle">خطأ</h2>
     <p class="text-[13px] text-gray-500 leading-6" id="errorMsg"></p>
-    <p class="text-[11px] text-gray-400 mt-3" id="errorCode"></p>
   </div>
-
-  <div class="bg-white rounded-2xl border p-3 mb-4">
-    <div class="relative">
-      <input type="text" id="searchInput" placeholder="البحث عن منتج..." class="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none text-sm">
-      <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-    </div>
-  </div>
+  <div class="bg-white rounded-2xl border p-3 mb-4"><div class="relative"><input type="text" id="searchInput" placeholder="البحث عن منتج..." class="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none text-sm"><i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i></div></div>
   <div id="productsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
   <div id="loadingState" class="grid grid-cols-2 gap-3"><div class="bg-white rounded-2xl p-4 border"><div class="w-full h-32 skeleton rounded-xl mb-2"></div><div class="h-3 skeleton rounded w-3/4 mx-auto"></div></div><div class="bg-white rounded-2xl p-4 border"><div class="w-full h-32 skeleton rounded-xl mb-2"></div><div class="h-3 skeleton rounded w-3/4 mx-auto"></div></div></div>
   <div id="emptyState" class="hidden text-center py-16"><i class="fa-solid fa-store text-4xl text-gray-300 mb-3"></i><p class="text-gray-500 text-sm">لا توجد منتجات حالياً</p></div>
 </main>
-
-<div id="cartBar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-2xl z-30">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-    <div>
-      <p class="text-xs text-gray-500"><span id="cartItemsCount">0</span> منتجات</p>
-      <p class="font-bold text-emerald-600 text-lg"><span id="cartTotal">0.00</span> درهم</p>
-    </div>
-    <button onclick="openCheckout()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2"><span>إتمام الطلب</span><i class="fa-solid fa-arrow-left"></i></button>
-  </div>
-</div>
-
-<div id="qtyModal" class="modal">
-  <div class="bg-white rounded-[24px] w-full max-w-md overflow-hidden animate-pop">
-    <div class="p-4 flex items-center justify-between border-b">
-      <h3 class="font-bold">تحديد الكمية</h3>
-      <button onclick="closeQtyModal()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="p-4">
-      <img id="qtyImg" src="" class="w-full h-56 object-contain bg-gray-50 rounded-2xl mb-3">
-      <h3 id="qtyName" class="font-bold text-base mb-1"></h3>
-      <p class="text-emerald-600 font-bold mb-1"><span id="qtyPrice">0</span> درهم</p>
-      <p class="text-xs text-gray-500 mb-4">المخزون: <span id="qtyStock">0</span></p>
-      <div class="flex items-center gap-3 justify-center">
-        <button onclick="changeModalQty(-1)" class="w-14 h-14 bg-white border-2 rounded-xl text-2xl font-bold">-</button>
-        <input id="qtyInput" type="number" min="1" value="1" class="w-20 h-14 text-center border-2 border-emerald-200 rounded-xl text-xl font-bold">
-        <button onclick="changeModalQty(1)" class="w-14 h-14 bg-white border-2 rounded-xl text-2xl font-bold">+</button>
-      </div>
-    </div>
-    <div class="p-4 border-t flex gap-2">
-      <button onclick="closeQtyModal()" class="px-6 py-3 bg-gray-100 rounded-xl font-bold">إلغاء</button>
-      <button onclick="confirmAddToCart()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">إضافة للطلب</button>
-    </div>
-  </div>
-</div>
-
-<div id="checkoutModal" class="modal">
-  <div class="bg-white rounded-[24px] w-full max-w-lg max-h-[92vh] overflow-y-auto animate-pop">
-    <div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg">معلوماتك</h3><button onclick="closeCheckout()" class="w-9 h-9 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="p-4 space-y-3">
-      <input id="cName" placeholder="الاسم الكامل *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500">
-      <input id="cPhone" placeholder="رقم الهاتف *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500" type="tel">
-      <input id="cCity" placeholder="المدينة *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500">
-      <input id="cAddress" placeholder="العنوان *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500">
-      <textarea id="cNote" placeholder="ملاحظة للطلب - اختياري" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500" rows="2"></textarea>
-      <div class="border rounded-xl p-3">
-        <p class="font-bold text-sm mb-2">طريقة الطلب</p>
-        <label class="flex items-center gap-3 p-3 rounded-xl border mb-2 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50"><input type="radio" name="payMethod" value="cod" checked><span class="font-bold text-sm">💵 الدفع عند الاستلام</span></label>
-        <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50"><input type="radio" name="payMethod" value="online"><span class="font-bold text-sm">💳 الدفع الآن</span><span class="text-[11px] text-gray-500">(سيتم تفعيله لاحقاً)</span></label>
-        <div id="onlinePayBox" class="hidden mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">سيتم ربط بوابة الدفع هنا لاحقاً. حالياً سيتم تأكيد الطلب كـ دفع عند الاستلام.</div>
-      </div>
-      <div id="cartSummary" class="bg-gray-50 rounded-xl p-3 space-y-2 text-sm"></div>
-      <div class="flex justify-between font-bold text-base pt-2 border-t"><span>الإجمالي:</span><span id="finalTotal" class="text-emerald-600">0 درهم</span></div>
-    </div>
-    <div class="p-4 border-t flex gap-2">
-      <button onclick="closeCheckout()" class="px-6 py-3 bg-gray-100 rounded-xl font-bold">العودة للتعديل</button>
-      <button onclick="confirmOrder()" id="confirmBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">تأكيد وإرسال الطلب</button>
-    </div>
-  </div>
-</div>
-
-<div id="successModal" class="modal" style="z-index:90">
-  <div class="bg-white rounded-[24px] w-full max-w-md p-8 text-center animate-pop">
-    <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-check text-3xl text-emerald-600"></i></div>
-    <h2 class="font-bold text-xl mb-2">تم إرسال طلبك بنجاح ✅</h2>
-    <p class="text-sm text-gray-500 mb-4">رقم الطلب: <span id="successId" class="font-bold text-gray-900"></span></p>
-    <div class="bg-gray-50 rounded-xl p-4 mb-4 text-sm space-y-1 text-right">
-      <p>الإجمالي: <span id="successTotal" class="font-bold"></span></p>
-      <p>طريقة الدفع: <span id="successPay"></span></p>
-    </div>
-    <button onclick="backToStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">العودة إلى المتجر</button>
-  </div>
-</div>
-
+<div id="cartBar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-2xl z-30"><div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3"><div><p class="text-xs text-gray-500"><span id="cartItemsCount">0</span> منتجات</p><p class="font-bold text-emerald-600 text-lg"><span id="cartTotal">0.00</span> درهم</p></div><button onclick="openCheckout()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2"><span>إتمام الطلب</span><i class="fa-solid fa-arrow-left"></i></button></div></div>
+<div id="qtyModal" class="modal"><div class="bg-white rounded-[24px] w-full max-w-md overflow-hidden animate-pop"><div class="p-4 flex items-center justify-between border-b"><h3 class="font-bold">تحديد الكمية</h3><button onclick="closeQtyModal()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div><div class="p-4"><img id="qtyImg" src="" class="w-full h-56 object-contain bg-gray-50 rounded-2xl mb-3"><h3 id="qtyName" class="font-bold text-base mb-1"></h3><p class="text-emerald-600 font-bold mb-1"><span id="qtyPrice">0</span> درهم</p><p class="text-xs text-gray-500 mb-4">المخزون: <span id="qtyStock">0</span></p><div class="flex items-center gap-3 justify-center"><button onclick="changeModalQty(-1)" class="w-14 h-14 bg-white border-2 rounded-xl text-2xl font-bold">-</button><input id="qtyInput" type="number" min="1" value="1" class="w-20 h-14 text-center border-2 border-emerald-200 rounded-xl text-xl font-bold"><button onclick="changeModalQty(1)" class="w-14 h-14 bg-white border-2 rounded-xl text-2xl font-bold">+</button></div></div><div class="p-4 border-t flex gap-2"><button onclick="closeQtyModal()" class="px-6 py-3 bg-gray-100 rounded-xl font-bold">إلغاء</button><button onclick="confirmAddToCart()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">إضافة للطلب</button></div></div></div>
+<div id="checkoutModal" class="modal"><div class="bg-white rounded-[24px] w-full max-w-lg max-h-[92vh] overflow-y-auto animate-pop"><div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg">معلوماتك</h3><button onclick="closeCheckout()" class="w-9 h-9 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button></div><div class="p-4 space-y-3"><input id="cName" placeholder="الاسم الكامل *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500"><input id="cPhone" placeholder="رقم الهاتف *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500" type="tel"><input id="cCity" placeholder="المدينة *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500"><input id="cAddress" placeholder="العنوان *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500"><textarea id="cNote" placeholder="ملاحظة للطلب - اختياري" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500" rows="2"></textarea><div class="border rounded-xl p-3"><p class="font-bold text-sm mb-2">طريقة الطلب</p><label class="flex items-center gap-3 p-3 rounded-xl border mb-2 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50"><input type="radio" name="payMethod" value="cod" checked><span class="font-bold text-sm">💵 الدفع عند الاستلام</span></label><label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50"><input type="radio" name="payMethod" value="online"><span class="font-bold text-sm">💳 الدفع الآن</span><span class="text-[11px] text-gray-500">(سيتم تفعيله لاحقاً)</span></label><div id="onlinePayBox" class="hidden mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">سيتم ربط بوابة الدفع هنا لاحقاً.</div></div><div id="cartSummary" class="bg-gray-50 rounded-xl p-3 space-y-2 text-sm"></div><div class="flex justify-between font-bold text-base pt-2 border-t"><span>الإجمالي:</span><span id="finalTotal" class="text-emerald-600">0 درهم</span></div></div><div class="p-4 border-t flex gap-2"><button onclick="closeCheckout()" class="px-6 py-3 bg-gray-100 rounded-xl font-bold">العودة للتعديل</button><button onclick="confirmOrder()" id="confirmBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">تأكيد وإرسال الطلب</button></div></div></div>
+<div id="successModal" class="modal" style="z-index:90"><div class="bg-white rounded-[24px] w-full max-w-md p-8 text-center animate-pop"><div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-check text-3xl text-emerald-600"></i></div><h2 class="font-bold text-xl mb-2">تم إرسال طلبك بنجاح ✅</h2><p class="text-sm text-gray-500 mb-4">رقم الطلب: <span id="successId" class="font-bold text-gray-900"></span></p><div class="bg-gray-50 rounded-xl p-4 mb-4 text-sm space-y-1 text-right"><p>الإجمالي: <span id="successTotal" class="font-bold"></span></p><p>طريقة الدفع: <span id="successPay"></span></p></div><button onclick="backToStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">العودة إلى المتجر</button></div></div>
 <div id="galleryModal" class="slider-modal"><button onclick="closeGallery()" class="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full text-white"><i class="fa-solid fa-xmark"></i></button><img id="galleryImage" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl"></div>
-
 <div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg"><span id="toastMessage" class="text-sm"></span></div></div>
-
 <script type="module">
 import { db } from "./firebase.js";
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-
-let STORE_ID = null;
-let products = [];
-let cart = [];
-let currentProduct = null;
-
-function escapeHtml(str){
-  if(str==null) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-}
-function getStoreId(){
-  try{
-    const url = new URL(window.location.href);
-    return url.searchParams.get('store');
-  }catch(e){
-    console.error('getStoreId error', e);
-    return null;
-  }
-}
-function showError(title, msg, code=''){
-  const box = document.getElementById('errorBox');
-  document.getElementById('errorTitle').textContent = title;
-  document.getElementById('errorMsg').innerHTML = msg;
-  document.getElementById('errorCode').textContent = code;
-  box.classList.remove('hidden');
-  document.getElementById('loadingState').classList.add('hidden');
-  document.getElementById('productsContainer').innerHTML='';
-  document.getElementById('emptyState').classList.add('hidden');
-}
-function hideError(){
-  document.getElementById('errorBox').classList.add('hidden');
-}
-
+let STORE_ID=null, products=[], cart=[], currentProduct=null;
+function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function getStoreId(){ try{ return new URL(window.location.href).searchParams.get('store'); }catch(e){ console.error('[STORE] getStoreId error', e); return null; } }
+function showError(title, msg){ document.getElementById('errorBox').classList.remove('hidden'); document.getElementById('errorTitle').textContent=title; document.getElementById('errorMsg').innerHTML=msg; document.getElementById('loadingState').classList.add('hidden'); }
+function hideError(){ document.getElementById('errorBox').classList.add('hidden'); }
 async function init(){
-  STORE_ID = getStoreId();
-  if(!STORE_ID){
-    showError('رابط المتجر غير صالح','الرابط لا يحتوي على معرف المتجر<br>تأكد من الرابط المرسل من صاحب المتجر يجب أن يكون بهذا الشكل:<br><b>store.html?store=XXXX</b>');
-    return;
-  }
-  if(window.KarniLang){
-    try{
-      const lang = localStorage.getItem('karni_language')||'ar';
-      await KarniLang.setLanguage(lang);
-      KarniLang.applyDirection(lang);
-      KarniLang.applyTranslations(document);
-    }catch(e){ console.error('lang init error', e); }
-  }
-  await loadStore();
-  setupEvents();
+  STORE_ID=getStoreId();
+  console.log('[STORE] UID:', STORE_ID);
+  if(!STORE_ID){ showError('رابط المتجر غير صالح','الرابط لا يحتوي على?store='); return; }
+  await loadStore(); setupEvents();
 }
-
 async function loadStore(){
-  hideError();
   document.getElementById('loadingState').classList.remove('hidden');
+  hideError();
+  let publicProducts=[], fallbackProducts=[];
   try{
-    // المحاولة 1: قراءة المتجر العام الآمن publicStores
-    let snap = await get(ref(db, `publicStores/${STORE_ID}`));
-    if(snap.exists()){
-      const data = snap.val();
-      document.getElementById('storeName').textContent = data.name || 'المتجر';
-      document.getElementById('storeLogo').textContent = (data.name||'K').charAt(0).toUpperCase();
-      if(data.name) document.title = data.name;
-      products = (data.products||[]).filter(p=>p &&!p.hidden);
-      document.getElementById('loadingState').classList.add('hidden');
-      if(products.length===0){
+    // الحالة A: publicStores موجود
+    const snapPublic = await get(ref(db, `publicStores/${STORE_ID}`));
+    console.log('[STORE] publicStores exists?', snapPublic.exists());
+    if(snapPublic.exists()){
+      const data=snapPublic.val();
+      document.getElementById('storeName').textContent=data.name||'المتجر';
+      document.getElementById('storeLogo').textContent=(data.name||'K').charAt(0).toUpperCase();
+      if(data.name) document.title=data.name;
+      publicProducts=data.products||[];
+      console.log('[STORE] public products:', publicProducts.length);
+    }
+    // الحالة B: إذا public فارغ، جرب fallback users
+    if(publicProducts.length===0){
+      console.log('[STORE] public empty, trying fallback users/'+STORE_ID+'/products');
+      try{
+        const snapUsers = await get(ref(db, `users/${STORE_ID}/products`));
+        if(snapUsers.exists()){
+          const val=snapUsers.val(); if(val._init) delete val._init;
+          fallbackProducts=Object.values(val).filter(v=>v&&typeof v==='object'&&!v._init&&!v.hidden).map(p=>{
+            if(p.image&&!p.mainImage) p.mainImage=p.image;
+            if(p.mainImage&&(!p.images||p.images.length===0)) p.images=[p.mainImage];
+            if(!p.images) p.images=p.mainImage?[p.mainImage]:[];
+            return p;
+          });
+          console.log('[STORE] fallback products:', fallbackProducts.length);
+        }
+      }catch(e){
+        const msg=String(e.message||e);
+        console.error('[STORE] fallback error', e);
+        if(msg.includes('Permission denied')||msg.includes('PERMISSION_DENIED')){
+          document.getElementById('loadingState').classList.add('hidden');
+          showError('تعذر الوصول إلى بيانات هذا المتجر بسبب إعدادات Firebase.','على صاحب المتجر فتح matjar.html مرة واحدة لتحديث المتجر العام، وتحديث Firebase Rules إلى publicStores');
+          return;
+        }
+      }
+    }
+
+    // اختيار المصدر
+    if(publicProducts.length>0){
+      console.log('[STORE] Using publicStores as source');
+      products=publicProducts;
+    } else if(fallbackProducts.length>0){
+      console.log('[STORE] Using fallback users products as source');
+      products=fallbackProducts;
+    } else {
+      // لا يوجد لا هذا ولا ذاك
+      if(snapPublic && snapPublic.exists()){
+        // public موجود لكن فارغ و fallback فشل بسبب عدم وجود منتجات
+        document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('emptyState').classList.remove('hidden');
+        return;
       } else {
-        renderProducts();
+        document.getElementById('loadingState').classList.add('hidden');
+        showError('هذا المتجر غير موجود أو لم يعد متاحاً','');
+        return;
       }
-      return;
     }
-
-    // المحاولة 2: fallback من users (إذا القواعد القديمة تسمح)
-    console.warn('publicStores not found, trying users/'+STORE_ID);
-    const prodSnap = await get(ref(db, `users/${STORE_ID}/products`));
-    if(!prodSnap.exists()){
-      document.getElementById('loadingState').classList.add('hidden');
-      showError('هذا المتجر غير موجود أو لم يعد متاحاً','قد يكون صاحب المتجر أوقف متجره العام');
-      return;
-    }
-    const val = prodSnap.val();
-    if(val._init) delete val._init;
-    products = Object.values(val).filter(v=>v && typeof v==='object' &&!v._init &&!v.hidden).map(p=>{
-      if(p.image &&!p.mainImage) p.mainImage = p.image;
-      if(p.mainImage && (!p.images||p.images.length===0)) p.images=[p.mainImage];
-      if(!p.images) p.images = p.mainImage? [p.mainImage]:[];
-      if(!p.mainImage && p.images.length>0) p.mainImage = p.images[0];
-      return p;
-    });
-
-    try{
-      const profSnap = await get(ref(db, `users/${STORE_ID}/profile`));
-      if(profSnap.exists()){
-        const prof = profSnap.val();
-        document.getElementById('storeName').textContent = prof.storeName || prof.displayName || 'المتجر';
-        document.getElementById('storeLogo').textContent = (prof.storeName||prof.displayName||'K').charAt(0).toUpperCase();
-        if(prof.storeName) document.title = prof.storeName;
-      }
-    }catch(e){ console.error('profile load error', e); }
 
     document.getElementById('loadingState').classList.add('hidden');
     if(products.length===0) document.getElementById('emptyState').classList.remove('hidden');
     else renderProducts();
 
   }catch(error){
-    console.error('Firebase loadStore error:', error);
+    console.error('[STORE] Firebase loadStore error:', error);
     document.getElementById('loadingState').classList.add('hidden');
-    const msg = String(error.message||error);
-    if(msg.includes('Permission denied') || msg.includes('PERMISSION_DENIED')){
-      showError('هذا المتجر غير متاح حالياً','صاحب المتجر لم يفعّل المتجر العام بعد<br>أو قواعد Firebase لم يتم تحديثها<br><br>على صاحب المتجر تحديث Firebase Rules إلى publicStores كما في الشرح','PERMISSION_DENIED');
+    const msg=String(error.message||error);
+    if(msg.includes('Permission denied')||msg.includes('PERMISSION_DENIED')){
+      showError('تعذر الوصول إلى بيانات هذا المتجر بسبب إعدادات Firebase.','حدث قواعد البيانات إلى publicStores');
     } else {
-      showError('حدث خطأ في تحميل المتجر','حاول مرة أخرى لاحقاً<br>'+escapeHtml(msg).slice(0,200), msg);
+      showError('حدث خطأ في تحميل المتجر', escapeHtml(msg).slice(0,300));
     }
   }
 }
-
 function renderProducts(){
-  const container = document.getElementById('productsContainer');
-  const empty = document.getElementById('emptyState');
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  let list = products;
-  if(q) list = list.filter(p=>(p.name||'').toLowerCase().includes(q));
+  const container=document.getElementById('productsContainer');
+  const empty=document.getElementById('emptyState');
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  let list=products; if(q) list=list.filter(p=>(p.name||'').toLowerCase().includes(q));
   if(list.length===0){ container.innerHTML=''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  container.innerHTML = list.map(p=>{
-    const img = escapeHtml(p.mainImage || p.images?.[0] || 'https://via.placeholder.com/300');
-    const inCart = cart.find(c=>c.productId==p.id);
-    const isZero = (parseInt(p.stock)||0)<=0;
+  container.innerHTML=list.map(p=>{
+    const img=escapeHtml(p.mainImage||p.images?.[0]||'https://via.placeholder.com/300');
+    const inCart=cart.find(c=>c.productId==p.id);
+    const isZero=(parseInt(p.stock)||0)<=0;
     return `<div class="bg-white rounded-2xl border overflow-hidden product-card">
       <div class="relative bg-gray-50 cursor-pointer" onclick="openGalleryDirect('${escapeHtml(p.id)}')">
         <img src="${img}" alt="${escapeHtml(p.name)}" class="w-full h-48 object-cover" loading="lazy">
@@ -282,165 +163,41 @@ function renderProducts(){
     </div>`;
   }).join('');
 }
-
 function setupEvents(){
   document.getElementById('searchInput').addEventListener('input', renderProducts);
   document.getElementById('cartBtn').addEventListener('click', ()=>{ if(cart.length>0) openCheckout(); });
   document.querySelectorAll('input[name="payMethod"]').forEach(r=>{
     r.addEventListener('change', e=>{
-      const box = document.getElementById('onlinePayBox');
+      const box=document.getElementById('onlinePayBox');
       if(e.target.value==='online') box.classList.remove('hidden'); else box.classList.add('hidden');
     });
   });
 }
-
-window.openQty = function(id){
-  const p = products.find(x=>x.id==id);
-  if(!p) return;
-  currentProduct = p;
-  document.getElementById('qtyImg').src = p.mainImage || p.images?.[0] || '';
-  document.getElementById('qtyName').textContent = p.name;
-  document.getElementById('qtyPrice').textContent = parseFloat(p.price||0).toFixed(2);
-  document.getElementById('qtyStock').textContent = p.stock||0;
-  const existing = cart.find(c=>c.productId==p.id);
-  document.getElementById('qtyInput').value = existing? existing.qty : 1;
-  document.getElementById('qtyModal').classList.add('active');
-}
-window.closeQtyModal = function(){ document.getElementById('qtyModal').classList.remove('active'); }
-window.changeModalQty = function(d){
-  const input = document.getElementById('qtyInput');
-  let v = parseInt(input.value)||0; v+=d; if(v<1) v=1; input.value=v;
-}
-window.confirmAddToCart = function(){
-  const qty = parseInt(document.getElementById('qtyInput').value)||0;
-  if(qty<=0 ||!currentProduct) return;
-  const stock = parseInt(currentProduct.stock)||0;
-  if(stock>0 && qty>stock){ showToast('الكمية المطلوبة غير متوفرة - المتوفر: '+stock); return; }
-  const idx = cart.findIndex(c=>c.productId==currentProduct.id);
-  if(idx>-1) cart[idx].qty = qty; else cart.push({productId: currentProduct.id, name: currentProduct.name, price: currentProduct.price, qty, mainImage: currentProduct.mainImage});
-  closeQtyModal();
-  updateCartUI();
-  renderProducts();
-  showToast('تمت الإضافة للطلب');
-}
-function updateCartUI(){
-  const count = cart.reduce((s,i)=>s+i.qty,0);
-  const total = cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0);
-  document.getElementById('cartCount').textContent = count;
-  document.getElementById('cartCount').classList.toggle('hidden', count===0);
-  document.getElementById('cartItemsCount').textContent = count;
-  document.getElementById('cartTotal').textContent = total.toFixed(2);
-  document.getElementById('cartBar').classList.toggle('hidden', count===0);
-}
-window.openCheckout = function(){
-  if(cart.length===0) return;
-  const total = cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0);
-  document.getElementById('cartSummary').innerHTML = cart.map(i=>`<div class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.qty}</span><span class="font-bold">${(parseFloat(i.price)*i.qty).toFixed(2)} درهم</span></div>`).join('');
-  document.getElementById('finalTotal').textContent = total.toFixed(2)+' درهم';
-  document.getElementById('checkoutModal').classList.add('active');
-}
-window.closeCheckout = function(){ document.getElementById('checkoutModal').classList.remove('active'); }
-
-window.confirmOrder = async function(){
-  const name = document.getElementById('cName').value.trim();
-  const phone = document.getElementById('cPhone').value.trim();
-  const city = document.getElementById('cCity').value.trim();
-  const address = document.getElementById('cAddress').value.trim();
-  const note = document.getElementById('cNote').value.trim();
-  const payMethod = document.querySelector('input[name="payMethod"]:checked')?.value || 'cod';
-
-  if(!name ||!phone ||!city ||!address){ showToast('المرجو ملء جميع الحقول الضرورية'); return; }
-
-  const btn = document.getElementById('confirmBtn');
-  btn.disabled=true; btn.textContent='جاري الإرسال...';
-
+window.openQty=function(id){const p=products.find(x=>x.id==id); if(!p)return; currentProduct=p; document.getElementById('qtyImg').src=p.mainImage||p.images?.[0]||''; document.getElementById('qtyName').textContent=p.name; document.getElementById('qtyPrice').textContent=parseFloat(p.price||0).toFixed(2); document.getElementById('qtyStock').textContent=p.stock||0; const existing=cart.find(c=>c.productId==p.id); document.getElementById('qtyInput').value=existing?existing.qty:1; document.getElementById('qtyModal').classList.add('active');}
+window.closeQtyModal=function(){document.getElementById('qtyModal').classList.remove('active');}
+window.changeModalQty=function(d){let v=parseInt(document.getElementById('qtyInput').value)||0; v+=d; if(v<1)v=1; document.getElementById('qtyInput').value=v;}
+window.confirmAddToCart=function(){const qty=parseInt(document.getElementById('qtyInput').value)||0; if(qty<=0||!currentProduct)return; const stock=parseInt(currentProduct.stock)||0; if(stock>0&&qty>stock){ showToast('الكمية غير متوفرة - المتوفر: '+stock); return;} const idx=cart.findIndex(c=>c.productId==currentProduct.id); if(idx>-1)cart[idx].qty=qty; else cart.push({productId:currentProduct.id,name:currentProduct.name,price:currentProduct.price,qty,mainImage:currentProduct.mainImage}); closeQtyModal(); updateCartUI(); renderProducts(); showToast('تمت الإضافة');}
+function updateCartUI(){const count=cart.reduce((s,i)=>s+i.qty,0); const total=cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0); document.getElementById('cartCount').textContent=count; document.getElementById('cartCount').classList.toggle('hidden',count===0); document.getElementById('cartItemsCount').textContent=count; document.getElementById('cartTotal').textContent=total.toFixed(2); document.getElementById('cartBar').classList.toggle('hidden',count===0);}
+window.openCheckout=function(){if(cart.length===0)return; const total=cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0); document.getElementById('cartSummary').innerHTML=cart.map(i=>`<div class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.qty}</span><span class="font-bold">${(parseFloat(i.price)*i.qty).toFixed(2)} درهم</span></div>`).join(''); document.getElementById('finalTotal').textContent=total.toFixed(2)+' درهم'; document.getElementById('checkoutModal').classList.add('active');}
+window.closeCheckout=function(){document.getElementById('checkoutModal').classList.remove('active');}
+window.confirmOrder=async function(){
+  const name=document.getElementById('cName').value.trim(), phone=document.getElementById('cPhone').value.trim(), city=document.getElementById('cCity').value.trim(), address=document.getElementById('cAddress').value.trim(), note=document.getElementById('cNote').value.trim(), payMethod=document.querySelector('input[name="payMethod"]:checked')?.value||'cod';
+  if(!name||!phone||!city||!address){ showToast('المرجو ملء الحقول'); return;}
+  const btn=document.getElementById('confirmBtn'); btn.disabled=true; btn.textContent='جاري الإرسال...';
   try{
-    // إعادة التحقق من المخزون من publicStores أو users
-    try{
-      let freshSnap = await get(ref(db, `publicStores/${STORE_ID}/products`));
-      let freshList = freshSnap.exists()? (freshSnap.val()||[]) : null;
-      if(!freshList){
-        freshSnap = await get(ref(db, `users/${STORE_ID}/products`));
-        if(freshSnap.exists()){
-          const v = freshSnap.val(); if(v._init) delete v._init;
-          freshList = Object.values(v);
-        }
-      }
-      if(freshList){
-        for(const item of cart){
-          const freshProd = Array.isArray(freshList)? freshList.find(p=>p.id==item.productId) : Object.values(freshList).find(p=>p.id==item.productId);
-          if(!freshProd){ showToast('المنتج '+item.name+' لم يعد متوفر'); btn.disabled=false; btn.textContent='تأكيد وإرسال الطلب'; return; }
-          if(parseInt(freshProd.stock||0) < item.qty){ showToast('الكمية غير متوفرة لـ '+item.name+' - المتبقي: '+freshProd.stock); btn.disabled=false; btn.textContent='تأكيد وإرسال الطلب'; return; }
-        }
-      }
-    }catch(e){ console.error('stock re-check error', e); }
-
-    const totalValue = cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0);
-    const orderData = {
-      clientName: name,
-      phone: phone,
-      address: address,
-      city: city,
-      note: note,
-      items: cart,
-      totalItems: cart.length,
-      totalQty: cart.reduce((s,i)=>s+i.qty,0),
-      totalValue: totalValue,
-      paymentMethod: payMethod,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      source: 'public_store'
-    };
-
+    const totalValue=cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0);
+    const order={clientName:name,phone,address,city,note,items:cart,totalItems:cart.length,totalQty:cart.reduce((s,i)=>s+i.qty,0),totalValue,paymentMethod:payMethod,status:'pending',createdAt:new Date().toISOString(),source:'public_store'};
     let pushRef;
-    try{
-      // المحاولة في publicStores/orders أولاً
-      pushRef = await push(ref(db, `publicStores/${STORE_ID}/orders`), orderData);
-    }catch(e){
-      console.error('publicStores orders write failed, trying users', e);
-    }
-    try{
-      // وأيضا في users/orders لصاحب المتجر
-      const r2 = await push(ref(db, `users/${STORE_ID}/orders`), orderData);
-      if(!pushRef) pushRef = r2;
-    }catch(e){
-      console.error('users orders write failed', e);
-      if(!pushRef) throw e;
-    }
-
-    const orderId = pushRef.key.slice(-6).toUpperCase();
-    closeCheckout();
-    document.getElementById('successId').textContent = orderId;
-    document.getElementById('successTotal').textContent = totalValue.toFixed(2)+' درهم';
-    document.getElementById('successPay').textContent = payMethod==='cod'? 'الدفع عند الاستلام' : 'الدفع الآن';
-    document.getElementById('successModal').classList.add('active');
-    cart=[]; updateCartUI(); renderProducts();
-
-  }catch(e){
-    console.error('confirmOrder error:', e);
-    showToast('خطأ في إرسال الطلب: '+ (e.message||e));
-  }finally{
-    btn.disabled=false; btn.textContent='تأكيد وإرسال الطلب';
-  }
+    try{ pushRef=await push(ref(db, `publicStores/${STORE_ID}/orders`), order); }catch(e){ console.error('[STORE] publicStores orders write failed', e); }
+    try{ const r2=await push(ref(db, `users/${STORE_ID}/orders`), order); if(!pushRef) pushRef=r2; }catch(e){ console.error('[STORE] users orders write failed', e); if(!pushRef) throw e; }
+    const orderId=pushRef.key.slice(-6).toUpperCase();
+    closeCheckout(); document.getElementById('successId').textContent=orderId; document.getElementById('successTotal').textContent=totalValue.toFixed(2)+' درهم'; document.getElementById('successPay').textContent=payMethod==='cod'?'الدفع عند الاستلام':'الدفع الآن'; document.getElementById('successModal').classList.add('active'); cart=[]; updateCartUI(); renderProducts();
+  }catch(e){ console.error('[STORE] confirmOrder error:', e); showToast('خطأ في الإرسال: '+(e.message||e)); }finally{ btn.disabled=false; btn.textContent='تأكيد وإرسال الطلب'; }
 }
-
-window.backToStore = function(){ document.getElementById('successModal').classList.remove('active'); }
-window.openGalleryDirect = function(id){
-  const p = products.find(x=>x.id==id);
-  if(!p) return;
-  const img = p.mainImage || p.images?.[0] || '';
-  document.getElementById('galleryImage').src = img;
-  document.getElementById('galleryModal').classList.add('active');
-}
-window.closeGallery = function(){ document.getElementById('galleryModal').classList.remove('active'); }
-
-function showToast(msg){
-  const t = document.getElementById('toast');
-  document.getElementById('toastMessage').textContent = msg;
-  t.classList.remove('hidden');
-  setTimeout(()=>t.classList.add('hidden'),3000);
-}
-
+window.backToStore=function(){document.getElementById('successModal').classList.remove('active');}
+window.openGalleryDirect=function(id){const p=products.find(x=>x.id==id); if(!p)return; document.getElementById('galleryImage').src=p.mainImage||p.images?.[0]||''; document.getElementById('galleryModal').classList.add('active');}
+window.closeGallery=function(){document.getElementById('galleryModal').classList.remove('active');}
+function showToast(msg){const t=document.getElementById('toast'); document.getElementById('toastMessage').textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),3000);}
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
