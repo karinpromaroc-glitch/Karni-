@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبي - Karni Pro</title>
+<script>setTimeout(()=>{var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);},80);</script>
+<style>.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center;padding:16px}.modal.active{display:flex}.gallery-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:110;display:none;align-items:center;justify-content:center;padding:12px}.gallery-modal.active{display:flex}.thumb-active{border-color:#059669!important;box-shadow:0 0 0 2px #059669}.animate-pop{animation:pop.28s cubic-bezier(.34,1.56,.64,1)}@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}</style>
+</head>
+<body class="bg-gray-50">
+<header class="bg-white border-b sticky top-0 z-20"><div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center"><a id="backToStore" href="#" class="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></a><h1 class="font-bold text-sm">تفاصيل طلبي</h1><div class="w-9"></div></div></header>
+<main class="max-w-3xl mx-auto px-4 pt-4 pb-28">
+  <div id="statusCard" class="bg-white rounded-2xl border p-4 mb-3"></div>
+  <div id="infoCard" class="bg-white rounded-2xl border p-4 mb-3"></div>
+  <div id="itemsCard" class="bg-white rounded-2xl border p-4 mb-3"></div>
+  <div class="flex gap-2"><button id="editBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm hidden">تعديل الطلب</button><button id="deleteBtn" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm">حذف الطلب</button><button id="newOrderBtn" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-sm">طلب جديد</button></div>
+</main>
+
+<div id="editModal" class="modal"><div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-pop"><div class="p-4 border-b flex justify-between"><h3 class="font-bold">تعديل الطلب</h3><button onclick="closeEdit()" class="w-8 h-8 bg-gray-100 rounded-full">×</button></div><div class="flex-1 overflow-y-auto p-4 space-y-3"><input id="eName" placeholder="الاسم" class="w-full border rounded-xl px-3 py-2 text-sm"><input id="ePhone" placeholder="الهاتف" class="w-full border rounded-xl px-3 py-2 text-sm"><div class="grid grid-cols-2 gap-2"><input id="eCity" placeholder="المدينة" class="border rounded-xl px-3 py-2 text-sm"><input id="eAddress" placeholder="العنوان" class="border rounded-xl px-3 py-2 text-sm"></div><textarea id="eNote" placeholder="ملاحظة" class="w-full border rounded-xl px-3 py-2 text-sm"></textarea><div id="editItems" class="space-y-2"></div><button onclick="openAddProduct()" class="w-full bg-gray-100 py-2 rounded-xl text-sm font-bold">+ إضافة منتج</button></div><div class="p-3 border-t"><button onclick="saveEdit()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">حفظ وإعادة إرسال</button></div></div></div>
+
+<div id="productPicker" class="modal" style="z-index:90"><div class="bg-white rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col"><div class="p-3 border-b flex justify-between"><h3 class="font-bold text-sm">اختر منتج</h3><button onclick="closePicker()" class="w-8 h-8 bg-gray-100 rounded-full">×</button></div><div id="pickerList" class="flex-1 overflow-y-auto p-2 space-y-2"></div></div></div>
+
+<div id="deleteConfirm" class="modal" style="z-index:95"><div class="bg-white rounded-2xl w-full max-w-sm p-6 text-center animate-pop"><div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-trash text-red-500 text-xl"></i></div><h3 class="font-bold mb-2">حذف الطلب؟</h3><p class="text-xs text-gray-500 mb-4">سيتم حذفه نهائياً</p><div class="flex gap-2"><button onclick="closeDelete()" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-sm">إلغاء</button><button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm">حذف</button></div></div></div>
+
+<div id="galleryModal" class="gallery-modal"><div class="bg-white rounded-2xl w-full max-w-lg overflow-hidden animate-pop"><div class="p-3 flex justify-between border-b"><span id="gCounter" class="bg-black text-white text-[11px] px-2 py-1 rounded-full">1/1</span><button onclick="closeGallery()" class="w-8 h-8 bg-gray-100 rounded-full">×</button></div><div id="gWrap" class="relative bg-gray-50 flex items-center justify-center" style="min-height:360px"><button onclick="prevG()" class="absolute right-3 w-9 h-9 bg-white shadow rounded-full">›</button><button onclick="nextG()" class="absolute left-3 w-9 h-9 bg-white shadow rounded-full">‹</button><img id="gMain" src="" class="max-h-[60vh] object-contain"></div><div class="p-2"><div id="gThumbs" class="flex gap-2 overflow-x-auto"></div></div></div></div>
+
+<div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-5 py-3 rounded-xl text-sm"><span id="toastMsg"></span></div></div>
+
+<script type="module">
+import { db } from "./firebase.js";
+import { ref, get, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+const qs=new URLSearchParams(location.search);
+const STORE_ID=qs.get('store'), ORDER_ID=qs.get('order'), TOKEN=qs.get('token');
+if(!STORE_ID||!ORDER_ID||!TOKEN){ document.body.innerHTML='<div class="p-10 text-center">رابط غير صحيح</div>'; throw new Error(); }
+let orderData=null, products=[], editCart=[], gImgs=[], gIdx=0, touchX=0;
+function toast(m){ document.getElementById('toastMsg').textContent=m; const t=document.getElementById('toast'); t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),3000); }
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function getImgs(it){ let a=[]; if(Array.isArray(it.images)) a=a.concat(it.images); if(it.mainImage) a.push(it.mainImage); if(it.image) a.push(it.image); a=a.filter(u=>String(u).startsWith('http')); return [...new Set(a)]; }
+async function load(){
+  const snap=await get(ref(db, `users/${STORE_ID}/orders/${ORDER_ID}`));
+  if(!snap.exists()){ document.body.innerHTML='<div class="p-10 text-center">الطلب غير موجود</div>'; return; }
+  orderData=snap.val();
+  if(orderData.customerToken && orderData.customerToken!==TOKEN){ document.body.innerHTML='<div class="p-10 text-center text-red-600">غير مصرح - التوكن غير صحيح</div>'; return; }
+  try{
+    let s=await get(ref(db, `publicStores/${STORE_ID}`)); if(s.exists()&&s.val().products) products=s.val().products;
+    else{ let s2=await get(ref(db, `users/${STORE_ID}/products`)); if(s2.exists()){ const v=s2.val(); if(v._init) delete v._init; products=Object.values(v).filter(x=>x&&!x._init); } }
+  }catch(e){}
+  render();
+}
+function render(){
+  const map={new:'قيد المراجعة', pending:'قيد المراجعة', accepted:'تم قبوله ✅', delivered:'تم التوصيل 🚚'};
+  document.getElementById('statusCard').innerHTML=`<div class="flex justify-between"><div><p class="text-xs text-gray-500">رقم الطلب</p><p class="font-bold text-xs">${ORDER_ID.slice(-6)}</p><p class="text-[11px] text-gray-400 mt-1">${new Date(orderData.createdAt).toLocaleString('ar-MA')}</p>${orderData.updatedAt?`<p class="text-[11px] text-blue-600">تم تعديله: ${new Date(orderData.updatedAt).toLocaleString('ar-MA')}</p>`:''}</div><span class="px-3 py-1 rounded-full text-xs font-bold ${orderData.status==='accepted'?'bg-blue-100 text-blue-700':orderData.status==='delivered'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}">${map[orderData.status]||orderData.status}</span></div>`;
+  document.getElementById('infoCard').innerHTML=`<p class="font-bold text-sm mb-2">معلوماتك</p><div class="text-xs space-y-1"><p>👤 ${escapeHtml(orderData.clientName)}</p><p>📞 ${escapeHtml(orderData.phone)}</p><p>🏙️ ${escapeHtml(orderData.city)} - ${escapeHtml(orderData.address)}</p><p>📝 ${escapeHtml(orderData.note||'')}</p></div>`;
+  document.getElementById('itemsCard').innerHTML=`<p class="font-bold text-sm mb-2">المنتجات</p><div class="space-y-2">${(orderData.items||[]).map((it,i)=>{ const f=getImgs(it)[0]||''; return `<div class="flex items-center gap-2 border rounded-xl p-2"><img src="${f}" class="w-14 h-14 rounded-lg object-cover cursor-pointer" onclick="openG(${i})"><div class="flex-1"><div class="font-bold text-xs">${escapeHtml(it.name)}</div><div class="text-[11px]">× ${it.qty} - ${parseFloat(it.price||0).toFixed(2)} د</div></div><span class="font-bold text-xs">${(it.price*it.qty).toFixed(2)}</span></div>`; }).join('')}<div class="flex justify-between font-bold pt-2 border-t mt-2 text-sm"><span>الإجمالي</span><span class="text-emerald-600">${parseFloat(orderData.totalValue||0).toFixed(2)} درهم</span></div>`;
+  const canEdit=!['accepted','delivered'].includes(orderData.status);
+  document.getElementById('editBtn').classList.toggle('hidden',!canEdit);
+  if(!canEdit) document.getElementById('editBtn').outerHTML=`<div class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl text-center text-xs font-bold">لا يمكن تعديل هذا الطلب لأنه تم قبوله بالفعل.</div>`;
+  document.getElementById('backToStore').href=`store.html?store=${STORE_ID}`;
+  document.getElementById('newOrderBtn').onclick=()=>location.href=`store.html?store=${STORE_ID}`;
+}
+window.openG=(idx)=>{ const it=orderData.items[idx]; gImgs=getImgs(it); gIdx=0; renderG(); document.getElementById('galleryModal').classList.add('active'); }
+function renderG(){ document.getElementById('gMain').src=gImgs[gIdx]; document.getElementById('gCounter').textContent=`${gIdx+1} / ${gImgs.length}`; document.getElementById('gThumbs').innerHTML=gImgs.map((s,i)=>`<img src="${s}" onclick="goG(${i})" class="w-14 h-14 rounded-lg border-2 ${i===gIdx?'thumb-active':''} cursor-pointer">`).join(''); }
+window.goG=(i)=>{ gIdx=i; renderG(); }
+window.nextG=()=>{ gIdx=(gIdx+1)%gImgs.length; renderG(); }
+window.prevG=()=>{ gIdx=(gIdx-1+gImgs.length)%gImgs.length; renderG(); }
+window.closeGallery=()=>document.getElementById('galleryModal').classList.remove('active');
+window.openEdit=()=>{ document.getElementById('eName').value=orderData.clientName||''; document.getElementById('ePhone').value=orderData.phone||''; document.getElementById('eCity').value=orderData.city||''; document.getElementById('eAddress').value=orderData.address||''; document.getElementById('eNote').value=orderData.note||''; editCart=JSON.parse(JSON.stringify(orderData.items||[])); renderEdit(); document.getElementById('editModal').classList.add('active'); }
+window.closeEdit=()=>document.getElementById('editModal').classList.remove('active');
+function renderEdit(){ document.getElementById('editItems').innerHTML=editCart.map((it,i)=>`<div class="flex items-center gap-2 border rounded-xl p-2"><div class="flex-1"><div class="font-bold text-xs">${escapeHtml(it.name)}</div><div class="flex gap-2 mt-1"><button onclick="eQty(${i},-1)" class="w-6 h-6 bg-gray-100 rounded-full">-</button><span class="text-xs font-bold">${it.qty}</span><button onclick="eQty(${i},1)" class="w-6 h-6 bg-gray-100 rounded-full">+</button></div></div><button onclick="eRemove(${i})" class="w-6 h-6 bg-red-50 text-red-500 rounded-full">×</button></div>`).join(''); }
+window.eQty=(i,d)=>{ editCart[i].qty=Math.max(1,editCart[i].qty+d); renderEdit(); }
+window.eRemove=(i)=>{ editCart.splice(i,1); renderEdit(); }
+window.openAddProduct=()=>{ document.getElementById('pickerList').innerHTML=products.map(p=>{ const img=p.mainImage||p.image||''; return `<div class="flex items-center gap-2 border rounded-xl p-2"><img src="${img}" class="w-12 h-12 rounded-lg"><div class="flex-1"><div class="font-bold text-xs">${escapeHtml(p.name)}</div><div class="text-[11px] text-emerald-600">${parseFloat(p.price||0).toFixed(2)} د</div></div><button onclick="addProd('${p.id}')" class="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">إضافة</button></div>`; }).join(''); document.getElementById('productPicker').classList.add('active'); }
+window.closePicker=()=>document.getElementById('productPicker').classList.remove('active');
+window.addProd=(id)=>{ const p=products.find(x=>x.id===id); if(!p) return; const ex=editCart.find(c=>c.productId===id); if(ex) ex.qty++; else editCart.push({productId:p.id,name:p.name,price:p.price,qty:1,mainImage:p.mainImage||p.image,images:[p.mainImage||p.image]}); renderEdit(); closePicker(); }
+window.saveEdit=async()=>{ if(editCart.length===0){ toast('السلة فارغة'); return; } try{ const total=editCart.reduce((s,it)=>s+parseFloat(it.price||0)*it.qty,0); await update(ref(db, `users/${STORE_ID}/orders/${ORDER_ID}`), {clientName:document.getElementById('eName').value.trim(), phone:document.getElementById('ePhone').value.trim(), city:document.getElementById('eCity').value.trim(), address:document.getElementById('eAddress').value.trim(), note:document.getElementById('eNote').value.trim(), items:editCart, totalItems:editCart.length, totalQty:editCart.reduce((s,it)=>s+it.qty,0), totalValue:total, updatedAt:new Date().toISOString(), editCount:(orderData.editCount||0)+1, status:'new'}); toast('تم التحديث'); closeEdit(); load(); }catch(e){ toast(e.message); } }
+window.confirmDelete=async()=>{ try{ await remove(ref(db, `users/${STORE_ID}/orders/${ORDER_ID}`)); toast('تم الحذف'); setTimeout(()=>location.href=`store.html?store=${STORE_ID}`,800); }catch(e){ toast(e.message); } }
+window.closeDelete=()=>document.getElementById('deleteConfirm').classList.remove('active');
+document.getElementById('deleteBtn').addEventListener('click', ()=>document.getElementById('deleteConfirm').classList.add('active'));
+document.getElementById('editBtn').addEventListener('click', ()=>openEdit());
+load();
+</script>
+</body>
+</html>
