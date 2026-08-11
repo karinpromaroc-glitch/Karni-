@@ -10,6 +10,12 @@
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center;padding:16px}
 .modal.active{display:flex}
 .animate-pop{animation:pop.28s cubic-bezier(.34,1.56,.64,1)} @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.gallery-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:110;display:none;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(8px)}
+.gallery-modal.active{display:flex;animation:fadeIn.25s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.gallery-card{animation:pop.3s cubic-bezier(.34,1.56,.64,1)}
+.thumb-active{border-color:#059669!important;box-shadow:0 0 0 2px #059669}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none}
 </style>
 </head>
 <body class="bg-gray-50">
@@ -31,15 +37,32 @@
   </div>
 </div>
 
+<!-- معرض الصور الاحترافي -->
+<div id="galleryModal" class="gallery-modal" onclick="if(event.target.id==='galleryModal') closeGallery()">
+  <div class="gallery-card bg-white rounded-[20px] w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+    <div class="p-3 flex items-center justify-between border-b">
+      <div class="flex items-center gap-2"><span id="galleryCounter" class="bg-gray-900 text-white text-[11px] px-2.5 py-1 rounded-full font-bold">1 / 1</span><span id="galleryProductName" class="font-bold text-sm truncate max-w-[180px]"></span></div>
+      <button onclick="closeGallery()" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="relative bg-gray-50 flex-1 flex items-center justify-center overflow-hidden" id="galleryMainWrap" style="min-height:320px">
+      <button id="galleryPrev" onclick="prevGallery()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center z-10"><i class="fa-solid fa-chevron-right"></i></button>
+      <button id="galleryNext" onclick="nextGallery()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center z-10"><i class="fa-solid fa-chevron-left"></i></button>
+      <img id="galleryMainImage" src="" class="max-w-full max-h-[55vh] w-auto h-auto object-contain select-none" draggable="false">
+    </div>
+    <div class="p-3 bg-white border-t">
+      <div id="galleryThumbs" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg"><span id="toastMessage" class="text-sm"></span></div></div>
 
 <script type="module">
 import { auth, db } from "./firebase.js";
-import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-
 function showToast(msg){
   const t=document.getElementById('toast');
   if(!t) return;
@@ -47,52 +70,139 @@ function showToast(msg){
   t.classList.remove('hidden');
   setTimeout(()=>t.classList.add('hidden'),3500);
 }
-
-// دالة محدثة تقبل 06 و 07 و +212 وتحول تلقائياً لصيغة wa.me بدون +
 function normalizePhone(raw){
   if(!raw) return null;
   let p = String(raw).trim();
-  // إزالة المسافات والرموز
   p = p.replace(/[\s\-\(\)]/g,'');
-  // إزالة + في البداية مؤقتاً
   if(p.startsWith('+')) p = p.slice(1);
-  // إبقاء الأرقام فقط
   p = p.replace(/\D/g,'');
   if(!p) return null;
-
-  // حالة 212695606911 -> 212695606911
   if(p.startsWith('212')){
-    if(p.length===12 && /^212[67]\d{8}$/.test(p)){
-      return p; // صحيح لـ wa.me
-    }
+    if(p.length===12 && /^212[67]\d{8}$/.test(p)) return p;
     return null;
   }
-
-  // حالة 0695606911 أو 0760606911 -> 212695606911
   if(p.startsWith('0') && p.length===10){
-    if(/^0[67]\d{8}$/.test(p)){
-      return '212' + p.slice(1);
-    }
+    if(/^0[67]\d{8}$/.test(p)) return '212' + p.slice(1);
     return null;
   }
-
-  // حالة 695606911 (9 أرقام تبدأ بـ 6 أو 7) -> 212695606911
-  if(p.length===9 && /^[67]\d{8}$/.test(p)){
-    return '212' + p;
-  }
-
+  if(p.length===9 && /^[67]\d{8}$/.test(p)) return '212' + p;
   return null;
 }
-
 function formatPay(method){
   return method==='cod'? 'الدفع عند الاستلام' : method==='online'? 'الدفع الآن' : 'الدفع عند الاستلام';
 }
 
+// ===== نظام الصور =====
+let productsMap = {}; // productId -> product
+function extractImagesFromItem(item){
+  try{
+    let imgs = [];
+    if(!item) return [];
+    if(Array.isArray(item.images) && item.images.length) imgs = imgs.concat(item.images);
+    if(Array.isArray(item.imageUrls) && item.imageUrls.length) imgs = imgs.concat(item.imageUrls);
+    if(item.mainImage) imgs.push(item.mainImage);
+    if(item.image) imgs.push(item.image);
+    if(item.imageUrl) imgs.push(item.imageUrl);
+    if(item.img) imgs.push(item.img);
+    // تنظيف وفلترة
+    imgs = imgs.map(u=>String(u||'').trim()).filter(u=>u && u.startsWith('http'));
+    // إزالة التكرار
+    return [...new Set(imgs)];
+  }catch(e){ return []; }
+}
+function getImagesForItem(item){
+  let imgs = extractImagesFromItem(item);
+  // إذا عندنا خريطة المنتجات، نكمل الصور منها
+  if(item && item.productId && productsMap[item.productId]){
+    const prod = productsMap[item.productId];
+    let pImgs = [];
+    if(Array.isArray(prod.images)) pImgs = pImgs.concat(prod.images);
+    if(prod.mainImage) pImgs.push(prod.mainImage);
+    if(prod.image) pImgs.push(prod.image);
+    pImgs = pImgs.map(u=>String(u||'').trim()).filter(u=>u.startsWith('http'));
+    imgs = [...new Set([...imgs,...pImgs])];
+  }
+  if(imgs.length===0) return ['https://via.placeholder.com/300x300?text=No+Image'];
+  return imgs;
+}
+
+// Gallery Logic
+let galleryImages = [];
+let galleryIndex = 0;
+let touchStartX = 0;
+window.openGalleryForItem = (orderId, itemIdx)=>{
+  try{
+    const order = cachedOrders.find(o=>o.firebaseId===orderId);
+    if(!order) return;
+    const item = order.items[itemIdx];
+    if(!item) return;
+    galleryImages = getImagesForItem(item);
+    galleryIndex = 0;
+    document.getElementById('galleryProductName').textContent = item.name || 'المنتج';
+    renderGallery();
+    document.getElementById('galleryModal').classList.add('active');
+    document.body.style.overflow='hidden';
+  }catch(e){ console.error(e); }
+}
+function renderGallery(){
+  if(!galleryImages.length) return;
+  const main = document.getElementById('galleryMainImage');
+  main.src = galleryImages[galleryIndex];
+  document.getElementById('galleryCounter').textContent = `${galleryIndex+1} / ${galleryImages.length}`;
+  const thumbs = document.getElementById('galleryThumbs');
+  thumbs.innerHTML = galleryImages.map((src,i)=>`
+    <img src="${escapeHtml(src)}" data-idx="${i}" onclick="goGallery(${i})" class="w-16 h-16 rounded-xl object-cover border-2 cursor-pointer flex-shrink-0 transition ${i===galleryIndex?'thumb-active border-emerald-600':'border-transparent hover:border-gray-300'}" loading="lazy">
+  `).join('');
+  const showArrows = galleryImages.length>1;
+  document.getElementById('galleryPrev').style.display = showArrows?'flex':'none';
+  document.getElementById('galleryNext').style.display = showArrows?'flex':'none';
+  // تمرير للصورة النشطة
+  setTimeout(()=>{
+    const active = thumbs.querySelector('.thumb-active');
+    if(active) active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  },100);
+}
+window.nextGallery = ()=>{ if(!galleryImages.length) return; galleryIndex=(galleryIndex+1)%galleryImages.length; renderGallery(); }
+window.prevGallery = ()=>{ if(!galleryImages.length) return; galleryIndex=(galleryIndex-1+galleryImages.length)%galleryImages.length; renderGallery(); }
+window.goGallery = (i)=>{ galleryIndex=i; renderGallery(); }
+window.closeGallery = ()=>{
+  document.getElementById('galleryModal').classList.remove('active');
+  document.body.style.overflow='';
+  galleryImages=[]; galleryIndex=0;
+}
+// Swipe
+const wrap = document.getElementById('galleryMainWrap');
+wrap.addEventListener('touchstart', e=>{ touchStartX=e.touches[0].clientX; }, {passive:true});
+wrap.addEventListener('touchend', e=>{
+  const diff = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(diff)>50){
+    if(diff>0) prevGallery(); else nextGallery();
+  }
+}, {passive:true});
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('galleryModal').classList.contains('active')) return;
+  if(e.key==='Escape') closeGallery();
+  if(e.key==='ArrowLeft') nextGallery();
+  if(e.key==='ArrowRight') prevGallery();
+});
+
 let cachedOrders = [];
 let pendingDeleteId = null;
 
-onAuthStateChanged(auth, (user)=>{
+onAuthStateChanged(auth, async (user)=>{
   if(!user){ location.href='login.html'; return; }
+  // تحميل خريطة المنتجات لدعم عدة صور
+  try{
+    const snapProd = await get(ref(db, `users/${user.uid}/products`));
+    if(snapProd.exists()){
+      const val = snapProd.val();
+      if(val._init) delete val._init;
+      Object.values(val).forEach(p=>{
+        if(p && p.id) productsMap[p.id]=p;
+      });
+    }
+  }catch(e){ console.warn('products map load failed', e); }
+
   const ordersRef = ref(db, `users/${user.uid}/orders`);
   onValue(ordersRef, (snap)=>{
     const list = document.getElementById('ordersList');
@@ -107,14 +217,31 @@ onAuthStateChanged(auth, (user)=>{
     const entries = Object.entries(snap.val());
     cachedOrders = entries.map(([firebaseId, data])=>({
       firebaseId: String(firebaseId),
-   ...data
+  ...data
     })).sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
 
     list.innerHTML = cachedOrders.map(o=>{
       const isAccepted = o.status==='accepted';
       const isDelivered = o.status==='delivered';
-      const itemsHtml = (o.items||[]).map(i=>`<div class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.qty}</span><span class="font-bold">${(parseFloat(i.price||0)*parseInt(i.qty||0)).toFixed(2)}</span></div>`).join('');
       const statusClass = o.status==='new'? 'bg-red-100 text-red-600' : o.status==='pending'? 'bg-amber-100 text-amber-700' : o.status==='accepted'? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700';
+      const itemsHtml = (o.items||[]).map((i,idx)=>{
+        const imgs = getImagesForItem(i);
+        const first = imgs[0];
+        const moreCount = imgs.length>1? `<span class="absolute -top-1 -right-1 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">${imgs.length}</span>` : '';
+        return `<div class="flex items-center justify-between gap-2 bg-white border rounded-xl p-2">
+          <div class="flex items-center gap-2.5 flex-1 min-w-0">
+            <div class="relative flex-shrink-0">
+              <img src="${escapeHtml(first)}" alt="${escapeHtml(i.name)}" class="w-14 h-14 rounded-xl object-cover border cursor-pointer hover:opacity-90 transition" onclick="openGalleryForItem('${escapeHtml(o.firebaseId)}', ${idx})" loading="lazy" onerror="this.src='https://via.placeholder.com/100?text=No'">
+              ${moreCount}
+            </div>
+            <div class="min-w-0">
+              <div class="font-bold text-[13px] truncate">${escapeHtml(i.name)}</div>
+              <div class="text-[11px] text-gray-500">الكمية: ${i.qty}</div>
+            </div>
+          </div>
+          <span class="font-bold text-[13px] flex-shrink-0">${(parseFloat(i.price||0)*parseInt(i.qty||0)).toFixed(2)} د</span>
+        </div>`;
+      }).join('');
       return `
       <div class="bg-white rounded-2xl border p-4">
         <div class="flex justify-between items-start gap-3 mb-3">
@@ -127,9 +254,8 @@ onAuthStateChanged(auth, (user)=>{
           <div class="text-right flex-1 min-w-0">
             <div class="font-bold text-[14px] truncate">${escapeHtml(o.clientName||'زبون')} - ${escapeHtml(o.phone||'')}</div>
           </div>
-        </div>
         <p class="text-xs text-gray-500 mb-2">${o.createdAt? new Date(o.createdAt).toLocaleString('ar-MA') : ''} - ${escapeHtml(o.city||'')} - ${formatPay(o.paymentMethod)}</p>
-        <div class="bg-gray-50 rounded-xl p-2 space-y-1 text-sm">${itemsHtml}</div>
+        <div class="bg-gray-50 rounded-xl p-2 space-y-2 text-sm">${itemsHtml || '<div class="text-xs text-gray-400 text-center">لا توجد منتجات</div>'}</div>
         <div class="flex justify-between font-bold mt-2 pt-2 border-t"><span>الإجمالي</span><span class="text-emerald-600">${(parseFloat(o.totalValue||0)).toFixed(2)} درهم</span></div>
         <div class="text-[11px] text-gray-400 mt-1">📍 ${escapeHtml(o.address||'')} ${o.note? ' - '+escapeHtml(o.note): ''}</div>
         <div class="flex gap-2 mt-3">
@@ -157,7 +283,6 @@ window.closeDeleteModal = ()=>{
   if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
   document.getElementById('deleteModal').classList.remove('active');
 }
-
 window.confirmDeleteOrder = async ()=>{
   if(!pendingDeleteId || typeof pendingDeleteId!== 'string'){
     showToast('معرف الطلب غير موجود');
@@ -181,7 +306,6 @@ window.confirmDeleteOrder = async ()=>{
     if(btn){ btn.disabled=false; btn.textContent='حذف الطلب'; }
   }
 }
-
 window.acceptOrder = async (firebaseId)=>{
   try{
     const u = auth.currentUser;
@@ -191,23 +315,18 @@ window.acceptOrder = async (firebaseId)=>{
     if(!order){ showToast('الطلب غير موجود'); return; }
     if(order.status==='accepted'){ showToast('الطلب مقبول مسبقاً'); return; }
     if(order.status==='delivered'){ showToast('الطلب تم توصيله مسبقاً'); return; }
-
     const btn = document.getElementById(`btn-accept-${firebaseId}`);
     if(btn){ btn.disabled=true; btn.textContent='جاري القبول...'; }
-
-    // تحويل الرقم - يدعم 06 و 07 و +212
     const normalized = normalizePhone(order.phone);
     if(!normalized){
       showToast('رقم الهاتف غير صالح. يجب أن يكون 06xxxxxxxx أو 07xxxxxxxx أو +212');
       if(btn){ btn.disabled=false; btn.textContent='قبول'; }
       return;
     }
-
     const itemsDetails = (order.items||[]).map(i=>{
       const total = (parseFloat(i.price||0)*parseInt(i.qty||0)).toFixed(2);
       return `- ${i.name} × ${i.qty} = ${total} درهم`;
     }).join('\n');
-
     const message = `السلام عليكم ${order.clientName||'عزيزي الزبون'} 👋
 
 شكراً جزيلاً على طلبك وثقتك بنا ❤️
@@ -228,17 +347,12 @@ ${order.address? `📍 العنوان: ${order.address}` : ''}
 شكراً لاختيارك لنا، ونتمنى أن تنال خدمتنا رضاك 🙏
 
 Karni Pro`;
-
-    // رابط WhatsApp بدون + كما هو مطلوب
     const waUrl = `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
-
     await update(ref(db, `users/${u.uid}/orders/${firebaseId}`), {
       status: 'accepted',
       acceptedAt: new Date().toISOString()
     });
-
     window.open(waUrl, '_blank');
-
   }catch(e){
     console.error(e);
     showToast('فشل قبول الطلب: '+(e.message||e));
@@ -246,7 +360,6 @@ Karni Pro`;
     if(btn){ btn.disabled=false; btn.textContent='قبول'; }
   }
 }
-
 window.closeOrder = async (firebaseId)=>{
   try{
     const u=auth.currentUser;
@@ -262,7 +375,6 @@ window.closeOrder = async (firebaseId)=>{
     showToast('خطأ: '+(e.message||e));
   }
 }
-
 document.getElementById('deleteModal').addEventListener('click', (e)=>{
   if(e.target.id==='deleteModal') closeDeleteModal();
 });
