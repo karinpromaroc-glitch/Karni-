@@ -131,6 +131,7 @@ onAuthStateChanged(auth, async (user)=>{
     cachedOrders=Object.entries(snap.val()).map(([fid,data])=>({firebaseId:String(fid),...data})).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
     list.innerHTML=cachedOrders.map(o=>{
       const statusClass=o.status==='new'?'bg-red-100 text-red-600':o.status==='pending'?'bg-amber-100 text-amber-700':o.status==='accepted'?'bg-blue-100 text-blue-700':'bg-emerald-100 text-emerald-700';
+      const isEdited = o.updatedAt && o.updatedAt!==o.createdAt;
       const itemsHtml=(o.items||[]).map((it,idx)=>{
         const imgs=getImagesForItem(it); const first=imgs[0];
         return `<div class="flex items-center justify-between gap-2 bg-white border rounded-xl p-2">
@@ -142,12 +143,22 @@ onAuthStateChanged(auth, async (user)=>{
         </div>`;
       }).join('');
       return `<div class="bg-white rounded-2xl border p-4">
-        <div class="flex justify-between items-start gap-3 mb-3">
-          <div class="flex items-center gap-2"><button data-id="${escapeHtml(o.firebaseId)}" onclick="openDeleteModal(this.dataset.id)" class="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><i class="fa-solid fa-trash text-[12px]"></i></button><span class="text-xs ${statusClass} px-2.5 py-1 rounded-full font-bold">${escapeHtml(o.status||'new')}</span></div>
-          <div class="font-bold text-[14px] truncate">${escapeHtml(o.clientName||'زبون')} - ${escapeHtml(o.phone||'')}</div>
+        <div class="flex justify-between items-start gap-3 mb-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button data-id="${escapeHtml(o.firebaseId)}" onclick="openDeleteModal(this.dataset.id)" class="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><i class="fa-solid fa-trash text-[12px]"></i></button>
+            <span class="text-xs ${statusClass} px-2.5 py-1 rounded-full font-bold">${escapeHtml(o.status||'new')}</span>
+            ${isEdited?`<span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-pen ml-1"></i>تم تعديله${o.editCount?` (${o.editCount})`:''}</span>`:''}
+            ${o.source==='public_store'?`<span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded-full">متجر عام</span>`:''}
+          </div>
+          <div class="font-bold text-[13px] truncate text-left">${escapeHtml(o.clientName||'زبون')} - ${escapeHtml(o.phone||'')}</div>
         </div>
         <p class="text-xs text-gray-500 mb-2">${o.createdAt?new Date(o.createdAt).toLocaleString('ar-MA'):''} - ${escapeHtml(o.city||'')} - ${formatPay(o.paymentMethod)}</p>
+        ${isEdited?`<div class="mb-2 text-[11px] bg-blue-50 border border-blue-100 rounded-xl p-2 flex items-center justify-between"><span class="text-blue-700 font-bold">✏️ تم تعديل الطلب</span><span class="text-gray-500">${new Date(o.updatedAt).toLocaleString('ar-MA')}</span></div>`:''}
         <div class="bg-gray-50 rounded-xl p-2 space-y-2">${itemsHtml}</div>
+        <div class="mt-2 text-[11px] text-gray-500 space-y-1">
+          ${o.address?`<div>📍 ${escapeHtml(o.address)}</div>`:''}
+          ${o.note?`<div>📝 ${escapeHtml(o.note)}</div>`:''}
+        </div>
         <div class="flex justify-between font-bold mt-2 pt-2 border-t"><span>الإجمالي</span><span class="text-emerald-600">${(parseFloat(o.totalValue||0)).toFixed(2)} درهم</span></div>
         <div class="flex gap-2 mt-3">
           ${o.status==='accepted'?`<button disabled class="flex-1 bg-blue-100 text-blue-700 py-2 rounded-xl text-sm font-bold">✓ تم قبول الطلب</button>`:o.status==='delivered'?`<button disabled class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-xl text-sm font-bold">✓ تم التوصيل</button>`:`<button data-id="${escapeHtml(o.firebaseId)}" onclick="acceptOrder(this.dataset.id)" id="btn-accept-${escapeHtml(o.firebaseId)}" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-sm font-bold">قبول</button>`}
