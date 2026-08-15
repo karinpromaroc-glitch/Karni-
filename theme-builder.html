@@ -8,66 +8,87 @@
 <style>
 *{font-family:'Cairo',sans-serif;box-sizing:border-box}
 body{background:#f8fafc;margin:0}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center;padding:16px}
-.modal.active{display:flex}
 .animate-pop{animation:pop.28s cubic-bezier(.34,1.56,.64,1)}@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
-<script>setTimeout(()=>{var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';document.head.appendChild(f);},80);</script>
+<script>setTimeout(()=>{var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@600&display=swap';document.head.appendChild(f);},80);</script>
 </head>
 <body class="pb-28">
 <header class="bg-white border-b sticky top-0 z-30">
-  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
     <a href="matjar.html" class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></a>
-    <div class="flex-1">
-      <h1 class="font-bold text-[16px]">تخصيص المتجر</h1>
-      <p class="text-[11px] text-gray-500">اختر تصميم متجرك</p>
-    </div>
+    <div class="flex-1"><h1 class="font-bold text-[16px]">تخصيص المتجر</h1><p class="text-[11px] text-gray-500">اختر تصميم متجرك</p></div>
+    <span id="currentLabel" class="text-[11px] bg-gray-100 px-2.5 py-1 rounded-full font-bold">Classic</span>
   </div>
 </header>
 
-<main class="max-w-3xl mx-auto px-4 pt-5 space-y-6">
+<main class="max-w-4xl mx-auto px-4 pt-5 space-y-6">
+  <!-- Themes -->
   <div>
-    <h2 class="font-bold text-[14px] mb-3 flex items-center gap-2"><span>🎨</span> Theme</h2>
-    <div id="classicCard" onclick="selectTheme('classic')" class="bg-white rounded-[20px] border-2 border-emerald-500 p-4 cursor-pointer relative overflow-hidden transition-all">
-      <div id="checkBadge" class="absolute top-3 left-3 w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-check text-[12px]"></i></div>
-      <div class="flex gap-4">
-        <div class="w-24 h-24 bg-gray-50 rounded-xl border flex flex-col overflow-hidden flex-shrink-0">
-          <div class="h-4 bg-emerald-600"></div>
-          <div class="p-1.5 space-y-1">
-            <div class="h-2 bg-gray-200 rounded w-full"></div>
-            <div class="grid grid-cols-2 gap-1"><div class="h-8 bg-white border rounded"></div><div class="h-8 bg-white border rounded"></div></div>
+    <h2 class="font-bold text-[14px] mb-3">🎨 اختر Theme</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+      <!-- Classic -->
+      <div id="card-classic" onclick="selectTheme('classic')" class="theme-card bg-white rounded-[20px] border-2 p-3 cursor-pointer transition-all relative">
+        <div class="check absolute top-3 left-3 w-7 h-7 bg-emerald-600 text-white rounded-full hidden items-center justify-center"><i class="fa-solid fa-check text-[11px]"></i></div>
+        <div class="flex gap-3">
+          <div class="w-20 h-20 rounded-xl overflow-hidden border bg-gray-50 flex flex-col">
+            <div class="h-3 bg-emerald-600"></div>
+            <div class="p-1 space-y-1"><div class="h-1.5 bg-gray-200 rounded"></div><div class="grid grid-cols-2 gap-1"><div class="h-6 bg-white border rounded-lg"></div><div class="h-6 bg-white border rounded-lg"></div></div></div>
           </div>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-[15px]">Classic</h3>
-          <p class="text-[11px] text-gray-500 mt-1 leading-5">التصميم الافتراضي الاحترافي - متجاوب وسريع ومناسب لجميع المنتجات</p>
-          <span id="selectedLabel" class="inline-flex mt-3 text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-bold">محدد ✓</span>
+          <div class="flex-1"><h3 class="font-bold text-[13px]">Classic</h3><p class="text-[11px] text-gray-500 leading-4 mt-1">تصميم احترافي ومتوازن مناسب لمعظم المتاجر</p><span class="status mt-2 inline-flex text-[10px] px-2 py-0.5 rounded-full font-bold"></span></div>
         </div>
       </div>
+
+      <!-- Modern -->
+      <div id="card-modern" onclick="selectTheme('modern')" class="theme-card bg-white rounded-[20px] border-2 p-3 cursor-pointer transition-all relative">
+        <div class="check absolute top-3 left-3 w-7 h-7 bg-black text-white rounded-full hidden items-center justify-center"><i class="fa-solid fa-check text-[11px]"></i></div>
+        <div class="flex gap-3">
+          <div class="w-20 h-20 rounded-xl overflow-hidden border bg-black flex flex-col">
+            <div class="h-3 bg-black flex items-center px-1 gap-1"><div class="w-3 h-1.5 bg-white rounded-full"></div><div class="flex-1 h-1.5 bg-white/20 rounded-full"></div></div>
+            <div class="p-1 space-y-1 bg-white flex-1"><div class="h-1.5 bg-black rounded-full w-full"></div><div class="grid grid-cols-2 gap-1"><div class="h-6 bg-gray-900 rounded-lg"></div><div class="h-6 bg-gray-100 rounded-lg border"></div></div></div>
+          </div>
+          <div class="flex-1"><h3 class="font-bold text-[13px]">Modern</h3><p class="text-[11px] text-gray-500 leading-4 mt-1">تصميم عصري وجريء مناسب للمتاجر الحديثة</p><span class="status mt-2 inline-flex text-[10px] px-2 py-0.5 rounded-full font-bold"></span></div>
+        </div>
+      </div>
+
+      <!-- Minimal -->
+      <div id="card-minimal" onclick="selectTheme('minimal')" class="theme-card bg-white rounded-[20px] border-2 p-3 cursor-pointer transition-all relative">
+        <div class="check absolute top-3 left-3 w-7 h-7 bg-gray-900 text-white rounded-full hidden items-center justify-center"><i class="fa-solid fa-check text-[11px]"></i></div>
+        <div class="flex gap-3">
+          <div class="w-20 h-20 rounded-xl overflow-hidden border bg-white flex flex-col">
+            <div class="h-3 bg-white border-b flex items-center justify-center"><div class="w-8 h-[2px] bg-gray-900"></div></div>
+            <div class="p-2 space-y-2 flex-1"><div class="h-[1px] bg-gray-200 w-full"></div><div class="grid grid-cols-1 gap-1"><div class="h-5 border border-gray-200"></div><div class="h-5 border border-gray-200"></div></div></div>
+          </div>
+          <div class="flex-1"><h3 class="font-bold text-[13px]">Minimal</h3><p class="text-[11px] text-gray-500 leading-4 mt-1">تصميم بسيط ونظيف يركز على المنتجات</p><span class="status mt-2 inline-flex text-[10px] px-2 py-0.5 rounded-full font-bold"></span></div>
+        </div>
+      </div>
+
+      <!-- Luxury -->
+      <div id="card-luxury" onclick="selectTheme('luxury')" class="theme-card bg-white rounded-[20px] border-2 p-3 cursor-pointer transition-all relative">
+        <div class="check absolute top-3 left-3 w-7 h-7 bg-[#b8965e] text-white rounded-full hidden items-center justify-center"><i class="fa-solid fa-check text-[11px]"></i></div>
+        <div class="flex gap-3">
+          <div class="w-20 h-20 rounded-xl overflow-hidden border bg-[#faf7f0] flex flex-col">
+            <div class="h-3 bg-black flex items-center justify-center"><div class="text-[5px] text-[#d4b483] tracking-[2px]">LUXE</div></div>
+            <div class="p-1 flex-1"><div class="border border-[#e8dcc3] h-full p-1"><div class="h-1 bg-[#d4b483] w-full mb-1"></div><div class="grid grid-cols-2 gap-1"><div class="h-6 border border-[#e8dcc3]"></div><div class="h-6 border border-[#e8dcc3]"></div></div></div></div>
+          </div>
+          <div class="flex-1"><h3 class="font-bold text-[13px]" style="font-family:'Playfair Display'">Luxury</h3><p class="text-[11px] text-gray-500 leading-4 mt-1">تصميم فاخر مناسب للعلامات الراقية</p><span class="status mt-2 inline-flex text-[10px] px-2 py-0.5 rounded-full font-bold"></span></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
+  <!-- Live Preview -->
   <div>
-    <h2 class="font-bold text-[14px] mb-3 flex items-center gap-2"><span>👁️</span> معاينة</h2>
-    <div class="bg-white rounded-[20px] border overflow-hidden">
-      <div class="bg-white border-b px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2"><div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">K</div><span class="font-bold text-[13px]">متجري</span></div>
-        <div class="w-8 h-8 bg-emerald-50 rounded-lg"></div>
-      </div>
-      <div class="p-3 bg-gray-50">
-        <div class="bg-white rounded-xl border p-2.5 mb-3 flex items-center gap-2 text-[11px] text-gray-400"><i class="fa-solid fa-magnifying-glass"></i> البحث عن منتج...</div>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="bg-white rounded-xl border overflow-hidden"><div class="h-20 bg-gray-100"></div><div class="p-2"><div class="h-2 bg-gray-200 rounded w-3/4 mb-1"></div><div class="h-2 bg-emerald-100 rounded w-1/2"></div></div></div>
-          <div class="bg-white rounded-xl border overflow-hidden"><div class="h-20 bg-gray-100"></div><div class="p-2"><div class="h-2 bg-gray-200 rounded w-3/4 mb-1"></div><div class="h-2 bg-emerald-100 rounded w-1/2"></div></div></div>
-        </div>
-      </div>
-      <p class="text-center text-[10px] text-gray-400 py-2">معاينة مؤقتة - Classic</p>
+    <h2 class="font-bold text-[14px] mb-3">👁️ معاينة مباشرة - <span id="previewName" class="text-emerald-600">Classic</span></h2>
+    <div id="previewWrapper" class="bg-white rounded-[20px] border overflow-hidden shadow-sm">
+      <!-- سيتم حقن Preview هنا -->
     </div>
   </div>
 </main>
 
 <div class="fixed bottom-0 inset-x-0 bg-white border-t p-4 z-30">
-  <div class="max-w-3xl mx-auto flex gap-3">
+  <div class="max-w-4xl mx-auto flex gap-3">
     <button id="saveBtn" onclick="saveTheme()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> حفظ ونشر</button>
   </div>
 </div>
@@ -82,19 +103,93 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/fi
 let currentUid=null;
 let currentTemplate='classic';
 
-function showToast(msg){
-  document.getElementById('toastMessage').textContent=msg;
+const THEMES={
+  classic:{label:'Classic', desc:'محدد'},
+  modern:{label:'Modern', desc:'محدد'},
+  minimal:{label:'Minimal', desc:'محدد'},
+  luxury:{label:'Luxury', desc:'محدد'}
+};
+
+function showToast(m){
+  document.getElementById('toastMessage').textContent=m;
   const t=document.getElementById('toast');
   t.classList.remove('hidden');
   setTimeout(()=>t.classList.add('hidden'),3000);
 }
 
+function renderPreview(tpl){
+  const w=document.getElementById('previewWrapper');
+  document.getElementById('previewName').textContent=THEMES[tpl].label;
+  document.getElementById('currentLabel').textContent=THEMES[tpl].label;
+  if(tpl==='classic'){
+    w.innerHTML=`
+      <div class="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2"><div class="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">K</div><span class="font-bold text-[13px]">متجري</span></div>
+        <div class="w-9 h-9 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bag-shopping text-xs"></i></div>
+      </div>
+      <div class="p-3 bg-gray-50">
+        <div class="bg-white rounded-xl border px-3 py-2.5 mb-3 flex items-center gap-2 text-[11px] text-gray-400"><i class="fa-solid fa-magnifying-glass"></i> البحث عن منتج...</div>
+        <div class="grid grid-cols-2 gap-3">
+          ${[1,2,3,4].map(i=>`<div class="bg-white rounded-2xl border overflow-hidden"><div class="h-24 bg-gray-100"></div><div class="p-2.5 text-center"><div class="font-bold text-[11px]">منتج ${i}</div><div class="text-emerald-600 font-bold text-[11px] mt-1">${[49,79,29,99][i-1]}.00 درهم</div><div class="mt-2 bg-emerald-600 text-white rounded-xl py-1.5 text-[10px] font-bold">إضافة</div></div></div>`).join('')}
+        </div>
+      </div>`;
+  } else if(tpl==='modern'){
+    w.innerHTML=`
+      <div class="bg-black text-white px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2"><div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-black">K</div><span class="font-black text-[13px] tracking-wide">STORE.</span></div>
+        <div class="flex gap-2"><div class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-magnifying-glass text-xs"></i></div><div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center"><i class="fa-solid fa-bag-shopping text-xs"></i></div></div>
+      </div>
+      <div class="p-3 bg-white">
+        <div class="bg-black text-white rounded-full px-4 py-2.5 mb-3 flex items-center justify-between text-[11px]"><span>ابحث عن ستايلك...</span><i class="fa-solid fa-arrow-left"></i></div>
+        <div class="grid grid-cols-2 gap-3">
+          ${[1,2,3,4].map(i=>`<div class="bg-gray-900 text-white rounded-[16px] overflow-hidden"><div class="h-28 bg-gradient-to-br from-gray-800 to-gray-900"></div><div class="p-3"><div class="font-black text-[11px]">PRODUCT ${i}</div><div class="text-white/60 text-[10px] mt-1">${[49,79,29,99][i-1]} MAD</div><div class="mt-2 bg-white text-black rounded-full py-2 text-[10px] font-black text-center">ADD +</div></div></div>`).join('')}
+        </div>
+      </div>`;
+  } else if(tpl==='minimal'){
+    w.innerHTML=`
+      <div class="bg-white border-b px-4 py-4 flex items-center justify-between">
+        <span class="font-bold text-[13px] tracking-[3px]">KARNI</span>
+        <div class="flex gap-4 text-[11px]"><span>SHOP</span><span class="text-gray-400">CART(0)</span></div>
+      </div>
+      <div class="p-6 bg-white">
+        <div class="border-b border-black pb-3 mb-6 flex items-center justify-between"><input placeholder="SEARCH" class="text-[11px] tracking-[2px] outline-none placeholder:text-gray-300"><i class="fa-solid fa-magnifying-glass text-[10px]"></i></div>
+        <div class="grid grid-cols-2 gap-8">
+          ${[1,2,3,4].map(i=>`<div class="group"><div class="aspect-[3/4] bg-gray-50 border border-gray-100"></div><div class="mt-3"><div class="text-[11px] font-bold">منتج ${i}</div><div class="text-[11px] text-gray-500 mt-1">${[49,79,29,99][i-1]}.00 درهم</div><div class="mt-2 text-[10px] underline">إضافة للسلة</div></div></div>`).join('')}
+        </div>
+      </div>`;
+  } else if(tpl==='luxury'){
+    w.innerHTML=`
+      <div class="bg-[#0a0a0a] text-[#d4b483] px-4 py-3 flex items-center justify-between" style="font-family:'Playfair Display'">
+        <div class="text-[13px] tracking-[4px]">KARNI LUXE</div>
+        <div class="flex gap-3"><div class="w-8 h-8 border border-[#d4b483]/30 rounded-full flex items-center justify-center"><i class="fa-solid fa-bag-shopping text-[10px]"></i></div></div>
+      </div>
+      <div class="p-4 bg-[#faf7f0]">
+        <div class="border border-[#e8dcc3] p-3 mb-4 flex items-center justify-between text-[11px] text-[#b8965e]"><span class="tracking-[2px]">SEARCH COLLECTION</span><i class="fa-solid fa-magnifying-glass text-[10px]"></i></div>
+        <div class="grid grid-cols-2 gap-3">
+          ${[1,2,3,4].map(i=>`<div class="bg-white border border-[#e8dcc3] p-2"><div class="aspect-[4/5] bg-[#f5efe3] border border-[#e8dcc3]/50"></div><div class="p-2 text-center" style="font-family:'Playfair Display'"><div class="text-[11px] font-semibold">منتج ${i}</div><div class="text-[#b8965e] text-[11px] mt-1">${[49,79,29,99][i-1]}.00 MAD</div><div class="mt-2 border border-black py-1.5 text-[9px] tracking-[2px]">AJOUTER</div></div></div>`).join('')}
+        </div>
+      </div>`;
+  }
+}
+
 window.selectTheme=(tpl)=>{
   currentTemplate=tpl;
-  document.getElementById('classicCard').classList.remove('border-gray-200');
-  document.getElementById('classicCard').classList.add('border-emerald-500');
-  document.getElementById('checkBadge').classList.remove('hidden');
-  document.getElementById('selectedLabel').classList.remove('hidden');
+  document.querySelectorAll('.theme-card').forEach(el=>{
+    el.classList.remove('border-emerald-600','border-black','border-[#b8965e]');
+    el.classList.add('border-gray-200');
+    el.querySelector('.check').classList.add('hidden');
+    el.querySelector('.check').classList.remove('flex');
+    el.querySelector('.status').textContent='';
+    el.querySelector('.status').className='status mt-2 inline-flex text-[10px] px-2 py-0.5 rounded-full font-bold';
+  });
+  const active=document.getElementById('card-'+tpl);
+  active.classList.remove('border-gray-200');
+  active.classList.add(tpl==='luxury'?'border-[#b8965e]':tpl==='modern'?'border-black':'border-emerald-600');
+  active.querySelector('.check').classList.remove('hidden');
+  active.querySelector('.check').classList.add('flex');
+  active.querySelector('.status').textContent='✓ محدد';
+  active.querySelector('.status').classList.add(tpl==='luxury'?'bg-[#faf7f0]','text-[#b8965e]', tpl==='modern'?'bg-black':'bg-emerald-50','text-emerald-700');
+  renderPreview(tpl);
 }
 
 onAuthStateChanged(auth, async (user)=>{
@@ -102,33 +197,32 @@ onAuthStateChanged(auth, async (user)=>{
   currentUid=user.uid;
   try{
     const snap=await get(ref(db, `users/${currentUid}/storeSettings/theme`));
-    if(snap.exists() && snap.val().template){
+    if(snap.exists() && snap.val().template && ['classic','modern','minimal','luxury'].includes(snap.val().template)){
       currentTemplate=snap.val().template;
     }else{
       currentTemplate='classic';
     }
     selectTheme(currentTemplate);
   }catch(e){
-    console.error('load theme error', e);
+    console.error(e);
     selectTheme('classic');
   }
 });
 
 window.saveTheme=async()=>{
-  if(!currentUid){ showToast('يجب تسجيل الدخول'); return; }
+  if(!currentUid) return;
   const btn=document.getElementById('saveBtn');
   const orig=btn.innerHTML;
   btn.disabled=true;
   btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
   try{
-    // مسار واحد فقط
     await set(ref(db, `users/${currentUid}/storeSettings/theme`), {
       template: currentTemplate,
       updatedAt: new Date().toISOString()
     });
     showToast('تم حفظ تصميم المتجر بنجاح ✅');
   }catch(e){
-    console.error('saveTheme error:', e);
+    console.error(e);
     showToast('تعذر حفظ التصميم');
   }finally{
     btn.disabled=false;
