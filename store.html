@@ -9,6 +9,7 @@
 :root{
   --theme-primary:#10B981;
   --theme-secondary:#111827;
+  --theme-accent:#059669;
   --theme-background:#F8FAFC;
   --theme-card:#FFFFFF;
   --theme-text:#111827;
@@ -47,8 +48,6 @@ body{background:var(--theme-background);margin:0;color:var(--theme-text);transit
     </div>
   </div>
 </header>
-
-<!-- Hero -->
 <div id="storeHero" class="hidden max-w-7xl mx-auto px-4 pt-4">
   <div id="heroBox" class="rounded-[20px] border p-6 text-center" style="background:var(--theme-card);border-radius:var(--theme-radius)">
     <h2 id="heroTitle" class="font-bold text-xl mb-2" style="color:var(--theme-text)"></h2>
@@ -56,7 +55,6 @@ body{background:var(--theme-background);margin:0;color:var(--theme-text);transit
     <img id="heroImage" src="" class="hidden mt-4 w-full h-48 object-cover rounded-xl">
   </div>
 </div>
-
 <main class="max-w-7xl mx-auto px-4 pt-4">
   <div id="errorBox" class="hidden bg-white border border-red-200 rounded-2xl p-8 text-center mb-4">
     <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i></div>
@@ -69,42 +67,12 @@ body{background:var(--theme-background);margin:0;color:var(--theme-text);transit
   <div id="emptyState" class="hidden text-center py-16"><i class="fa-solid fa-store text-4xl text-gray-300 mb-3"></i><p class="text-gray-500 text-sm">لا توجد منتجات حالياً</p></div>
 </main>
 <div id="cartBar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-2xl z-30"><div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3"><div><p class="text-xs" style="color:var(--theme-muted)"><span id="cartItemsCount">0</span> منتجات</p><p class="font-bold text-lg" style="color:var(--theme-primary)"><span id="cartTotal">0.00</span> درهم</p></div><button onclick="openCheckout()" class="text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2" style="background:var(--theme-primary)"><span>إتمام الطلب</span><i class="fa-solid fa-arrow-left"></i></button></div></div>
-
 <div id="qtyModal" class="modal"><div class="bg-white rounded-[24px] w-full max-w-md overflow-hidden animate-pop"><div class="p-4 flex items-center justify-between border-b"><h3 class="font-bold">تحديد الكمية</h3><button onclick="closeQtyModal()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div><div class="p-4"><img id="qtyImg" src="" class="w-full h-56 object-contain bg-gray-50 rounded-2xl mb-3"><h3 id="qtyName" class="font-bold text-base mb-1"></h3><p class="font-bold mb-1" style="color:var(--theme-primary)"><span id="qtyPrice">0</span> درهم</p><p class="text-xs text-gray-500 mb-4">المخزون: <span id="qtyStock">0</span></p><div class="flex items-center gap-3 justify-center"><button onclick="changeModalQty(-1)" class="w-14 h-14 bg-white border-2 rounded-xl text-2xl font-bold">-</button><input id="qtyInput" type="number" min="1" value="1" class="w-20 h-14 text-center border-2 rounded-xl text-xl font-bold" style="border-color:var(--theme-primary)"><button onclick="changeModalQty(1)" class="w-14 h-14 bg-white border-2 rounded-xl text-2xl font-bold">+</button></div></div><div class="p-4 border-t flex gap-2"><button onclick="closeQtyModal()" class="px-6 py-3 bg-gray-100 rounded-xl font-bold">إلغاء</button><button onclick="confirmAddToCart()" class="flex-1 text-white py-3 rounded-xl font-bold" style="background:var(--theme-primary)">إضافة للطلب</button></div></div></div>
-
 <div id="checkoutModal" class="modal"><div class="bg-white rounded-[24px] w-full max-w-lg max-h-[92vh] overflow-y-auto animate-pop"><div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg">معلوماتك</h3><button onclick="closeCheckout()" class="w-9 h-9 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button></div><div class="p-4 space-y-3"><input id="cName" placeholder="الاسم الكامل *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500"><input id="cPhone" placeholder="رقم الهاتف *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500" type="tel"><input id="cCity" placeholder="المدينة *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500"><input id="cAddress" placeholder="العنوان *" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500"><textarea id="cNote" placeholder="ملاحظة للطلب - اختياري" class="w-full px-4 py-3 rounded-xl border outline-none focus:border-emerald-500" rows="2"></textarea><div class="border rounded-xl p-3"><p class="font-bold text-sm mb-2">طريقة الطلب</p><label class="flex items-center gap-3 p-3 rounded-xl border mb-2 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50"><input type="radio" name="payMethod" value="cod" checked><span class="font-bold text-sm">💵 الدفع عند الاستلام</span></label><label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50"><input type="radio" name="payMethod" value="online"><span class="font-bold text-sm">💳 الدفع الآن</span><span class="text-[11px] text-gray-500">(سيتم تفعيله لاحقاً)</span></label><div id="onlinePayBox" class="hidden mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">سيتم ربط بوابة الدفع هنا لاحقاً.</div></div><div id="cartSummary" class="bg-gray-50 rounded-xl p-3 space-y-2 text-sm"></div><div class="flex justify-between font-bold text-base pt-2 border-t"><span>الإجمالي:</span><span id="finalTotal" style="color:var(--theme-primary)">0 درهم</span></div></div><div class="p-4 border-t flex gap-2"><button onclick="closeCheckout()" class="px-6 py-3 bg-gray-100 rounded-xl font-bold">العودة للتعديل</button><button onclick="confirmOrder()" id="confirmBtn" class="flex-1 text-white py-3 rounded-xl font-bold" style="background:var(--theme-primary)">تأكيد وإرسال الطلب</button></div></div></div>
-
 <div id="successModal" class="modal" style="z-index:90"><div class="bg-white rounded-[24px] w-full max-w-md p-8 text-center animate-pop"><div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background:color-mix(in srgb, var(--theme-primary) 15%, white)"><i class="fa-solid fa-check text-3xl" style="color:var(--theme-primary)"></i></div><h2 class="font-bold text-xl mb-2">تم إرسال طلبك بنجاح ✅</h2><p class="text-sm text-gray-500 mb-2">رقم الطلب: <span id="successId" class="font-bold text-gray-900"></span></p><p class="text-[11px] text-gray-400 mb-4">احتفظ برابط الطلب لتتمكن من تعديله لاحقاً</p><div class="bg-gray-50 rounded-xl p-4 mb-4 text-sm space-y-1 text-right"><p>الإجمالي: <span id="successTotal" class="font-bold"></span></p><p>طريقة الدفع: <span id="successPay"></span></p></div><div class="flex gap-2"><button onclick="viewMyOrder()" class="flex-1 text-white py-3 rounded-xl font-bold text-sm" style="background:var(--theme-primary)">عرض طلبي</button><button onclick="backToStore()" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-sm">العودة للمتجر</button></div></div></div>
-
-<div id="myOrdersModal" class="modal" style="z-index:95">
-  <div class="bg-white rounded-[20px] w-full max-w-sm p-6 text-center animate-pop">
-    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background:color-mix(in srgb, var(--theme-primary) 12%, white)"><i class="fa-solid fa-receipt text-2xl" style="color:var(--theme-primary)"></i></div>
-    <h3 class="font-bold text-[16px] mb-2">طلباتي</h3>
-    <p class="text-[13px] text-gray-500 mb-6">هل تريد فتح آخر طلب لك؟</p>
-    <div class="flex gap-3">
-      <button onclick="closeMyOrdersModal()" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-sm">إلغاء</button>
-      <button onclick="goToLastOrder()" class="flex-1 py-3 text-white rounded-xl font-bold text-sm" style="background:var(--theme-primary)">فتح طلبي</button>
-    </div>
-  </div>
-</div>
-
-<div id="galleryModal" class="slider-modal" onclick="if(event.target.id==='galleryModal') closeGallery()">
-  <div class="bg-white rounded-[20px] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-pop" onclick="event.stopPropagation()">
-    <div class="p-3 flex items-center justify-between border-b">
-      <div class="flex items-center gap-2"><span id="galleryCounter" class="bg-gray-900 text-white text-[11px] px-2.5 py-1 rounded-full font-bold">1 / 1</span><span id="galleryName" class="font-bold text-sm truncate max-w-[160px]"></span></div>
-      <button onclick="closeGallery()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="relative bg-gray-50 flex-1 flex items-center justify-center overflow-hidden" id="galleryWrap" style="min-height:380px">
-      <button onclick="prevGallery()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 shadow-lg rounded-full flex items-center justify-center z-10"><i class="fa-solid fa-chevron-right"></i></button>
-      <button onclick="nextGallery()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 shadow-lg rounded-full flex items-center justify-center z-10"><i class="fa-solid fa-chevron-left"></i></button>
-      <img id="galleryImage" src="" class="max-w-full max-h-[60vh] object-contain select-none" draggable="false">
-    </div>
-    <div class="p-3 bg-white border-t"><div id="galleryThumbs" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div></div>
-  </div>
-</div>
-
+<div id="myOrdersModal" class="modal" style="z-index:95"><div class="bg-white rounded-[20px] w-full max-w-sm p-6 text-center animate-pop"><div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background:color-mix(in srgb, var(--theme-primary) 12%, white)"><i class="fa-solid fa-receipt text-2xl" style="color:var(--theme-primary)"></i></div><h3 class="font-bold text-[16px] mb-2">طلباتي</h3><p class="text-[13px] text-gray-500 mb-6">هل تريد فتح آخر طلب لك؟</p><div class="flex gap-3"><button onclick="closeMyOrdersModal()" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-sm">إلغاء</button><button onclick="goToLastOrder()" class="flex-1 py-3 text-white rounded-xl font-bold text-sm" style="background:var(--theme-primary)">فتح طلبي</button></div></div></div>
+<div id="galleryModal" class="slider-modal" onclick="if(event.target.id==='galleryModal') closeGallery()"><div class="bg-white rounded-[20px] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-pop" onclick="event.stopPropagation()"><div class="p-3 flex items-center justify-between border-b"><div class="flex items-center gap-2"><span id="galleryCounter" class="bg-gray-900 text-white text-[11px] px-2.5 py-1 rounded-full font-bold">1 / 1</span><span id="galleryName" class="font-bold text-sm truncate max-w-[160px]"></span></div><button onclick="closeGallery()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div><div class="relative bg-gray-50 flex-1 flex items-center justify-center overflow-hidden" id="galleryWrap" style="min-height:380px"><button onclick="prevGallery()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 shadow-lg rounded-full flex items-center justify-center z-10"><i class="fa-solid fa-chevron-right"></i></button><button onclick="nextGallery()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 shadow-lg rounded-full flex items-center justify-center z-10"><i class="fa-solid fa-chevron-left"></i></button><img id="galleryImage" src="" class="max-w-full max-h-[60vh] object-contain select-none" draggable="false"></div><div class="p-3 bg-white border-t"><div id="galleryThumbs" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div></div></div></div>
 <div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg"><span id="toastMessage" class="text-sm"></span></div></div>
-
 <script type="module">
 import { db } from "./firebase.js";
 import { ref, get, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
@@ -113,66 +81,44 @@ import { ThemeEngine } from "./theme-engine.js";
 let STORE_ID=null, products=[], cart=[], currentProduct=null;
 let galleryImages=[], galleryIndex=0, touchStartX=0;
 let lastOrderInfo=null;
-let currentTheme = ThemeEngine.getDefaults();
+let currentTheme = ThemeEngine.getDefaultTheme();
 
 function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 function getStoreId(){ try{ return new URL(window.location.href).searchParams.get('store'); }catch(e){ return null; } }
 function showError(title, msg){ document.getElementById('errorBox').classList.remove('hidden'); document.getElementById('errorTitle').textContent=title; document.getElementById('errorMsg').innerHTML=msg; document.getElementById('loadingState').classList.add('hidden'); }
 function hideError(){ document.getElementById('errorBox').classList.add('hidden'); }
 function getAllImages(p){
-  let imgs=[];
-  if(Array.isArray(p.images)) imgs=imgs.concat(p.images);
-  if(Array.isArray(p.imageUrls)) imgs=imgs.concat(p.imageUrls);
-  if(p.mainImage) imgs.push(p.mainImage);
-  if(p.image) imgs.push(p.image);
-  if(p.imageUrl) imgs.push(p.imageUrl);
-  imgs=imgs.map(u=>String(u||'').trim()).filter(u=>u.startsWith('http'));
-  return [...new Set(imgs)];
+  let imgs=[]; if(Array.isArray(p.images)) imgs=imgs.concat(p.images); if(Array.isArray(p.imageUrls)) imgs=imgs.concat(p.imageUrls); if(p.mainImage) imgs.push(p.mainImage); if(p.image) imgs.push(p.image); if(p.imageUrl) imgs.push(p.imageUrl);
+  imgs=imgs.map(u=>String(u||'').trim()).filter(u=>u.startsWith('http')); return [...new Set(imgs)];
 }
-function generateToken(){
-  const arr=new Uint8Array(24);
-  crypto.getRandomValues(arr);
-  return Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
+function generateToken(){ const arr=new Uint8Array(24); crypto.getRandomValues(arr); return Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join(''); }
 
 async function applyStoreTheme(){
   try{
     ThemeEngine.setDB(db);
-    const theme = await ThemeEngine.load(STORE_ID);
-    currentTheme = ThemeEngine.apply(theme);
-    // Header style
+    const theme = await ThemeEngine.loadTheme(STORE_ID);
+    currentTheme = ThemeEngine.applyTheme(theme);
     const headerInner = document.getElementById('headerInner');
-    headerInner.className = `max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 ${theme.header.style==='centered'?'theme-header-centered':'theme-header-standard'}`;
-    // Show/hide logo/name
-    document.getElementById('storeLogo').style.display = theme.header.showLogo? 'flex':'none';
-    document.getElementById('storeName').style.display = theme.header.showStoreName? 'block':'none';
-    document.getElementById('storeSub').style.display = theme.header.showStoreName? 'block':'none';
-    // Grid columns
+    const hStyle = theme.header?.style || theme.header || 'standard';
+    headerInner.className = `max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 ${hStyle==='centered'?'theme-header-centered':'theme-header-standard'}`;
+    document.getElementById('storeLogo').style.display = theme.header?.showLogo!==false? 'flex':'none';
+    document.getElementById('storeName').style.display = theme.header?.showStoreName!==false? 'block':'none';
+    document.getElementById('storeSub').style.display = theme.header?.showStoreName!==false? 'block':'none';
     const container = document.getElementById('productsContainer');
-    const cols = theme.layout.productColumns;
-    if(window.innerWidth < 768){
-      container.style.gridTemplateColumns = `repeat(${Math.min(cols,2)}, minmax(0,1fr))`;
-    } else if(window.innerWidth < 1024){
-      container.style.gridTemplateColumns = `repeat(${Math.min(cols,3)}, minmax(0,1fr))`;
-    } else {
-      container.style.gridTemplateColumns = `repeat(${cols}, minmax(0,1fr))`;
-    }
-    // Hero
+    const cols = theme.layoutConfig?.borderRadius? (theme.layoutConfig?.productColumns || 2) : (theme.layoutConfig?.productColumns || 2);
+    const productCols = theme.layoutConfig?.productColumns || 2;
+    if(window.innerWidth < 768){ container.style.gridTemplateColumns = `repeat(${Math.min(productCols,2)}, minmax(0,1fr))`; }
+    else if(window.innerWidth < 1024){ container.style.gridTemplateColumns = `repeat(${Math.min(productCols,3)}, minmax(0,1fr))`; }
+    else { container.style.gridTemplateColumns = `repeat(${productCols}, minmax(0,1fr))`; }
     const heroWrap = document.getElementById('storeHero');
-    if(theme.hero.enabled && (theme.hero.title || theme.hero.image)){
+    if(theme.hero?.enabled && (theme.hero.title || theme.hero.image)){
       heroWrap.classList.remove('hidden');
       document.getElementById('heroTitle').textContent = theme.hero.title||'';
       document.getElementById('heroSubtitle').textContent = theme.hero.subtitle||'';
       const imgEl = document.getElementById('heroImage');
-      if(theme.hero.image){
-        imgEl.src = theme.hero.image;
-        imgEl.classList.remove('hidden');
-      } else imgEl.classList.add('hidden');
+      if(theme.hero.image){ imgEl.src = theme.hero.image; imgEl.classList.remove('hidden'); } else imgEl.classList.add('hidden');
     } else heroWrap.classList.add('hidden');
-  }catch(e){
-    console.warn('[store] theme load failed', e);
-    currentTheme = ThemeEngine.apply(ThemeEngine.getDefaults());
-  }
+  }catch(e){ console.warn('[store] theme load failed', e); currentTheme = ThemeEngine.applyTheme(ThemeEngine.getDefaultTheme()); }
 }
 
 async function init(){
@@ -184,73 +130,36 @@ async function init(){
   await loadStore(); setupEvents(); updateCartUI();
 }
 async function loadStore(){
-  document.getElementById('loadingState').classList.remove('hidden');
-  hideError();
-  let publicProducts=[], fallbackProducts=[];
+  document.getElementById('loadingState').classList.remove('hidden'); hideError(); let publicProducts=[], fallbackProducts=[];
   try{
     const snapPublic = await get(ref(db, `publicStores/${STORE_ID}`));
-    if(snapPublic.exists()){
-      const data=snapPublic.val();
-      document.getElementById('storeName').textContent=data.name||'المتجر';
-      document.getElementById('storeLogo').textContent=(data.name||'K').charAt(0).toUpperCase();
-      if(data.name) document.title=data.name;
-      publicProducts=data.products||[];
-    }
+    if(snapPublic.exists()){ const data=snapPublic.val(); document.getElementById('storeName').textContent=data.name||'المتجر'; document.getElementById('storeLogo').textContent=(data.name||'K').charAt(0).toUpperCase(); if(data.name) document.title=data.name; publicProducts=data.products||[]; }
     if(publicProducts.length===0){
       try{
         const snapUsers = await get(ref(db, `users/${STORE_ID}/products`));
-        if(snapUsers.exists()){
-          const val=snapUsers.val(); if(val._init) delete val._init;
-          fallbackProducts=Object.values(val).filter(v=>v&&typeof v==='object'&&!v._init).map(p=>{
-            p.allImages=getAllImages(p);
-            if(p.allImages.length===0&&p.mainImage) p.allImages=[p.mainImage];
-            return p;
-          });
-        }
-      }catch(e){
-        const msg=String(e.message||e);
-        if(msg.includes('Permission denied')||msg.includes('PERMISSION_DENIED')){
-          document.getElementById('loadingState').classList.add('hidden');
-          showError('تعذر الوصول إلى بيانات هذا المتجر','على صاحب المتجر فتح matjar.html مرة واحدة لتحديث المتجر العام');
-          return;
-        }
-      }
+        if(snapUsers.exists()){ const val=snapUsers.val(); if(val._init) delete val._init; fallbackProducts=Object.values(val).filter(v=>v&&typeof v==='object'&&!v._init).map(p=>{ p.allImages=getAllImages(p); if(p.allImages.length===0&&p.mainImage) p.allImages=[p.mainImage]; return p; }); }
+      }catch(e){ const msg=String(e.message||e); if(msg.includes('Permission denied')||msg.includes('PERMISSION_DENIED')){ document.getElementById('loadingState').classList.add('hidden'); showError('تعذر الوصول إلى بيانات هذا المتجر','على صاحب المتجر فتح matjar.html مرة واحدة لتحديث المتجر العام'); return; } }
     }
     if(publicProducts.length>0){ products=publicProducts.map(p=>({...p, allImages:getAllImages(p)})); }
     else if(fallbackProducts.length>0){ products=fallbackProducts; }
-    else {
-      document.getElementById('loadingState').classList.add('hidden');
-      document.getElementById('emptyState').classList.remove('hidden');
-      return;
-    }
+    else { document.getElementById('loadingState').classList.add('hidden'); document.getElementById('emptyState').classList.remove('hidden'); return; }
     document.getElementById('loadingState').classList.add('hidden');
-    if(products.length===0) document.getElementById('emptyState').classList.remove('hidden');
-    else renderProducts();
-  }catch(error){
-    document.getElementById('loadingState').classList.add('hidden');
-    showError('حدث خطأ في تحميل المتجر', escapeHtml(String(error.message||error)).slice(0,300));
-  }
+    if(products.length===0) document.getElementById('emptyState').classList.remove('hidden'); else renderProducts();
+  }catch(error){ document.getElementById('loadingState').classList.add('hidden'); showError('حدث خطأ في تحميل المتجر', escapeHtml(String(error.message||error)).slice(0,300)); }
 }
 function renderProducts(){
-  const container=document.getElementById('productsContainer');
-  const empty=document.getElementById('emptyState');
-  const q=document.getElementById('searchInput').value.toLowerCase().trim();
-  let list=products; if(q) list=list.filter(p=>(p.name||'').toLowerCase().includes(q));
-  if(list.length===0){ container.innerHTML=''; empty.classList.remove('hidden'); return; }
-  empty.classList.add('hidden');
-  const t = currentTheme;
+  const container=document.getElementById('productsContainer'); const empty=document.getElementById('emptyState');
+  const q=document.getElementById('searchInput').value.toLowerCase().trim(); let list=products; if(q) list=list.filter(p=>(p.name||'').toLowerCase().includes(q));
+  if(list.length===0){ container.innerHTML=''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden');
+  const t = currentTheme; const radius = t.layoutConfig?.borderRadius || t.borderRadius || "16px";
   container.innerHTML=list.map(p=>{
     const img=escapeHtml(p.allImages?.[0]||p.mainImage||'https://via.placeholder.com/300');
-    const inCart=cart.find(c=>c.productId==p.id);
-    const isZero=(parseInt(p.stock)||0)<=0;
+    const inCart=cart.find(c=>c.productId==p.id); const isZero=(parseInt(p.stock)||0)<=0;
     const countBadge=p.allImages&&p.allImages.length>1?`<span class="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded-full">${p.allImages.length} صور</span>`:'';
-    const cardStyle = t.productCard.style;
-    const radius = t.layout.borderRadius;
-    const showPrice = t.productCard.showPrice;
-    const showStock = t.productCard.showStock;
-    const showBtn = t.productCard.showButton;
+    const cardStyle = t.productCard?.style || t.cardStyle || 'standard';
+    const showPrice = t.productCard?.showPrice!==false; const showStock = t.productCard?.showStock!==false; const showBtn = t.productCard?.showButton!==false;
     return `<div class="border overflow-hidden product-card" style="background:var(--theme-card);border-radius:${radius}">
-      <div class="relative cursor-pointer ${cardStyle==='compact'?'bg-white':''}" style="background:${cardStyle==='modern'?'#f8fafc':'var(--theme-card)'}" onclick="openGallery('${escapeHtml(p.id)}')">
+      <div class="relative cursor-pointer ${cardStyle==='compact'?'bg-white':''}" onclick="openGallery('${escapeHtml(p.id)}')">
         <img src="${img}" alt="${escapeHtml(p.name)}" class="w-full ${cardStyle==='compact'?'h-32':'h-48'} object-cover" style="border-radius:${radius} ${radius} 0 0" loading="lazy">
         ${showStock?`<span class="absolute top-2 right-2 ${isZero?'bg-red-100 text-red-600':'bg-emerald-100 text-emerald-700'} text-[11px] px-2.5 py-1 rounded-full font-bold" style="${isZero?'':`background:color-mix(in srgb, var(--theme-primary) 12%, white);color:var(--theme-primary)`}">${isZero?'غير متوفر':'متوفر'}</span>`:''}
         ${countBadge}
@@ -267,12 +176,7 @@ function renderProducts(){
 function setupEvents(){
   document.getElementById('searchInput').addEventListener('input', renderProducts);
   document.getElementById('cartBtn').addEventListener('click', ()=>{ if(cart.length>0) openCheckout(); });
-  document.querySelectorAll('input[name="payMethod"]').forEach(r=>{
-    r.addEventListener('change', e=>{
-      const box=document.getElementById('onlinePayBox');
-      if(e.target.value==='online') box.classList.remove('hidden'); else box.classList.add('hidden');
-    });
-  });
+  document.querySelectorAll('input[name="payMethod"]').forEach(r=>{ r.addEventListener('change', e=>{ const box=document.getElementById('onlinePayBox'); if(e.target.value==='online') box.classList.remove('hidden'); else box.classList.add('hidden'); }); });
 }
 window.openQty=function(id){const p=products.find(x=>x.id==id); if(!p)return; currentProduct=p; document.getElementById('qtyImg').src=p.allImages?.[0]||p.mainImage||''; document.getElementById('qtyName').textContent=p.name; document.getElementById('qtyPrice').textContent=parseFloat(p.price||0).toFixed(2); document.getElementById('qtyStock').textContent=p.stock||0; const existing=cart.find(c=>c.productId==p.id); document.getElementById('qtyInput').value=existing?existing.qty:1; document.getElementById('qtyModal').classList.add('active');}
 window.closeQtyModal=function(){document.getElementById('qtyModal').classList.remove('active');}
@@ -299,7 +203,6 @@ window.openCheckout=function(){
   document.getElementById('checkoutModal').classList.add('active');
 }
 window.closeCheckout=function(){document.getElementById('checkoutModal').classList.remove('active');}
-
 window.openGallery=function(id){
   const p=products.find(x=>x.id==id); if(!p) return;
   galleryImages=p.allImages&&p.allImages.length>0?p.allImages:getAllImages(p);
@@ -323,7 +226,6 @@ document.getElementById('galleryWrap').addEventListener('touchstart', e=>{ touch
 document.getElementById('galleryWrap').addEventListener('touchend', e=>{
   const diff=e.changedTouches[0].clientX-touchStartX; if(Math.abs(diff)>50){ if(diff>0) prevGallery(); else nextGallery(); }
 }, {passive:true});
-
 window.confirmOrder=async function(){
   const name=document.getElementById('cName').value.trim(), phone=document.getElementById('cPhone').value.trim(), city=document.getElementById('cCity').value.trim(), address=document.getElementById('cAddress').value.trim(), note=document.getElementById('cNote').value.trim(), payMethod=document.querySelector('input[name="payMethod"]:checked')?.value||'cod';
   if(!name||!phone||!city||!address){ showToast('المرجو ملء الحقول'); return;}
@@ -333,17 +235,10 @@ window.confirmOrder=async function(){
     const newOrderRef = push(ref(db, `users/${STORE_ID}/orders`));
     const orderId = newOrderRef.key;
     const totalValue=cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0);
-    const orderData = {
-      orderId: orderId,
-      clientName: name, phone, city, address, note,
-      items: cart.map(it=>({ productId: it.productId, name: it.name, price: it.price, qty: it.qty, mainImage: it.mainImage||it.images?.[0]||'', images: it.images||[it.mainImage].filter(Boolean), image: it.mainImage||'', imageUrl: it.mainImage||'' })),
-      totalItems: cart.length, totalQty: cart.reduce((s,i)=>s+i.qty,0), totalValue,
-      paymentMethod: payMethod, status: 'new', createdAt: new Date().toISOString(), updatedAt: null, customerToken: token, editCount: 0, source: 'public_store'
-    };
+    const orderData = { orderId, clientName:name, phone, city, address, note, items:cart.map(it=>({ productId:it.productId, name:it.name, price:it.price, qty:it.qty, mainImage:it.mainImage||it.images?.[0]||'', images:it.images||[it.mainImage].filter(Boolean), image:it.mainImage||'', imageUrl:it.mainImage||'' })), totalItems:cart.length, totalQty:cart.reduce((s,i)=>s+i.qty,0), totalValue, paymentMethod:payMethod, status:'new', createdAt:new Date().toISOString(), updatedAt:null, customerToken:token, editCount:0, source:'public_store' };
     await set(newOrderRef, orderData);
-    localStorage.setItem('last_order_'+STORE_ID, JSON.stringify({orderId, token, storeId: STORE_ID}));
-    lastOrderInfo={orderId, token};
-    closeCheckout();
+    localStorage.setItem('last_order_'+STORE_ID, JSON.stringify({orderId, token, storeId:STORE_ID}));
+    lastOrderInfo={orderId, token}; closeCheckout();
     document.getElementById('successId').textContent=orderId.slice(-6).toUpperCase();
     document.getElementById('successTotal').textContent=totalValue.toFixed(2)+' درهم';
     document.getElementById('successPay').textContent=payMethod==='cod'?'الدفع عند الاستلام':'الدفع الآن';
@@ -352,19 +247,10 @@ window.confirmOrder=async function(){
   }catch(e){ showToast('خطأ: '+(e.message||e)); }finally{ btn.disabled=false; btn.textContent='تأكيد وإرسال الطلب'; }
 }
 window.backToStore=function(){document.getElementById('successModal').classList.remove('active');}
-window.viewMyOrder=function(){
-  if(!lastOrderInfo) return;
-  location.href=`talab.html?store=${STORE_ID}&order=${lastOrderInfo.orderId}&token=${lastOrderInfo.token}`;
-}
-window.openMyOrdersModal=function(){
-  if(!lastOrderInfo){ showToast('لا يوجد طلب محفوظ في هذا الجهاز'); return; }
-  document.getElementById('myOrdersModal').classList.add('active');
-}
+window.viewMyOrder=function(){ if(!lastOrderInfo) return; location.href=`talab.html?store=${STORE_ID}&order=${lastOrderInfo.orderId}&token=${lastOrderInfo.token}`; }
+window.openMyOrdersModal=function(){ if(!lastOrderInfo){ showToast('لا يوجد طلب محفوظ في هذا الجهاز'); return; } document.getElementById('myOrdersModal').classList.add('active'); }
 window.closeMyOrdersModal=()=>document.getElementById('myOrdersModal').classList.remove('active');
-window.goToLastOrder=function(){
-  if(!lastOrderInfo) return;
-  location.href=`talab.html?store=${STORE_ID}&order=${lastOrderInfo.orderId}&token=${lastOrderInfo.token}`;
-}
+window.goToLastOrder=function(){ if(!lastOrderInfo) return; location.href=`talab.html?store=${STORE_ID}&order=${lastOrderInfo.orderId}&token=${lastOrderInfo.token}`; }
 function showToast(msg){const t=document.getElementById('toast'); document.getElementById('toastMessage').textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),3000);}
 document.addEventListener('DOMContentLoaded', init);
 </script>
