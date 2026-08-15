@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تخصيص المتجر - Karni Pro</title>
+<script src="lang.js"></script>
+<style>
+*{font-family:'Cairo',sans-serif;box-sizing:border-box}
+body{background:#f8fafc;margin:0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:center;justify-content:center;padding:16px}
+.modal.active{display:flex}
+.animate-pop{animation:pop.28s cubic-bezier(.34,1.56,.64,1)}@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+<script>setTimeout(()=>{var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';document.head.appendChild(l);var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';document.head.appendChild(f);},80);</script>
+</head>
+<body class="pb-28">
+<header class="bg-white border-b sticky top-0 z-30">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+    <a href="matjar.html" class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></a>
+    <div class="flex-1">
+      <h1 class="font-bold text-[16px]">تخصيص المتجر</h1>
+      <p class="text-[11px] text-gray-500">اختر تصميم متجرك</p>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 pt-5 space-y-6">
+  <!-- Theme Section -->
+  <div>
+    <h2 class="font-bold text-[14px] mb-3 flex items-center gap-2"><span>🎨</span> Theme</h2>
+
+    <div id="classicCard" onclick="selectTheme('classic')" class="bg-white rounded-[20px] border-2 border-emerald-500 p-4 cursor-pointer relative overflow-hidden transition-all">
+      <div id="checkBadge" class="absolute top-3 left-3 w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-check text-[12px]"></i></div>
+      <div class="flex gap-4">
+        <div class="w-24 h-24 bg-gray-50 rounded-xl border flex flex-col overflow-hidden flex-shrink-0">
+          <div class="h-4 bg-emerald-600"></div>
+          <div class="p-1.5 space-y-1">
+            <div class="h-2 bg-gray-200 rounded w-full"></div>
+            <div class="grid grid-cols-2 gap-1"><div class="h-8 bg-white border rounded"></div><div class="h-8 bg-white border rounded"></div></div>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-[15px]">Classic</h3>
+          <p class="text-[11px] text-gray-500 mt-1 leading-5">التصميم الافتراضي الاحترافي - متجاوب وسريع ومناسب لجميع المنتجات</p>
+          <span id="selectedLabel" class="inline-flex mt-3 text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-bold">محدد ✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div>
+    <h2 class="font-bold text-[14px] mb-3 flex items-center gap-2"><span>👁️</span> معاينة</h2>
+    <div class="bg-white rounded-[20px] border overflow-hidden">
+      <div class="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2"><div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">K</div><span class="font-bold text-[13px]">متجري</span></div>
+        <div class="w-8 h-8 bg-emerald-50 rounded-lg"></div>
+      </div>
+      <div class="p-3 bg-gray-50">
+        <div class="bg-white rounded-xl border p-2.5 mb-3 flex items-center gap-2 text-[11px] text-gray-400"><i class="fa-solid fa-magnifying-glass"></i> البحث عن منتج...</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-white rounded-xl border overflow-hidden"><div class="h-20 bg-gray-100"></div><div class="p-2"><div class="h-2 bg-gray-200 rounded w-3/4 mb-1"></div><div class="h-2 bg-emerald-100 rounded w-1/2"></div></div></div>
+          <div class="bg-white rounded-xl border overflow-hidden"><div class="h-20 bg-gray-100"></div><div class="p-2"><div class="h-2 bg-gray-200 rounded w-3/4 mb-1"></div><div class="h-2 bg-emerald-100 rounded w-1/2"></div></div></div>
+        </div>
+      </div>
+      <p class="text-center text-[10px] text-gray-400 py-2">معاينة مؤقتة - Classic</p>
+    </div>
+  </div>
+</main>
+
+<div class="fixed bottom-0 inset-x-0 bg-white border-t p-4 z-30">
+  <div class="max-w-3xl mx-auto flex gap-3">
+    <button id="saveBtn" onclick="saveTheme()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> حفظ ونشر</button>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[100]"><div class="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg"><span id="toastMessage" class="text-sm"></span></div></div>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { ref, get, set, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+let currentUid=null;
+let currentTemplate='classic';
+let initialTemplate='classic';
+
+function showToast(msg){
+  document.getElementById('toastMessage').textContent=msg;
+  const t=document.getElementById('toast');
+  t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'),3000);
+}
+
+window.selectTheme=(tpl)=>{
+  currentTemplate=tpl;
+  document.getElementById('classicCard').classList.remove('border-gray-200');
+  document.getElementById('classicCard').classList.add('border-emerald-500');
+  document.getElementById('checkBadge').classList.remove('hidden');
+  document.getElementById('selectedLabel').classList.remove('hidden');
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){ location.href='login.html'; return; }
+  currentUid=user.uid;
+  // تحميل الثيم الحالي
+  try{
+    const snap=await get(ref(db, `users/${currentUid}/storeSettings/theme`));
+    if(snap.exists()){
+      const data=snap.val();
+      if(data.template) currentTemplate=data.template;
+    }else{
+      // جرب المسار القديم لو موجود
+      const snap2=await get(ref(db, `users/${currentUid}/storeSettings`));
+      if(snap2.exists() && snap2.val().theme && snap2.val().theme.template){
+        currentTemplate=snap2.val().theme.template;
+      }
+    }
+    initialTemplate=currentTemplate;
+    selectTheme(currentTemplate);
+  }catch(e){
+    console.error('load theme error', e);
+    selectTheme('classic');
+  }
+});
+
+window.saveTheme=async()=>{
+  if(!currentUid){ showToast('يجب تسجيل الدخول'); return; }
+  const btn=document.getElementById('saveBtn');
+  const orig=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+  try{
+    // حفظ فقط theme بدون مساس بأي شيء آخر
+    await update(ref(db, `users/${currentUid}/storeSettings`), {
+      theme: {
+        template: currentTemplate,
+        updatedAt: new Date().toISOString()
+      }
+    });
+    // كذلك حفظ نسخة مفصلة في المسار المطلوب
+    await set(ref(db, `users/${currentUid}/storeSettings/theme`), {
+      template: currentTemplate,
+      updatedAt: new Date().toISOString()
+    });
+
+    showToast('تم حفظ تصميم المتجر بنجاح ✅');
+    initialTemplate=currentTemplate;
+    console.log('Theme saved:', currentTemplate);
+  }catch(e){
+    console.error('saveTheme error:', e);
+    showToast('تعذر حفظ التصميم');
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML=orig;
+  }
+}
+</script>
+</body>
+</html>
