@@ -26,10 +26,8 @@ body{background:#f8fafc;margin:0}
 </header>
 
 <main class="max-w-3xl mx-auto px-4 pt-5 space-y-6">
-  <!-- Theme Section -->
   <div>
     <h2 class="font-bold text-[14px] mb-3 flex items-center gap-2"><span>🎨</span> Theme</h2>
-
     <div id="classicCard" onclick="selectTheme('classic')" class="bg-white rounded-[20px] border-2 border-emerald-500 p-4 cursor-pointer relative overflow-hidden transition-all">
       <div id="checkBadge" class="absolute top-3 left-3 w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-check text-[12px]"></i></div>
       <div class="flex gap-4">
@@ -49,7 +47,6 @@ body{background:#f8fafc;margin:0}
     </div>
   </div>
 
-  <!-- Preview -->
   <div>
     <h2 class="font-bold text-[14px] mb-3 flex items-center gap-2"><span>👁️</span> معاينة</h2>
     <div class="bg-white rounded-[20px] border overflow-hidden">
@@ -79,12 +76,11 @@ body{background:#f8fafc;margin:0}
 
 <script type="module">
 import { auth, db } from "./firebase.js";
-import { ref, get, set, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { ref, get, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 let currentUid=null;
 let currentTemplate='classic';
-let initialTemplate='classic';
 
 function showToast(msg){
   document.getElementById('toastMessage').textContent=msg;
@@ -104,20 +100,13 @@ window.selectTheme=(tpl)=>{
 onAuthStateChanged(auth, async (user)=>{
   if(!user){ location.href='login.html'; return; }
   currentUid=user.uid;
-  // تحميل الثيم الحالي
   try{
     const snap=await get(ref(db, `users/${currentUid}/storeSettings/theme`));
-    if(snap.exists()){
-      const data=snap.val();
-      if(data.template) currentTemplate=data.template;
+    if(snap.exists() && snap.val().template){
+      currentTemplate=snap.val().template;
     }else{
-      // جرب المسار القديم لو موجود
-      const snap2=await get(ref(db, `users/${currentUid}/storeSettings`));
-      if(snap2.exists() && snap2.val().theme && snap2.val().theme.template){
-        currentTemplate=snap2.val().theme.template;
-      }
+      currentTemplate='classic';
     }
-    initialTemplate=currentTemplate;
     selectTheme(currentTemplate);
   }catch(e){
     console.error('load theme error', e);
@@ -132,22 +121,12 @@ window.saveTheme=async()=>{
   btn.disabled=true;
   btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
   try{
-    // حفظ فقط theme بدون مساس بأي شيء آخر
-    await update(ref(db, `users/${currentUid}/storeSettings`), {
-      theme: {
-        template: currentTemplate,
-        updatedAt: new Date().toISOString()
-      }
-    });
-    // كذلك حفظ نسخة مفصلة في المسار المطلوب
+    // مسار واحد فقط
     await set(ref(db, `users/${currentUid}/storeSettings/theme`), {
       template: currentTemplate,
       updatedAt: new Date().toISOString()
     });
-
     showToast('تم حفظ تصميم المتجر بنجاح ✅');
-    initialTemplate=currentTemplate;
-    console.log('Theme saved:', currentTemplate);
   }catch(e){
     console.error('saveTheme error:', e);
     showToast('تعذر حفظ التصميم');
